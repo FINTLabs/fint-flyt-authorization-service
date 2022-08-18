@@ -1,11 +1,22 @@
+fint:
+  org-id: fintlabs.no
+  kafka:
+    topic:
+      org-id: ${fint.org-id}
+      domain-context: flyt
+    application-id: fint-flyt-authorization-service
 spring:
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: ${fint.kafka.application-id}
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
   datasource:
-    url: jdbc:postgresql://localhost:5432/fint_flyt_authorization_service
+    url: jdbc:postgresql://localhost:5435/fint-flyt-authorization-service
     username: postgres
     password: password
   jpa:

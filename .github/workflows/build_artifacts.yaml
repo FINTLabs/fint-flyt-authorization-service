@@ -23,20 +23,12 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
-
-      - name: Gradle Setup
-        uses: gradle/gradle-build-action@v2.1.6
-        with:
-          gradle-version: wrapper
-
-      - name: Gradle build
+      - name: Build artefacts
         run: |
-          ./gradlew build
+          gradle build --no-daemon
           mkdir data
           cp ./build/libs/${GITHUB_REPOSITORY#*/}-*.jar ./data/app.jar
-          
+          echo "Branch: ${{ github.ref}}"
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.1
@@ -52,4 +44,3 @@ jobs:
           token: ${{ secrets.GITHUBACTION_TOKEN }}
           repository: ${{ github.repository }}
           event-type: trigger-to-publish
-
