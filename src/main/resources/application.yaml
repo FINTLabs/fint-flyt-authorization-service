@@ -15,20 +15,20 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
-  datasource:
-    url: jdbc:postgresql://localhost:5435/fint-flyt-authorization-service
-    username: postgres
-    password: password
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        enable_lazy_load_no_trans: true
-    hibernate:
-      ddl-auto: update
+#  datasource:
+#    url: jdbc:postgresql://localhost:5435/fint-flyt-authorization-service
+#    username: postgres
+#    password: password
+#  jpa:
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            non_contextual_creation: true
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        enable_lazy_load_no_trans: true
+#    hibernate:
+#      ddl-auto: update
 management:
   endpoints:
     web:
