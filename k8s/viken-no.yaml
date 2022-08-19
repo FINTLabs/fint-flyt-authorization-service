@@ -1,15 +1,19 @@
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: aiven-kafka
+spec:
+  itemPath: "vaults/aks-alpha-vault/items/aiven-kafka"
+---
 apiVersion: v1
 kind: Service
 metadata:
-  #annotations:
-  #  service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   labels:
     io.kompose.service: fint-flyt-authorization-service
   name: fint-flyt-authorization-service
 spec:
   ports:
-    - name: "8080"
-      port: 8080
+    - port: 8080
   type: ClusterIP
   selector:
     io.kompose.service: fint-flyt-authorization-service
@@ -34,20 +38,31 @@ spec:
         io.kompose.service: fint-flyt-authorization-service
     spec:
       restartPolicy: Always
+      volumes:
+        - name: credentials
+          secret:
+            secretName: aiven-kafka-certificates
       containers:
-        - image: fintlabsacr.azurecr.io/fint-flyt-authorization-service:build.${BUILD_NUMBER}_${GIT_COMMIT}
+        - image: fintlabsacr.azurecr.io/fint-flyt-authorization-service:dummy
           name: fint-flyt-authorization-service
+          volumeMounts:
+            - name: credentials
+              mountPath: /credentials
           resources:
             limits:
-              memory: "512Mi"
+              memory: "2048Mi"
               cpu: "1"
             requests:
-              memory: "128Mi"
+              memory: "512Mi"
               cpu: "100m"
           ports:
             - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: aiven-kafka
+            - secretRef:
+                name: fint-flyt-authorization-service
           env:
-            - name: TZ
-              value: Europe/Oslo
-            - name: JAVA_TOOL_OPTIONS
-              value: '-XX:+ExitOnOutOfMemoryError -Xmx480M -verbose:gc'
+            - { name: TZ, value: Europe/Oslo }
+            - { name: JAVA_TOOL_OPTIONS, value: '-XX:+ExitOnOutOfMemoryError -Xmx1840M' }
+            - { name: fint.org-id, value: 'viken.no' }
