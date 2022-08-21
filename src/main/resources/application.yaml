@@ -1,14 +1,10 @@
 fint:
-<<<<<<< Updated upstream
   org-id: fintlabs.no
   kafka:
     topic:
       org-id: ${fint.org-id}
       domain-context: flyt
     application-id: fint-flyt-authorization-service
-=======
-  org-id: viken.no
->>>>>>> Stashed changes
 spring:
   security:
     oauth2:
