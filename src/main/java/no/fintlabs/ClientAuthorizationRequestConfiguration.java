@@ -25,7 +25,7 @@ public class ClientAuthorizationRequestConfiguration {
                                     .sourceApplicationId("1")
                                     .build())
                     .build();
-            case "9a319191-9bbf-4de3-af8e-616a244e4e06" -> ReplyProducerRecord.<ClientAuthorization>builder()
+            case "931be08e-b134-47aa-912e-eab3b5d5b770" -> ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization
                             .builder()
                             .authorized(true)
