@@ -19,11 +19,11 @@ public class ClientAuthorizationRequestConfiguration {
         return switch (consumerRecord.value()) {
             case "5679f546-b72e-41d4-bbfe-68b029a8c158" -> ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization
-                                    .builder()
-                                    .authorized(true)
-                                    .clientId(consumerRecord.value())
-                                    .sourceApplicationId("1")
-                                    .build())
+                            .builder()
+                            .authorized(true)
+                            .clientId(consumerRecord.value())
+                            .sourceApplicationId("1")
+                            .build())
                     .build();
             case "9a319191-9bbf-4de3-af8e-616a244e4e06" -> ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization

@@ -4,6 +4,6 @@ metadata:
   name: fint-flyt-authorization-service
 data:
   JAVA_TOOL_OPTIONS: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
-  fint.org-id: 'viken.test'
+  fint.org-id: 'viken.no'
   fint.flyt.resource-server.security.api.internal.enabled: 'true'
-  fint.flyt.resource-server.security.api.internal.authorized-org-ids: 'viken.test, vigo.no'
+  fint.flyt.resource-server.security.api.internal.authorized-org-ids: 'viken.no, vigo.no'
