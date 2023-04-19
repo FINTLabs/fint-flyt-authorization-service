@@ -5,6 +5,8 @@ import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;
 import no.fintlabs.kafka.requestreply.topic.RequestTopicNameParameters;
 import no.fintlabs.kafka.requestreply.topic.RequestTopicService;
+import no.fintlabs.models.AcosSourceApplication;
+import no.fintlabs.models.EgrunnervervSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,20 +19,20 @@ public class ClientAuthorizationRequestConfiguration {
     private static ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
 
         return switch (consumerRecord.value()) {
-            case "5679f546-b72e-41d4-bbfe-68b029a8c158" -> ReplyProducerRecord.<ClientAuthorization>builder()
+            case AcosSourceApplication.CLIENT_ID -> ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization
                             .builder()
                             .authorized(true)
                             .clientId(consumerRecord.value())
-                            .sourceApplicationId("1")
+                            .sourceApplicationId(AcosSourceApplication.SOURCE_APPLICATION_ID)
                             .build())
                     .build();
-            case "a5aafb0b-3510-4136-8229-709db246db30" -> ReplyProducerRecord.<ClientAuthorization>builder()
+            case EgrunnervervSourceApplication.CLIENT_ID -> ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization
                             .builder()
                             .authorized(true)
                             .clientId(consumerRecord.value())
-                            .sourceApplicationId("2")
+                            .sourceApplicationId(EgrunnervervSourceApplication.SOURCE_APPLICATION_ID)
                             .build())
                     .build();
             default -> ReplyProducerRecord.<ClientAuthorization>builder()
