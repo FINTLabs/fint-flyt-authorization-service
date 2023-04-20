@@ -13,37 +13,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
+import java.util.Objects;
+
 @Configuration
 public class ClientAuthorizationRequestConfiguration {
 
+
     private static ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
 
-        return switch (consumerRecord.value()) {
-            case AcosSourceApplication.CLIENT_ID -> ReplyProducerRecord.<ClientAuthorization>builder()
-                    .value(ClientAuthorization
-                            .builder()
-                            .authorized(true)
-                            .clientId(consumerRecord.value())
-                            .sourceApplicationId(AcosSourceApplication.SOURCE_APPLICATION_ID)
-                            .build())
-                    .build();
-            case EgrunnervervSourceApplication.CLIENT_ID -> ReplyProducerRecord.<ClientAuthorization>builder()
-                    .value(ClientAuthorization
-                            .builder()
-                            .authorized(true)
-                            .clientId(consumerRecord.value())
-                            .sourceApplicationId(EgrunnervervSourceApplication.SOURCE_APPLICATION_ID)
-                            .build())
-                    .build();
-            default -> ReplyProducerRecord.<ClientAuthorization>builder()
+        if (Objects.equals(consumerRecord.value(), AcosSourceApplication.CLIENT_ID)){
+            return buildReplyProducerRecord(AcosSourceApplication.CLIENT_ID, AcosSourceApplication.SOURCE_APPLICATION_ID);
+        } else if (Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)){
+            return buildReplyProducerRecord(EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID);
+        } else {
+            return ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization
                             .builder()
                             .authorized(false)
                             .clientId(consumerRecord.value())
                             .build())
                     .build();
-        };
-
+        }
     }
 
     @Bean
@@ -65,6 +55,17 @@ public class ClientAuthorizationRequestConfiguration {
                 new CommonLoggingErrorHandler()
 
         ).createContainer(topicNameParameters);
+    }
+
+    private static ReplyProducerRecord<ClientAuthorization> buildReplyProducerRecord(String clientId, String sourceApplicationId){
+        return ReplyProducerRecord.<ClientAuthorization>builder()
+                .value(ClientAuthorization
+                        .builder()
+                        .authorized(true)
+                        .clientId(clientId)
+                        .sourceApplicationId(sourceApplicationId)
+                        .build())
+                .build();
     }
 
 }

@@ -1,9 +1,17 @@
 package no.fintlabs.models;
 
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 @Getter
 public class EgrunnervervSourceApplication {
-    public static final String CLIENT_ID = "a5aafb0b-3510-4136-8229-709db246db30";
+    public static String CLIENT_ID;
     public static final String SOURCE_APPLICATION_ID = "2";
+
+    @Value("${fint.flyt.egrunnerverv.sso.client-id}")
+    public void setClientId(String clientId) {
+        CLIENT_ID = clientId;
+    }
 }
