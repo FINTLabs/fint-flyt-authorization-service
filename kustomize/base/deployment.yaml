@@ -31,5 +31,9 @@ spec:
           envFrom:
             - secretRef:
                 name: fint-flyt-authorization-service-kafka
+            - secretRef:
+                name: fint-flyt-acos-oauth2-client
+            - secretRef:
+                name: fint-flyt-egrunnerverv-oauth2-client
             - configMapRef:
                 name: fint-flyt-authorization-service
