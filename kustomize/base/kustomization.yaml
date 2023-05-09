@@ -5,5 +5,5 @@ resources:
   - deployment.yaml
   - service.yaml
   - config-map.yaml
-  - oauth2-acos-client.yaml
-  - oauth2-egrunnerverv-client.yaml
+  - acos-oauth2-client.yaml
+  - egrunnerverv-oauth2-client.yaml
