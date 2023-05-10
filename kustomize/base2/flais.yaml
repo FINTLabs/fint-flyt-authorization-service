@@ -18,6 +18,9 @@ spec:
       value: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
     - name: fint.flyt.resource-server.security.api.internal.authorized-org-ids
       value: "vigo.no"
+  envFrom:
+    - secretRef:
+        name: fint-flyt-egrunnerverv-oauth2-client
   resources:
     limits:
       memory: "2048Mi"
