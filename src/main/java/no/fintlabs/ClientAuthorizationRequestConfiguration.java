@@ -21,9 +21,9 @@ public class ClientAuthorizationRequestConfiguration {
 
     private static ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
 
-        if (Objects.equals(consumerRecord.value(), AcosSourceApplication.CLIENT_ID)){
+        if (AcosSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), AcosSourceApplication.CLIENT_ID)){
             return buildReplyProducerRecord(AcosSourceApplication.CLIENT_ID, AcosSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)){
+        } else if (EgrunnervervSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)){
             return buildReplyProducerRecord(EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID);
         } else {
             return ReplyProducerRecord.<ClientAuthorization>builder()

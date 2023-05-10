@@ -10,7 +10,7 @@ public class EgrunnervervSourceApplication {
     public static String CLIENT_ID;
     public static final String SOURCE_APPLICATION_ID = "2";
 
-    @Value("${fint.flyt.egrunnerverv.sso.client-id}")
+    @Value("${fint.flyt.egrunnerverv.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }

@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: trondelagfylke-no
+
+resources:
+  - ../../../base2
+
+commonLabels:
+  app.kubernetes.io/name: fint-flyt-authorization-service
+  app.kubernetes.io/instance: fint-flyt-authorization-service_trondelagfylke_no
+  app.kubernetes.io/version: latest
+  app.kubernetes.io/component: backend
+  app.kubernetes.io/part-of: fint-flyt
+  fintlabs.no/team: flyt
+  fintlabs.no/org-id: trondelagfylke.no
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/kafka/acls/0/topic"
+        value: "trondelagfylke-no.flyt.*"
+      - op: replace
+        path: "/spec/orgId"
+        value: "trondelagfylke.no"
+      - op: replace
+        path: "/spec/env/1/value"
+        value: "trondelagfylke.no, vigo.no"
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
+
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-alpha-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+    target:
+      kind: OnePasswordItem
+      name: fint-flyt-egrunnerverv-oauth2-client

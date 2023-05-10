@@ -10,7 +10,7 @@ public class AcosSourceApplication {
     public static String CLIENT_ID;
     public static final String SOURCE_APPLICATION_ID = "1";
 
-    @Value("${fint.flyt.acos.sso.client-id}")
+    @Value("${fint.flyt.acos.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }
