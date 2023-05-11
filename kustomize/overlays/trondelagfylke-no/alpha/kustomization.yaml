@@ -20,14 +20,9 @@ patches:
       - op: replace
         path: "/spec/env/1/value"
         value: "trondelagfylke.no, vigo.no"
+      - op: replace
+        path: "/spec/onePassword/itemPath"
+        value: "vaults/aks-alpha-vault/items/fint-flyt-egrunnerverv-oauth2-client"
     target:
       kind: Application
       name: fint-flyt-authorization-service
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-alpha-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client
