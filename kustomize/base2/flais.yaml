@@ -3,6 +3,14 @@ kind: Application
 metadata:
   name: fint-flyt-authorization-service
   namespace: fintlabs-no
+  labels:
+    app.kubernetes.io/instance: fint-flyt-authorization-service_fintlabs_no
+    app.kubernetes.io/name: fint-flyt-authorization-service
+    app.kubernetes.io/version: latest
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: fint-flyt
+    fintlabs.no/team: flyt
+    fintlabs.no/org-id: fintlabs.no
 spec:
   port: 8080
   imagePullPolicy: Always
@@ -18,9 +26,11 @@ spec:
       value: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
     - name: fint.flyt.resource-server.security.api.internal.authorized-org-ids
       value: "vigo.no"
-  envFrom:
-    - secretRef:
-        name: fint-flyt-egrunnerverv-oauth2-client
+#  envFrom:
+#    - secretRef:
+#        name: fint-flyt-egrunnerverv-oauth2-client
+  onePassword:
+    itemPath: path
   resources:
     limits:
       memory: "2048Mi"
