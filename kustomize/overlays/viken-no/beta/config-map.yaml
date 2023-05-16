@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: fint-flyt-authorization-service
-data:
-  fint.org-id: 'viken.no'
-  fint.flyt.resource-server.security.api.internal.authorized-org-ids: 'viken.no, vigo.no'

@@ -1,9 +1,4 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - kafka-user-and-acl.yaml
-  - deployment.yaml
-  - service.yaml
-  - config-map.yaml
-  - acos-oauth2-client.yaml
-  - egrunnerverv-oauth2-client.yaml
+  - flais.yaml
