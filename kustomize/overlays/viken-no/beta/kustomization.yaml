@@ -21,6 +21,9 @@ patches:
       - op: replace
         path: "/spec/env/1/value"
         value: "viken.no, vigo.no"
+      - op: replace
+        path: "/spec/onePassword"
+        value: null
 
     target:
       kind: Application
