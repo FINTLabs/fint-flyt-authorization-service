@@ -30,6 +30,9 @@ spec:
       value: 'true'
   onePassword:
     itemPath: path
+  envFrom:
+    secretRef:
+      name: null
   resources:
     limits:
       memory: "2048Mi"
