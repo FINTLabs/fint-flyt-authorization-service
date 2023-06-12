@@ -25,7 +25,7 @@ patches:
         path: "/spec/onePassword"
         value: null
       - op: replace
-        path: /spec/envFrom
+        path: "/spec/envFrom"
         value:
           - secretRef:
               name: fint-flyt-acos-oauth2-client
