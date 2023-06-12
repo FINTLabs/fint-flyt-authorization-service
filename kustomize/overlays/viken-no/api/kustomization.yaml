@@ -4,7 +4,7 @@ namespace: viken-no
 
 resources:
   - ../../../base
-  - ../beta/acos-oauth2-client.yaml
+  - acos-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_viken_no
