@@ -31,7 +31,6 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -40,9 +39,6 @@ dependencies {
     implementation 'no.fintlabs:fint-flyt-resource-server:1.0.0'
 
     implementation 'no.fintlabs:fint-kafka:2.3.0'
-
-    implementation 'io.springfox:springfox-boot-starter:3.0.0'
-    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
