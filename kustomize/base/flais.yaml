@@ -12,6 +12,7 @@ metadata:
     fintlabs.no/team: flyt
     fintlabs.no/org-id: fintlabs.no
 spec:
+  loggingLevel: info
   port: 8080
   imagePullPolicy: Always
   orgId: fintlabs.no
