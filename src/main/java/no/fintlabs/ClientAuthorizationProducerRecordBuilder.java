@@ -21,7 +21,7 @@ public class ClientAuthorizationProducerRecordBuilder {
         } else if (EgrunnervervSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)) {
             return buildReplyProducerRecord(EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID);
         } else if (RF1350SourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), RF1350SourceApplication.CLIENT_ID)) {
-            log.debug("request by client with id="+RF1350SourceApplication.CLIENT_ID+". returning source application id="+RF1350SourceApplication.SOURCE_APPLICATION_ID);
+            log.debug("Request by client with id="+RF1350SourceApplication.CLIENT_ID+". Returning source application id="+RF1350SourceApplication.SOURCE_APPLICATION_ID);
             return buildReplyProducerRecord(RF1350SourceApplication.CLIENT_ID, RF1350SourceApplication.SOURCE_APPLICATION_ID);
         } else {
             return ReplyProducerRecord.<ClientAuthorization>builder()
