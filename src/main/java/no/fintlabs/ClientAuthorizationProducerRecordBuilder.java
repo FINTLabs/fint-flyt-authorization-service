@@ -1,5 +1,6 @@
 package no.fintlabs;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.models.AcosSourceApplication;
 import no.fintlabs.models.EgrunnervervSourceApplication;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
+@Slf4j
 public class ClientAuthorizationProducerRecordBuilder {
 
     public ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
@@ -19,6 +21,7 @@ public class ClientAuthorizationProducerRecordBuilder {
         } else if (EgrunnervervSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)) {
             return buildReplyProducerRecord(EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID);
         } else if (RF1350SourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), RF1350SourceApplication.CLIENT_ID)) {
+            log.debug("request by client with id="+RF1350SourceApplication.CLIENT_ID+". returning source application id="+RF1350SourceApplication.SOURCE_APPLICATION_ID);
             return buildReplyProducerRecord(RF1350SourceApplication.CLIENT_ID, RF1350SourceApplication.SOURCE_APPLICATION_ID);
         } else {
             return ReplyProducerRecord.<ClientAuthorization>builder()
