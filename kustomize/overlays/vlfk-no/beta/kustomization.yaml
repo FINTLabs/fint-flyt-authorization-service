@@ -23,6 +23,11 @@ patches:
       - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+      - op: add
+        path: "/spec/envFrom/0"
+        value:
+          secretRef:
+            name: fint-flyt-rf1350-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service
