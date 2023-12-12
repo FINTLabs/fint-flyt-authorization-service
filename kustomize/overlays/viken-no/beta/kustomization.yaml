@@ -24,12 +24,11 @@ patches:
       - op: replace
         path: "/spec/onePassword"
         value: null
-      - op: replace
-        path: "/spec/envFrom"
+      - op: add
+        path: "/spec/envFrom/0"
         value:
-          - secretRef:
-              name: fint-flyt-acos-oauth2-client
-
+          secretRef:
+            name: fint-flyt-acos-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service
