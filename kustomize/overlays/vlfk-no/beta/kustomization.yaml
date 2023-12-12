@@ -24,9 +24,11 @@ patches:
       - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-      - op: replace
-        path: "/spec/loggingLevel"
-        value: "debug"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "logging.level.no.fintlabs"
+          value: "DEBUG"
       - op: add
         path: "/spec/envFrom/0"
         value:
