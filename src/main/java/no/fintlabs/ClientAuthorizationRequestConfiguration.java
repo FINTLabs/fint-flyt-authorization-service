@@ -6,7 +6,6 @@ import no.fintlabs.kafka.requestreply.topic.RequestTopicNameParameters;
 import no.fintlabs.kafka.requestreply.topic.RequestTopicService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.listener.CommonLoggingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
 @Configuration
@@ -30,12 +29,10 @@ public class ClientAuthorizationRequestConfiguration {
 
         requestTopicService.ensureTopic(topicNameParameters, 0, TopicCleanupPolicyParameters.builder().build());
 
-        return requestConsumerFactoryService.createFactory(
+        return requestConsumerFactoryService.createRecordConsumerFactory(
                 String.class,
                 ClientAuthorization.class,
-                (recordBuilder::apply),
-                new CommonLoggingErrorHandler()
-
+                (recordBuilder::apply)
         ).createContainer(topicNameParameters);
     }
 
