@@ -1,28 +1,28 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: nfk-no
+namespace: ofk-no
 
 resources:
   - ../../../base
 
 commonLabels:
-  app.kubernetes.io/instance: fint-flyt-authorization-service_nfk_no
-  fintlabs.no/org-id: nfk.no
+  app.kubernetes.io/instance: fint-flyt-authorization-service_ofk_no
+  fintlabs.no/org-id: ofk.no
 
 patches:
   - patch: |-
       - op: replace
         path: "/spec/kafka/acls/0/topic"
-        value: "nfk-no.flyt.*"
+        value: "ofk-no.flyt.*"
       - op: replace
         path: "/spec/orgId"
-        value: "nfk.no"
+        value: "ofk.no"
       - op: replace
         path: "/spec/env/1/value"
-        value: "nfk.no, vigo.no"
+        value: "ofk.no, vigo.no"
       - op: replace
         path: "/spec/onePassword/itemPath"
-        value: "vaults/aks-alpha-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
     target:
       kind: Application
       name: fint-flyt-authorization-service
