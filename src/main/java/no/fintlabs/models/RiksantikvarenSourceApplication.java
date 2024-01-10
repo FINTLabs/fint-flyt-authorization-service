@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Getter
-public class RF1350SourceApplication {
+public class RiksantikvarenSourceApplication {
     public static String CLIENT_ID;
     public static final String SOURCE_APPLICATION_ID = "3";
 
-    @Value("${fint.flyt.rf1350.sso.client-id:#{null}}")
+    @Value("${fint.flyt.riksantikvaren.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }

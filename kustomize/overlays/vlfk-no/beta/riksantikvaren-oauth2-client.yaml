@@ -1,0 +1,9 @@
+apiVersion: "fintlabs.no/v1alpha1"
+kind: NamOAuthClientApplicationResource
+metadata:
+  name: fint-flyt-riksantikvaren-oauth2-client
+spec:
+  clientIdProperty: fint.flyt.riksantikvaren.sso.client-id
+  clientSecretProperty: fint.flyt.riksantikvaren.sso.client-secret
+  grantTypes:
+    - client_credentials
