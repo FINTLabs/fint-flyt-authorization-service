@@ -19,9 +19,6 @@ patches:
         path: "/spec/orgId"
         value: "ofk.no"
       - op: replace
-        path: "/spec/env/1/value"
-        value: "ofk.no, vigo.no"
-      - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
       - op: add
