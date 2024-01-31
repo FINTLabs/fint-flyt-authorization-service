@@ -16,7 +16,7 @@ public class AuthorizationController {
 
     @GetMapping("check-authorized")
     public ResponseEntity<?> checkAuthorization() {
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok("User authorized");
     }
 
 }
