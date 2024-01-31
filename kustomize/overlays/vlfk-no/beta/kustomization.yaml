@@ -19,8 +19,22 @@ patches:
         path: "/spec/orgId"
         value: "vlfk.no"
       - op: replace
+        path: "/spec/url/basePath"
+        value: "/beta/vlfk-no"
+      - op: replace
+        path: "/spec/ingress/basePath"
+        value: "/beta/vlfk-no/api/intern/authorization"
+      - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+      - op: replace
+        path: "/spec/env/1/value"
+        value: |
+          {
+            "vlfk.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
+            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
+            "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
+          }
       - op: add
         path: "/spec/env/-"
         value:

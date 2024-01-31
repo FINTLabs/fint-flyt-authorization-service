@@ -20,6 +20,14 @@ patches:
       - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+      - op: replace
+        path: "/spec/env/1/value"
+        value: |
+          {
+            "vestfoldfylke.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
+            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
+            "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
+          }
     target:
       kind: Application
       name: fint-flyt-authorization-service
