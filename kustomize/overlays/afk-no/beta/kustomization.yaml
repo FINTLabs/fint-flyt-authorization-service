@@ -19,6 +19,12 @@ patches:
         path: "/spec/orgId"
         value: "afk.no"
       - op: replace
+        path: "/spec/url/basePath"
+        value: "/beta/afk-no"
+      - op: replace
+        path: "/spec/ingress/basePath"
+        value: "/beta/afk-no/api/intern/authorization"
+      - op: replace
         path: "/spec/onePassword/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
       - op: replace
