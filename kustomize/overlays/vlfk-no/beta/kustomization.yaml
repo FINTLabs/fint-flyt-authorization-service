@@ -4,7 +4,7 @@ namespace: vlfk-no
 
 resources:
   - ../../../base
-  - riksantikvaren-oauth2-client.yaml
+  - digisak-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
@@ -44,7 +44,7 @@ patches:
         path: "/spec/envFrom/0"
         value:
           secretRef:
-            name: fint-flyt-riksantikvaren-oauth2-client
+            name: fint-flyt-digisak-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service

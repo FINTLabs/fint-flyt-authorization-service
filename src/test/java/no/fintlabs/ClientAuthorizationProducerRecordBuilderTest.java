@@ -3,7 +3,7 @@ package no.fintlabs;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.models.AcosSourceApplication;
 import no.fintlabs.models.EgrunnervervSourceApplication;
-import no.fintlabs.models.RiksantikvarenSourceApplication;
+import no.fintlabs.models.DigisakSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,10 +47,10 @@ class ClientAuthorizationProducerRecordBuilderTest {
     }
 
     @Test
-    void testApply_RiksantikvarenSourceApplicationClientId() {
-        String clientId = "riksantikvarenClientId";
+    void testApply_DigisakSourceApplicationClientId() {
+        String clientId = "digisakClientId";
         String sourceAppId = "3";
-        RiksantikvarenSourceApplication.CLIENT_ID = clientId;
+        DigisakSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
