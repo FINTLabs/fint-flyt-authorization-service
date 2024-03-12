@@ -21,7 +21,7 @@ public class AuthorizationController {
     }
 
     @GetMapping("user")
-    public ResponseEntity<?> checkUser() {
+    public ResponseEntity<AuthorizedUser> checkUser() {
         return ResponseEntity.ok(AuthorizedUser.builder().admin(true).build());
     }
 
