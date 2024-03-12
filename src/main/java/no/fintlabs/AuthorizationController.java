@@ -1,5 +1,6 @@
 package no.fintlabs;
 
+import no.fintlabs.models.AuthorizedUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,11 @@ public class AuthorizationController {
     @GetMapping("check-authorized")
     public ResponseEntity<?> checkAuthorization() {
         return ResponseEntity.ok("User authorized");
+    }
+
+    @GetMapping("user")
+    public ResponseEntity<?> checkUser() {
+        return ResponseEntity.ok(AuthorizedUser.builder().admin(true).build());
     }
 
 }
