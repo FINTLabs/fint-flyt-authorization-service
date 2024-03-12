@@ -7,6 +7,7 @@ fint:
           internal:
             enabled: true
             authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"https://role-catalog.vigoiks.no/vigo/flyt/developer\"]}"
+            admin-role: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
   kafka:
     default-replicas: 1
 spring:
