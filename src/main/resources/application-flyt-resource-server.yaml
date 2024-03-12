@@ -4,3 +4,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+fint:
+  flyt:
+    resource-server:
+      security:
+        api:
+          internal:
+            admin-role: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
