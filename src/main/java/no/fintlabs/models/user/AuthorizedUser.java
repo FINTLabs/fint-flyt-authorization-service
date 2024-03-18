@@ -1,4 +1,4 @@
-package no.fintlabs.models;
+package no.fintlabs.models.user;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -5,6 +5,7 @@ namespace: fintlabs-no
 resources:
   - ../../../base
   - digisak-oauth2-client.yaml
+  - oppfolgingstjenesten-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_fintlabs_no
@@ -45,6 +46,11 @@ patches:
         value:
           secretRef:
             name: fint-flyt-digisak-oauth2-client
+      - op: add
+        path: "/spec/envFrom/1"
+        value:
+          secretRef:
+            name: fint-flyt-oppfolgingstjenesten-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service
