@@ -42,6 +42,11 @@ patches:
         value:
           secretRef:
             name: fint-flyt-acos-oauth2-client
+      - op: add
+        path: "/spec/envFrom/1"
+        value:
+          secretRef:
+            name: fint-flyt-oppfolgingstjenesten-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service
