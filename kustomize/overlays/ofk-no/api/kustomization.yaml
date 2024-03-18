@@ -5,6 +5,7 @@ namespace: ofk-no
 resources:
   - ../../../base
   - acos-oauth2-client.yaml
+  - oppfolgingstjenesten-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-ofk_no
