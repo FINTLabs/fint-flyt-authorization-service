@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Getter
-public class OppfolgingstjenestenSourceApplication {
+public class VigoSourceApplication {
     public static String CLIENT_ID;
     public static final String SOURCE_APPLICATION_ID = "4";
 
-    @Value("${fint.flyt.oppfolgingstjenesten.sso.client-id:#{null}}")
+    @Value("${fint.flyt.vigo.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }

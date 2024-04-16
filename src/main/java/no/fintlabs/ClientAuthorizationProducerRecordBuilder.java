@@ -5,7 +5,7 @@ import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.models.sourceapplication.AcosSourceApplication;
 import no.fintlabs.models.sourceapplication.EgrunnervervSourceApplication;
 import no.fintlabs.models.sourceapplication.DigisakSourceApplication;
-import no.fintlabs.models.sourceapplication.OppfolgingstjenestenSourceApplication;
+import no.fintlabs.models.sourceapplication.VigoSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +24,9 @@ public class ClientAuthorizationProducerRecordBuilder {
         } else if (DigisakSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), DigisakSourceApplication.CLIENT_ID)) {
             log.debug("Request by client with id="+ DigisakSourceApplication.CLIENT_ID+". Returning source application id="+ DigisakSourceApplication.SOURCE_APPLICATION_ID);
             return buildReplyProducerRecord(DigisakSourceApplication.CLIENT_ID, DigisakSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (OppfolgingstjenestenSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), OppfolgingstjenestenSourceApplication.CLIENT_ID)) {
-            log.debug("Request by client with id="+ OppfolgingstjenestenSourceApplication.CLIENT_ID+". Returning source application id="+ OppfolgingstjenestenSourceApplication.SOURCE_APPLICATION_ID);
-            return buildReplyProducerRecord(OppfolgingstjenestenSourceApplication.CLIENT_ID, OppfolgingstjenestenSourceApplication.SOURCE_APPLICATION_ID);
+        } else if (VigoSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), VigoSourceApplication.CLIENT_ID)) {
+            log.debug("Request by client with id="+ VigoSourceApplication.CLIENT_ID+". Returning source application id="+ VigoSourceApplication.SOURCE_APPLICATION_ID);
+            return buildReplyProducerRecord(VigoSourceApplication.CLIENT_ID, VigoSourceApplication.SOURCE_APPLICATION_ID);
         } else {
             return ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization

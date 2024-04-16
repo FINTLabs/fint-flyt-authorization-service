@@ -5,7 +5,7 @@ namespace: ofk-no
 resources:
   - ../../../base
   - acos-oauth2-client.yaml
-  - oppfolgingstjenesten-oauth2-client.yaml
+  - vigo-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_ofk_no
@@ -46,7 +46,7 @@ patches:
         path: "/spec/envFrom/1"
         value:
           secretRef:
-            name: fint-flyt-oppfolgingstjenesten-oauth2-client
+            name: fint-flyt-vigo-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service
