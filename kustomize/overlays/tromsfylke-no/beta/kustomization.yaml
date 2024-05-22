@@ -4,6 +4,7 @@ namespace: tromsfylke-no
 
 resources:
   - ../../../base
+  - vigo-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_tromsfylke_no
