@@ -1,7 +1,6 @@
-package no.fintlabs;
+package no.fintlabs.authorization.adminuser;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.models.user.AuthorizedUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,9 +14,9 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization")
 @Slf4j
-public class AuthorizationController {
+public class AdminUserController {
 
-    public AuthorizationController() {
+    public AdminUserController() {
     }
 
     @GetMapping("check-authorized")
@@ -26,15 +25,15 @@ public class AuthorizationController {
     }
 
     @GetMapping("user")
-    public Mono<ResponseEntity<AuthorizedUser>> checkUser() {
+    public Mono<ResponseEntity<AdminUser>> checkAdminUser() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .flatMap(authentication -> {
                     if (authentication != null && authentication.getAuthorities().stream()
                             .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
-                        return Mono.just(ResponseEntity.ok(AuthorizedUser.builder().admin(true).build()));
+                        return Mono.just(ResponseEntity.ok(AdminUser.builder().admin(true).build()));
                     } else {
-                        return Mono.just(ResponseEntity.ok(AuthorizedUser.builder().admin(false).build()));
+                        return Mono.just(ResponseEntity.ok(AdminUser.builder().admin(false).build()));
                     }
                 });
     }
