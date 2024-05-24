@@ -5,4 +5,5 @@ spring:
     include:
       - flyt-kafka
       - flyt-logging
+      - flyt-postgres
       - flyt-resource-server
