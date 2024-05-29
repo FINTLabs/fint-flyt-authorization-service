@@ -1,5 +1,7 @@
 package no.fintlabs.authorization.user;
 
+import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.authorization.AuthorizationUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,41 +14,42 @@ import reactor.core.scheduler.Schedulers;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
+@Slf4j
 @RequestMapping(INTERNAL_API + "/authorization/user")
 @RestController
 public class UserPermissionController {
 
-    private UserPermissionRepository userPermissionRepository;
+    private final UserPermissionRepository userPermissionRepository;
+    private final AuthorizationUtil authorizationUtil;
+
+    public UserPermissionController(
+            UserPermissionRepository userPermissionRepository,
+            AuthorizationUtil authorizationUtil
+    ) {
+        this.userPermissionRepository = userPermissionRepository;
+        this.authorizationUtil = authorizationUtil;
+    }
+
+    @GetMapping("check-authorized")
+    public ResponseEntity<?> checkAuthorization() {
+        return ResponseEntity.ok("User authorized");
+    }
 
     @GetMapping("sourceapplication")
-    public Mono<ResponseEntity<UserPermission>> getSourceApplications(
+    public Mono<ResponseEntity<UserPermissionDto>> getSourceApplications(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-
         return authenticationMono
-                .map(this::getSub)
+                .map(authentication -> authorizationUtil.getObjectIdentifierFromToken((JwtAuthenticationToken) authentication))
                 .publishOn(Schedulers.boundedElastic())
-                .map(sub -> userPermissionRepository.findBySub(sub))
-                .map(optionalUserPermission -> optionalUserPermission
-                        .map(ResponseEntity::ok)
-                        .orElse(ResponseEntity.notFound().build())
+                .map(userPermissionRepository::findByObjectIdentifier)
+                .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(
+                                UserPermissionDto
+                                        .builder()
+                                        .sourceApplicationIds(userPermission.getSourceApplicationIds())
+                                        .build()
+                        )).orElseGet(() -> ResponseEntity.notFound().build())
                 );
-    }
-
-    public String getSub(Authentication authentication) {
-        if (authentication == null) {
-            throw new IllegalStateException("Authentication cannot be null");
-        }
-
-        if (!(authentication instanceof JwtAuthenticationToken)) {
-            throw new IllegalStateException("Principal is not of type JWT");
-        }
-
-        return getSubFromToken((JwtAuthenticationToken) authentication);
-    }
-
-    public String getSubFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-        return jwtAuthenticationToken.getName();
     }
 
 }

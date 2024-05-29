@@ -1,6 +1,8 @@
 package no.fintlabs.authorization.adminuser;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.authorization.user.UserPermission;
+import no.fintlabs.authorization.user.UserPermissionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -8,6 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
@@ -16,77 +21,43 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 @Slf4j
 public class AdminUserController {
 
-    public AdminUserController() {
+    private final UserPermissionRepository userPermissionRepository;
+
+    public AdminUserController(
+            UserPermissionRepository userPermissionRepository
+    ) {
+        this.userPermissionRepository = userPermissionRepository;
     }
 
-    @GetMapping("check-authorized")
-    public ResponseEntity<?> checkAuthorization() {
-        return ResponseEntity.ok("User authorized");
-    }
 
-    @GetMapping("user")
+    @GetMapping("check-is-admin")
     public Mono<ResponseEntity<AdminUser>> checkAdminUser(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return authenticationMono
-                .map(authentication -> {
-                    if (authentication != null && authentication.getAuthorities().stream()
-                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
-                        return ResponseEntity.ok(AdminUser.builder().admin(true).build());
+        return isAdmin(authenticationMono)
+                .map(isAdmin -> ResponseEntity.ok(AdminUser.builder().admin(isAdmin).build()));
+    }
+
+    @GetMapping("userpermissions")
+    public Mono<ResponseEntity<List<UserPermission>>> getUserPermissions(
+            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    ) {
+        return isAdmin(authenticationMono)
+                .flatMap(isAdmin -> {
+                    if (isAdmin) {
+                        return Mono.fromCallable(userPermissionRepository::findAll)
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .map(userPermissions -> ResponseEntity.ok().body(userPermissions));
                     } else {
-                        return ResponseEntity.ok(AdminUser.builder().admin(false).build());
+                        return Mono.just(ResponseEntity.notFound().build());
                     }
                 });
     }
 
-//
-//
-//    // todo move  to AdminUserController
-//    @PostMapping("sourceapplication")
-//    public Mono<ResponseEntity<UserPermission>> setSourceApplications(
-//            @RequestBody UserPermissionDto userPermissionDto,
-//            @AuthenticationPrincipal Mono<Authentication> authenticationMono
-//    ) {
-//        authenticationMono
-//                .map(this::getSub)
-//                        .
-//
-//
-//
-//                userPermissionRepository.save(UserPermission.builder().build())
-//
-//        return Mono.just(ResponseEntity.ok(
-//                UserPermission
-//                        .builder()
-//                        .sub(getSub(authenticationMono))
-//                        .sourceApplicationIds(userPermissionDto.getSourceApplicationIds())
-//                        .build())
-//        );
-//
-//
-//        UserPermission userPermission = UserPermission
-//                .builder()
-//                .sub(getSub(authenticationMono))
-//                .sourceApplicationIds(userPermissionDto.getSourceApplicationIds())
-//                .build();
-//
-//        return (ResponseEntity.ok(userPermission));
-//    }
-//
-//    public String getSub(Authentication authentication) {
-//        if (authentication == null) {
-//            throw new IllegalStateException("Authentication cannot be null");
-//        }
-//
-//        if (!(authentication instanceof JwtAuthenticationToken)) {
-//            throw  new IllegalStateException("Principal is not of type JWT");
-//        }
-//
-//        return getSubFromToken((JwtAuthenticationToken) authentication);
-//    }
-//
-//    public String getSubFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-//        return jwtAuthenticationToken.getName();
-//    }
+    private Mono<Boolean> isAdmin(Mono<Authentication> authenticationMono) {
+        return authenticationMono
+                .map(authentication -> authentication != null && authentication.getAuthorities().stream()
+                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")));
+    }
 
 }
