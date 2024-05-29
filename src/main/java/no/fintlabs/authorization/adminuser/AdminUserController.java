@@ -38,7 +38,7 @@ public class AdminUserController {
     }
 
     @GetMapping("userpermissions")
-    public Mono<ResponseEntity<List<UserPermission>>> getUserPermissions(
+    public Mono<ResponseEntity<List<UserPermissionDto>>> getUserPermissions(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return isAdmin(authenticationMono)
@@ -46,7 +46,11 @@ public class AdminUserController {
                     if (isAdmin) {
                         return Mono.fromCallable(userPermissionRepository::findAll)
                                 .subscribeOn(Schedulers.boundedElastic())
-                                .map(userPermissions -> ResponseEntity.ok().body(userPermissions));
+                                .map(userPermissions -> {
+                                    List<UserPermissionDto> userPermissionDtos = new java.util.ArrayList<>(List.of());
+                                    userPermissions.forEach(userPermission -> userPermissionDtos.add(buildUserPermissionDto(userPermission)));
+                                    return ResponseEntity.ok().body(userPermissionDtos);
+                                });
                     } else {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
