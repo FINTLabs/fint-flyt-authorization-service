@@ -46,6 +46,7 @@ public class UserPermissionController {
                 .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(
                                 UserPermissionDto
                                         .builder()
+                                        .objectIdentifier(userPermission.getObjectIdentifier())
                                         .sourceApplicationIds(userPermission.getSourceApplicationIds())
                                         .build()
                         )).orElseGet(() -> ResponseEntity.notFound().build())

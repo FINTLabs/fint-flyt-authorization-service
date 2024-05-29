@@ -26,6 +26,7 @@ public class UserPermission {
             joinColumns = @JoinColumn(name = "user_permission_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"user_permission_id", "source_application_ids"})
     )
+    @Setter
     @Column(name = "source_application_ids")
     private List<Integer> sourceApplicationIds;
 }
