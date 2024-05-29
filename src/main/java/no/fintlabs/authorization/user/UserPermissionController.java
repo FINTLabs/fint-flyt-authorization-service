@@ -35,7 +35,7 @@ public class UserPermissionController {
         return ResponseEntity.ok("User authorized");
     }
 
-    @GetMapping("userpermission")
+    @GetMapping("permission")
     public Mono<ResponseEntity<UserPermissionDto>> getSourceApplications(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
