@@ -1,6 +1,5 @@
 package no.fintlabs.authorization.adminuser;
 
-import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.authorization.user.UserPermission;
 import no.fintlabs.authorization.user.UserPermissionDto;
 import no.fintlabs.authorization.user.UserPermissionRepository;
@@ -20,7 +19,6 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/adminuser")
-@Slf4j
 public class AdminUserController {
 
     private final UserPermissionRepository userPermissionRepository;
@@ -56,7 +54,7 @@ public class AdminUserController {
     }
 
     @PostMapping("userpermissions")
-    public Mono<ResponseEntity<List<UserPermissionDto>>> setUserPermission(
+    public Mono<ResponseEntity<List<UserPermissionDto>>> setUserPermissions(
             @RequestBody List<UserPermissionDto> userPermissionDtos,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
@@ -73,11 +71,7 @@ public class AdminUserController {
                                                 .getSourceApplicationIds());
                                         userPermissionRepository.save(userPermission);
 
-                                        return UserPermissionDto
-                                                .builder()
-                                                .objectIdentifier(userPermission.getObjectIdentifier())
-                                                .sourceApplicationIds(userPermission.getSourceApplicationIds())
-                                                .build();
+                                        return buildUserPermissionDto(userPermission);
                                     } else {
                                         UserPermission newUserPermission = UserPermission.builder()
                                                 .objectIdentifier(userPermissionDto.getObjectIdentifier())
@@ -85,11 +79,7 @@ public class AdminUserController {
                                                 .build();
                                         userPermissionRepository.save(newUserPermission);
 
-                                        return UserPermissionDto
-                                                .builder()
-                                                .objectIdentifier(newUserPermission.getObjectIdentifier())
-                                                .sourceApplicationIds(newUserPermission.getSourceApplicationIds())
-                                                .build();
+                                        return buildUserPermissionDto(newUserPermission);
                                     }
                                 }).subscribeOn(Schedulers.boundedElastic()))
                                 .collectList()
@@ -100,6 +90,13 @@ public class AdminUserController {
                 });
     }
 
+    private UserPermissionDto buildUserPermissionDto(UserPermission userPermission) {
+        return UserPermissionDto
+                .builder()
+                .objectIdentifier(userPermission.getObjectIdentifier())
+                .sourceApplicationIds(userPermission.getSourceApplicationIds())
+                .build();
+    }
 
     private Mono<Boolean> isAdmin(Mono<Authentication> authenticationMono) {
         return authenticationMono
