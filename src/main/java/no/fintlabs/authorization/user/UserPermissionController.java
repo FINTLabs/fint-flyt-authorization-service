@@ -35,7 +35,7 @@ public class UserPermissionController {
         return ResponseEntity.ok("User authorized");
     }
 
-    @GetMapping("userpermission")
+    @GetMapping("permission")
     public Mono<ResponseEntity<UserPermissionDto>> getSourceApplications(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
@@ -46,6 +46,7 @@ public class UserPermissionController {
                 .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(
                                 UserPermissionDto
                                         .builder()
+                                        .objectIdentifier(userPermission.getObjectIdentifier())
                                         .sourceApplicationIds(userPermission.getSourceApplicationIds())
                                         .build()
                         )).orElseGet(() -> ResponseEntity.notFound().build())
