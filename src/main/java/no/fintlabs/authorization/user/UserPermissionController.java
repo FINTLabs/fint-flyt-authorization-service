@@ -40,7 +40,8 @@ public class UserPermissionController {
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authenticationMono
-                .map(authentication -> authorizationUtil.getObjectIdentifierFromToken((JwtAuthenticationToken) authentication))
+                .map(authentication -> authorizationUtil
+                        .getObjectIdentifierFromToken((JwtAuthenticationToken) authentication))
                 .publishOn(Schedulers.boundedElastic())
                 .map(userPermissionRepository::findByObjectIdentifier)
                 .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(

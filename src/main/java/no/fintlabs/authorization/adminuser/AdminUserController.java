@@ -50,7 +50,7 @@ public class AdminUserController {
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .map(userPermissions -> ResponseEntity.ok().body(userPermissions));
                     } else {
-                        return Mono.just(ResponseEntity.notFound().build());
+                        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
                 });
     }
@@ -69,7 +69,8 @@ public class AdminUserController {
                                             .findByObjectIdentifier(userPermissionDto.getObjectIdentifier());
                                     if (userPermissionOptional.isPresent()) {
                                         UserPermission userPermission = userPermissionOptional.get();
-                                        userPermission.setSourceApplicationIds(userPermissionDto.getSourceApplicationIds());
+                                        userPermission.setSourceApplicationIds(userPermissionDto
+                                                .getSourceApplicationIds());
                                         userPermissionRepository.save(userPermission);
 
                                         return UserPermissionDto
