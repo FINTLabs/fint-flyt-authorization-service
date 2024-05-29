@@ -8,6 +8,6 @@ import java.util.Optional;
 @Repository
 public interface UserPermissionRepository extends JpaRepository<UserPermission, Long> {
 
-    Optional<UserPermission> findBySub(String sub);
+    Optional<UserPermission> findByObjectIdentifier(String sub);
 
 }
