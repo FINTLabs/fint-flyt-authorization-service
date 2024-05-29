@@ -21,6 +21,8 @@ spec:
     acls:
       - permission: admin
         topic: 'no-permission'
+  database:
+    database: fint-flyt
   url:
     hostname: flyt.vigoiks.no
     basePath: path

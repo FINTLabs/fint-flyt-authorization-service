@@ -19,7 +19,13 @@ public class UserPermission {
     private long id;
     @Setter
     @Column(unique = true, nullable = false)
-    private String sub;
+    private String objectIdentifier;
     @ElementCollection
+    @CollectionTable(
+            name = "user_permission_source_application_ids",
+            joinColumns = @JoinColumn(name = "user_permission_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_permission_id", "source_application_ids"})
+    )
+    @Column(name = "source_application_ids")
     private List<Integer> sourceApplicationIds;
 }
