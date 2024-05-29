@@ -55,40 +55,6 @@ public class AdminUserController {
                 });
     }
 
-//    @PostMapping("userpermissions")
-//    public Mono<ResponseEntity<List<UserPermissionDto>>> setUserPermission(
-//            @RequestBody List<UserPermissionDto> userPermissionDtos,
-//            @AuthenticationPrincipal Mono<Authentication> authenticationMono
-//    ) {
-//        return isAdmin(authenticationMono)
-//                .flatMap(isAdmin -> {
-//                    if (isAdmin) {
-//                        return Flux.fromIterable(userPermissionDtos)
-//                                .flatMap(userPermissionDto -> {
-//                                    Optional<UserPermission> userPermissionOptional = userPermissionRepository
-//                                            .findByObjectIdentifier(userPermissionDto.getObjectIdentifier());
-//                                    if (userPermissionOptional.isPresent()) {
-//                                        UserPermission userPermission = userPermissionOptional.get();
-//                                        userPermission.setSourceApplicationIds(userPermissionDto.getSourceApplicationIds());
-//                                        return userPermissionRepository.save(userPermission);
-//                                    } else {
-//                                        UserPermission userPermission = UserPermission
-//                                                .builder()
-//                                                .objectIdentifier(userPermissionDto.getObjectIdentifier())
-//                                                .sourceApplicationIds(userPermissionDto.getSourceApplicationIds())
-//                                                .build();
-//                                        return userPermissionRepository.save(userPermission);
-//                                    }
-//                                }).subscribeOn(Schedulers.boundedElastic())
-//                                .collectList()
-//                                .map(ResponseEntity::ok);
-//                    } else {
-//                        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
-//                    }
-//
-//                });
-//    }
-
     @PostMapping("userpermissions")
     public Mono<ResponseEntity<List<UserPermissionDto>>> setUserPermission(
             @RequestBody List<UserPermissionDto> userPermissionDtos,
