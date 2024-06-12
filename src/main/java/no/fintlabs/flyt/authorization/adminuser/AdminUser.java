@@ -1,4 +1,4 @@
-package no.fintlabs.authorization.adminuser;
+package no.fintlabs.flyt.authorization.adminuser;
 
 import lombok.Builder;
 import lombok.Getter;

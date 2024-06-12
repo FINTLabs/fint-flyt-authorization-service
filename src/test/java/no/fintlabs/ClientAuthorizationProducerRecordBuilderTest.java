@@ -1,9 +1,9 @@
 package no.fintlabs;
 
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
-import no.fintlabs.models.sourceapplication.AcosSourceApplication;
-import no.fintlabs.models.sourceapplication.EgrunnervervSourceApplication;
-import no.fintlabs.models.sourceapplication.DigisakSourceApplication;
+import no.fintlabs.flyt.models.sourceapplication.AcosSourceApplication;
+import no.fintlabs.flyt.models.sourceapplication.EgrunnervervSourceApplication;
+import no.fintlabs.flyt.models.sourceapplication.DigisakSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

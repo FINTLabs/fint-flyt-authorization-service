@@ -1,4 +1,4 @@
-package no.fintlabs.authorization.user;
+package no.fintlabs.flyt.authorization.user;
 
 import com.sun.istack.NotNull;
 import lombok.Builder;

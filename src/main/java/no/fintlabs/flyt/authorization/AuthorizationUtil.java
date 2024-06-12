@@ -1,4 +1,4 @@
-package no.fintlabs.authorization;
+package no.fintlabs.flyt.authorization;
 
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;

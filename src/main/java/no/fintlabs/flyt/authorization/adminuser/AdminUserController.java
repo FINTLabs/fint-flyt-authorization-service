@@ -1,8 +1,10 @@
-package no.fintlabs.authorization.adminuser;
+package no.fintlabs.flyt.authorization.adminuser;
 
-import no.fintlabs.authorization.user.UserPermission;
-import no.fintlabs.authorization.user.UserPermissionDto;
-import no.fintlabs.authorization.user.UserPermissionRepository;
+import no.fintlabs.flyt.authorization.user.UserPermission;
+import no.fintlabs.flyt.authorization.user.UserPermissionDto;
+import no.fintlabs.flyt.authorization.user.UserPermissionRepository;
+import no.fintlabs.flyt.azure.AzureUserCache;
+import no.fintlabs.flyt.azure.AzureUserCacheRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,10 +24,14 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 public class AdminUserController {
 
     private final UserPermissionRepository userPermissionRepository;
+    private final AzureUserCacheRepository azureUserCacheRepository;
 
     public AdminUserController(
-            UserPermissionRepository userPermissionRepository) {
+            UserPermissionRepository userPermissionRepository,
+            AzureUserCacheRepository azureUserCacheRepository
+    ) {
         this.userPermissionRepository = userPermissionRepository;
+        this.azureUserCacheRepository = azureUserCacheRepository;
     }
 
 
@@ -63,8 +69,10 @@ public class AdminUserController {
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return isAdmin(authenticationMono)
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap(isAdmin -> {
                     if (isAdmin) {
+
                         return Flux.fromIterable(userPermissionDtos)
                                 .flatMap(userPermissionDto -> Mono.fromCallable(() -> {
                                     Optional<UserPermission> userPermissionOptional = userPermissionRepository
@@ -95,9 +103,13 @@ public class AdminUserController {
     }
 
     private UserPermissionDto buildUserPermissionDto(UserPermission userPermission) {
+
+        AzureUserCache azureUserCache = azureUserCacheRepository.findByObjectIdentifier(userPermission.getObjectIdentifier());
+
         return UserPermissionDto
                 .builder()
                 .objectIdentifier(userPermission.getObjectIdentifier())
+                .email(azureUserCache.getEmail())
                 .sourceApplicationIds(userPermission.getSourceApplicationIds())
                 .build();
     }

@@ -1,4 +1,4 @@
-package no.fintlabs.models.sourceapplication;
+package no.fintlabs.flyt.models.sourceapplication;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

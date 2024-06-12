@@ -3,6 +3,7 @@ fint:
 spring:
   profiles:
     include:
+      - flyt-azure
       - flyt-kafka
       - flyt-logging
       - flyt-postgres

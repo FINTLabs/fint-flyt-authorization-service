@@ -1,0 +1,61 @@
+package no.fintlabs.flyt.azure;
+
+import com.azure.identity.ClientSecretCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
+import com.microsoft.graph.http.IHttpProvider;
+import com.microsoft.graph.models.AppRoleAssignment;
+import com.microsoft.graph.requests.GraphServiceClient;
+import lombok.Getter;
+import lombok.Setter;
+import okhttp3.Request;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+
+@Getter
+@Setter
+@EnableAutoConfiguration
+@Configuration
+@ConfigurationProperties(prefix = "azure.credentials")
+public class Config {
+    private String clientid;
+    private String clientsecret;
+    private String tenantid;
+    private String appid;
+
+    private IHttpProvider<Request> httpProvider;
+
+    @Bean
+    public ConfigUser configUser() {
+        return new ConfigUser();
+    }
+
+    @Bean
+    public AppRoleAssignment appRole() {
+        return new AppRoleAssignment();
+    }
+
+    @Bean
+    public GraphServiceClient<Request> graphService() {
+        ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
+                .clientId(clientid)
+                .clientSecret(clientsecret)
+                .tenantId(tenantid)
+                .build();
+
+        TokenCredentialAuthProvider tokenCredentialAuthProvider = new TokenCredentialAuthProvider(
+                List.of("https://graph.microsoft.com/.default"),
+                clientSecretCredential
+        );
+
+        return GraphServiceClient
+                .builder()
+                .authenticationProvider(tokenCredentialAuthProvider)
+                .buildClient();
+    }
+}

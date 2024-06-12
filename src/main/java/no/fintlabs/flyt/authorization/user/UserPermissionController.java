@@ -1,7 +1,7 @@
-package no.fintlabs.authorization.user;
+package no.fintlabs.flyt.authorization.user;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.authorization.AuthorizationUtil;
+import no.fintlabs.flyt.authorization.AuthorizationUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
