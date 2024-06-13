@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +56,7 @@ public class AdminUserController {
                                 .map(userPermissions -> {
                                     List<UserPermissionDto> userPermissionDtos = new java.util.ArrayList<>(List.of());
                                     userPermissions.forEach(userPermission -> userPermissionDtos.add(buildUserPermissionDto(userPermission)));
+                                    userPermissionDtos.sort(Comparator.comparing(UserPermissionDto::getEmail, Comparator.nullsLast(String::compareTo)));
                                     return ResponseEntity.ok().body(userPermissionDtos);
                                 });
                     } else {
