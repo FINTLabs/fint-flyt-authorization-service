@@ -97,7 +97,10 @@ public class AdminUserController {
                                     }
                                 }).subscribeOn(Schedulers.boundedElastic()))
                                 .collectList()
-                                .map(ResponseEntity::ok);
+                                .map(userPermissionDtoList -> {
+                                    userPermissionDtoList.sort(Comparator.comparing(UserPermissionDto::getEmail, Comparator.nullsLast(String::compareTo)));
+                                    return ResponseEntity.ok().body(userPermissionDtoList);
+                                });
                     } else {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
