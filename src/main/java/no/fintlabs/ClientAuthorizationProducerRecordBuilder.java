@@ -1,18 +1,16 @@
 package no.fintlabs;
 
-import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import no.fintlabs.flyt.models.sourceapplication.AcosSourceApplication;
-import no.fintlabs.flyt.models.sourceapplication.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.models.sourceapplication.DigisakSourceApplication;
+import no.fintlabs.flyt.models.sourceapplication.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.models.sourceapplication.VigoSourceApplication;
+import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
-@Slf4j
 public class ClientAuthorizationProducerRecordBuilder {
 
     public ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {

@@ -1,6 +1,5 @@
 package no.fintlabs.flyt.authorization.user;
 
-import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.AuthorizationUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,6 @@ import reactor.core.scheduler.Schedulers;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@Slf4j
 @RequestMapping(INTERNAL_API + "/authorization/user")
 @RestController
 public class UserPermissionController {

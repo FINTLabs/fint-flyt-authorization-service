@@ -3,8 +3,6 @@ package no.fintlabs.flyt.azure;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
-import com.microsoft.graph.http.IHttpProvider;
-import com.microsoft.graph.models.AppRoleAssignment;
 import com.microsoft.graph.requests.GraphServiceClient;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,12 +21,10 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties(prefix = "azure.credentials")
 public class Config {
-    private String clientid;
-    private String clientsecret;
-    private String tenantid;
-    private String appid;
-
-    private IHttpProvider<Request> httpProvider;
+    private String clientId;
+    private String clientSecret;
+    private String tenantId;
+    private String appId;
 
     @Bean
     public ConfigUser configUser() {
@@ -36,16 +32,17 @@ public class Config {
     }
 
     @Bean
-    public AppRoleAssignment appRole() {
-        return new AppRoleAssignment();
+    @ConfigurationProperties(prefix = "fint.flyt.azure-ad-gateway")
+    public PermittedAppRoles appRoles() {
+        return new PermittedAppRoles();
     }
 
     @Bean
     public GraphServiceClient<Request> graphService() {
         ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
-                .clientId(clientid)
-                .clientSecret(clientsecret)
-                .tenantId(tenantid)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .tenantId(tenantId)
                 .build();
 
         TokenCredentialAuthProvider tokenCredentialAuthProvider = new TokenCredentialAuthProvider(

@@ -23,10 +23,9 @@ spring:
 fint:
   flyt:
     azure-ad-gateway:
-      approles:
+      permitted-approles:
         flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
         flyt-developer: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
-        flyt-admin: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
       user-scheduler:
         pull:
           initial-delay-ms: 1000
