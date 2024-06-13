@@ -6,6 +6,7 @@ resources:
   - ../../../base
   - digisak-oauth2-client.yaml
   - vigo-oauth2-client.yaml
+  - onePassword.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_fintlabs_no
