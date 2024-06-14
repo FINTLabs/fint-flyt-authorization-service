@@ -28,7 +28,7 @@ public class AzureADUserSyncService {
     protected final UserPermissionService userPermissionService;
     protected final UserPermissionRepository userPermissionRepository;
     protected final AzureAppRoleCacheService azureAppRoleCacheService;
-    protected final AzureUserCacheRepository azureUserCacheRepository;
+    protected final AzureUserCacheService azureUserCacheService;
 
     @Scheduled(
             initialDelayString = "${fint.flyt.azure-ad-gateway.user-scheduler.pull.initial-delay-ms}",
@@ -101,8 +101,15 @@ public class AzureADUserSyncService {
             }
         } while (currentPage != null);
 
-        userPermissionService.saveUserPermissions(userPermissionList);
-        azureUserCacheRepository.saveAll(azureUserCaches);
+        if (!userPermissionList.isEmpty()) {
+            userPermissionService.refreshUserPermissions(userPermissionList);
+            userPermissionList.forEach(userPermission -> log.info("Saving user permission {} in db", userPermission.getObjectIdentifier()));
+        }
+
+        if (!azureUserCaches.isEmpty()) {
+            azureUserCacheService.refreshAzureUserCaches(azureUserCaches);
+            azureUserCaches.forEach(azureUserCache -> log.debug("Saving azure user {} in cache", azureUserCache.getEmail()));
+        }
 
         log.info("{} User objects processed in Azure AD", usersProcessed);
     }

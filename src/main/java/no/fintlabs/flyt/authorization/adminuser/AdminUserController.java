@@ -114,7 +114,7 @@ public class AdminUserController {
         return UserPermissionDto
                 .builder()
                 .objectIdentifier(userPermission.getObjectIdentifier())
-                .email(azureUserCache.getEmail())
+                .email(azureUserCache != null ? azureUserCache.getEmail() : null)
                 .sourceApplicationIds(userPermission.getSourceApplicationIds())
                 .build();
     }

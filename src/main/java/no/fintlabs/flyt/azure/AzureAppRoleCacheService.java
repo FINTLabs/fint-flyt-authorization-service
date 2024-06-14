@@ -17,19 +17,16 @@ public class AzureAppRoleCacheService {
 
     protected final AzureAppRoleService azureAppRoleService;
 
-    protected final AzureUserCacheRepository azureUserCacheRepository;
     protected final AzureAppRoleCacheRepository azureAppRoleCacheRepository;
     protected final AzureAppRoleAssignmentCacheRepository azureAppRoleAssignmentCacheRepository;
     protected final AzureGroupMembersCacheRepository azureGroupMembersCacheRepository;
 
     public AzureAppRoleCacheService(
             AzureAppRoleService azureAppRoleService,
-            AzureUserCacheRepository azureUserCacheRepository,
             AzureAppRoleCacheRepository azureAppRoleCacheRepository,
             AzureAppRoleAssignmentCacheRepository azureAppRoleAssignmentCacheRepository,
             AzureGroupMembersCacheRepository azureGroupMembersCacheRepository) {
         this.azureAppRoleService = azureAppRoleService;
-        this.azureUserCacheRepository = azureUserCacheRepository;
         this.azureAppRoleCacheRepository = azureAppRoleCacheRepository;
         this.azureAppRoleAssignmentCacheRepository = azureAppRoleAssignmentCacheRepository;
         this.azureGroupMembersCacheRepository = azureGroupMembersCacheRepository;
@@ -91,7 +88,7 @@ public class AzureAppRoleCacheService {
         if (roles.isEmpty()) {
             log.debug("User with email {} has no roles assigned in app {}", email, appId);
         } else {
-            log.info("User with email {} has the following roles in app {}: {}", email, appId, roles);
+            log.debug("User with email {} has the following roles in app {}: {}", email, appId, roles);
         }
 
         return roles;
@@ -108,10 +105,6 @@ public class AzureAppRoleCacheService {
 
     private String getAppRoleValue(UUID appRoleId, String appId) {
         Map<String, AppRole> appRoles = azureAppRoleCacheRepository.findAll();
-//        if (appRoles == null) {
-//            log.debug("App roles are null for appId: {}", appId);
-//            return null;
-//        }
 
         for (Map.Entry<String, AppRole> entry : appRoles.entrySet()) {
             AppRole appRole = entry.getValue();

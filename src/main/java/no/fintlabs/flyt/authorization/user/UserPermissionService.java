@@ -17,16 +17,16 @@ public class UserPermissionService {
         this.userPermissionRepository = userPermissionRepository;
     }
 
-    public void saveUserPermissions(List<UserPermission> userPermissions) {
+    public void refreshUserPermissions(List<UserPermission> userPermissions) {
 
         deleteUserPermissionsNotInList(userPermissions);
 
         List<UserPermission> newUserPermissionList = new ArrayList<>();
 
         userPermissions.forEach(userPermission -> {
-            Optional<UserPermission> existingPermission = userPermissionRepository
+            Optional<UserPermission> existingUserPermission = userPermissionRepository
                     .findByObjectIdentifier(userPermission.getObjectIdentifier());
-            if (existingPermission.isEmpty()) {
+            if (existingUserPermission.isEmpty()) {
                 newUserPermissionList.add(userPermission);
             }
         });

@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class AzureUserCacheRepository {
-    private final Map<String, AzureUserCache> userCache = new ConcurrentHashMap<>();
+    private final Map<String, AzureUserCache> azureUserCacheMap = new ConcurrentHashMap<>();
 
     public void save(AzureUserCache azureUserCache) {
-        userCache.put(azureUserCache.getObjectIdentifier(), azureUserCache);
+        azureUserCacheMap.put(azureUserCache.getObjectIdentifier(), azureUserCache);
     }
 
     public void saveAll(List<AzureUserCache> azureUserCaches) {
@@ -19,18 +19,15 @@ public class AzureUserCacheRepository {
     }
 
     public AzureUserCache findByObjectIdentifier(String objectIdentifier) {
-        return userCache.get(objectIdentifier);
+        return azureUserCacheMap.get(objectIdentifier);
     }
 
     public Map<String, AzureUserCache> findAll() {
-        return userCache;
+        return azureUserCacheMap;
     }
 
     public void deleteByObjectIdentifier(String objectIdentifier) {
-        userCache.remove(objectIdentifier);
+        azureUserCacheMap.remove(objectIdentifier);
     }
 
-    public boolean existsByObjectIdentifier(String objectIdentifier) {
-        return userCache.containsKey(objectIdentifier);
-    }
 }
