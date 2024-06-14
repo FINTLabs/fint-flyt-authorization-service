@@ -6,7 +6,6 @@ import com.microsoft.graph.requests.UserCollectionPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.UserPermission;
-import no.fintlabs.flyt.authorization.user.UserPermissionRepository;
 import no.fintlabs.flyt.authorization.user.UserPermissionService;
 import okhttp3.Request;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,7 +25,6 @@ public class AzureADUserSyncService {
     protected final GraphServiceClient<Request> graphService;
     protected final AzureAppRoleService azureAppRoleService;
     protected final UserPermissionService userPermissionService;
-    protected final UserPermissionRepository userPermissionRepository;
     protected final AzureAppRoleCacheService azureAppRoleCacheService;
     protected final AzureUserCacheService azureUserCacheService;
 
