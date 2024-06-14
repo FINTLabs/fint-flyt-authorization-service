@@ -1,9 +1,12 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.services;
 
 import com.microsoft.graph.models.AppRole;
 import com.microsoft.graph.models.AppRoleAssignment;
 import com.microsoft.graph.models.User;
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.flyt.azure.repositories.AzureAppRoleAssignmentCacheRepository;
+import no.fintlabs.flyt.azure.repositories.AzureAppRoleCacheRepository;
+import no.fintlabs.flyt.azure.repositories.AzureGroupMembersCacheRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,25 +18,25 @@ import java.util.UUID;
 @Slf4j
 public class AzureAppRoleCacheService {
 
-    protected final AzureAppRoleService azureAppRoleService;
+    protected final AzureAppGraphService azureAppGraphService;
 
     protected final AzureAppRoleCacheRepository azureAppRoleCacheRepository;
     protected final AzureAppRoleAssignmentCacheRepository azureAppRoleAssignmentCacheRepository;
     protected final AzureGroupMembersCacheRepository azureGroupMembersCacheRepository;
 
     public AzureAppRoleCacheService(
-            AzureAppRoleService azureAppRoleService,
+            AzureAppGraphService azureAppGraphService,
             AzureAppRoleCacheRepository azureAppRoleCacheRepository,
             AzureAppRoleAssignmentCacheRepository azureAppRoleAssignmentCacheRepository,
             AzureGroupMembersCacheRepository azureGroupMembersCacheRepository) {
-        this.azureAppRoleService = azureAppRoleService;
+        this.azureAppGraphService = azureAppGraphService;
         this.azureAppRoleCacheRepository = azureAppRoleCacheRepository;
         this.azureAppRoleAssignmentCacheRepository = azureAppRoleAssignmentCacheRepository;
         this.azureGroupMembersCacheRepository = azureGroupMembersCacheRepository;
     }
 
     public void storeAzureAppRoleDataInCache(String appId) {
-        List<AppRoleAssignment> appRoleAssignments = azureAppRoleService.getAppRoleAssignments(appId);
+        List<AppRoleAssignment> appRoleAssignments = azureAppGraphService.getAppRoleAssignments(appId);
         azureAppRoleAssignmentCacheRepository.saveAll(appId, appRoleAssignments);
 
         appRoleAssignments.forEach(appRoleAssignment -> {
@@ -46,12 +49,12 @@ public class AzureAppRoleCacheService {
             String principalId = appRoleAssignment.principalId.toString();
 
             if (principalType.equals("Group")) {
-                List<User> groupMembers = azureAppRoleService.getGroupMembers(principalId);
+                List<User> groupMembers = azureAppGraphService.getGroupMembers(principalId);
                 azureGroupMembersCacheRepository.saveAll(principalId, groupMembers);
             }
         });
 
-        List<AppRole> appRoles = azureAppRoleService.getAppRoles(appId);
+        List<AppRole> appRoles = azureAppGraphService.getAppRoles(appId);
         azureAppRoleCacheRepository.saveAllPermittedRoles(appRoles);
     }
 

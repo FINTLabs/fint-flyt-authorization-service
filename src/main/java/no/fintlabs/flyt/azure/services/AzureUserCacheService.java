@@ -1,6 +1,8 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.services;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.flyt.azure.repositories.AzureUserCacheRepository;
+import no.fintlabs.flyt.azure.models.AzureUserCache;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

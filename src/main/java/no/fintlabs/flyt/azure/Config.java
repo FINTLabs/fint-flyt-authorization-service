@@ -6,6 +6,8 @@ import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.requests.GraphServiceClient;
 import lombok.Getter;
 import lombok.Setter;
+import no.fintlabs.flyt.azure.models.ConfigUser;
+import no.fintlabs.flyt.azure.models.PermittedAppRoles;
 import okhttp3.Request;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;

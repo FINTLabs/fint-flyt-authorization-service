@@ -1,7 +1,8 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.repositories;
 
 import com.microsoft.graph.models.AppRole;
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.flyt.azure.models.PermittedAppRoles;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;

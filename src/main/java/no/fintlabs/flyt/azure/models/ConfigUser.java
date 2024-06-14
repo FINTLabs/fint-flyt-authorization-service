@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

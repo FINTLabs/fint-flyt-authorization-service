@@ -1,5 +1,6 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.repositories;
 
+import no.fintlabs.flyt.azure.models.AzureUserCache;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

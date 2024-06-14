@@ -44,14 +44,8 @@ dependencies {
     implementation 'no.fintlabs:fint-kafka:4.0.1'
     implementation 'no.fintlabs:fint-flyt-resource-server:2.1.0'
 
-//    implementation 'com.microsoft.graph:microsoft-graph:6.11.0'
-//    implementation 'com.azure:azure-identity:1.12.1'
-
     implementation 'com.azure:azure-identity:1.10.2'
     implementation 'com.microsoft.graph:microsoft-graph:5.80.0'
-
-//    implementation 'com.azure:azure-identity:1.4.6'
-//    implementation 'com.microsoft.graph:microsoft-graph:5.9.0'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'

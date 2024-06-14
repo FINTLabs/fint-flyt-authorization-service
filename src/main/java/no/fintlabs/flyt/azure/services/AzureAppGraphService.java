@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.services;
 
 import com.microsoft.graph.models.*;
 import com.microsoft.graph.options.QueryOption;
@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class AzureAppRoleService {
+public class AzureAppGraphService {
 
     protected final GraphServiceClient<Request> graphService;
 
-    public AzureAppRoleService(
+    public AzureAppGraphService(
             GraphServiceClient<Request> graphService
     ) {
         this.graphService = graphService;

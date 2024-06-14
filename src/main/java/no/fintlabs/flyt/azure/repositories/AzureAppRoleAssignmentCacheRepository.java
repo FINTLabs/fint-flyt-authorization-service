@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.azure;
+package no.fintlabs.flyt.azure.repositories;
 
 import com.microsoft.graph.models.AppRoleAssignment;
 import org.springframework.stereotype.Repository;
