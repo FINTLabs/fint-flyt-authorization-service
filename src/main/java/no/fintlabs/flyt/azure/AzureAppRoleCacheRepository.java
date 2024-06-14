@@ -1,15 +1,18 @@
 package no.fintlabs.flyt.azure;
 
 import com.microsoft.graph.models.AppRole;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
+@Slf4j
 public class AzureAppRoleCacheRepository {
 
-    private final List<AppRole> appRoleCache = new ArrayList<>();
+    private final Map<String, AppRole> appRoleCache = new HashMap<>();
     protected final PermittedAppRoles permittedAppRoles;
 
     public AzureAppRoleCacheRepository(PermittedAppRoles permittedAppRoles) {
@@ -17,7 +20,11 @@ public class AzureAppRoleCacheRepository {
     }
 
     public void save(AppRole appRole) {
-        appRoleCache.add(appRole);
+        if (appRole.id != null) {
+            appRoleCache.put(appRole.id.toString(), appRole);
+        } else {
+            log.warn("App role {} was not saved in cache because id is null", appRole);
+        }
     }
 
     public void saveAllPermittedRoles(List<AppRole> appRoles) {
@@ -29,7 +36,7 @@ public class AzureAppRoleCacheRepository {
         );
     }
 
-    public List<AppRole> findAll() {
+    public Map<String, AppRole> findAll() {
         return appRoleCache;
     }
 }

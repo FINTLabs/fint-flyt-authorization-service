@@ -1,5 +1,6 @@
 package no.fintlabs.flyt.authorization.user;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserPermissionService {
 
     private final UserPermissionRepository userPermissionRepository;
@@ -17,7 +19,7 @@ public class UserPermissionService {
 
     public void saveUserPermissions(List<UserPermission> userPermissions) {
 
-        nullifyUserPermissionsNotInList(userPermissions);
+        deleteUserPermissionsNotInList(userPermissions);
 
         List<UserPermission> newUserPermissionList = new ArrayList<>();
 
@@ -32,20 +34,22 @@ public class UserPermissionService {
         userPermissionRepository.saveAll(newUserPermissionList);
     }
 
-    private void nullifyUserPermissionsNotInList(List<UserPermission> userPermissions) {
+    private void deleteUserPermissionsNotInList(List<UserPermission> userPermissions) {
         List<UserPermission> allCurrentUserPermissions = userPermissionRepository.findAll();
 
         List<String> inputUserPermissionIdentifiers = userPermissions.stream()
                 .map(UserPermission::getObjectIdentifier)
                 .toList();
 
-        List<UserPermission> userPermissionsToNullify = allCurrentUserPermissions.stream()
+        List<UserPermission> userPermissionsToDelete = allCurrentUserPermissions.stream()
                 .filter(userPermission -> !inputUserPermissionIdentifiers.contains(userPermission.getObjectIdentifier()))
                 .toList();
 
-        userPermissionsToNullify.forEach(userPermission -> userPermission.setSourceApplicationIds(null));
+        userPermissionRepository.deleteAll(userPermissionsToDelete);
 
-        userPermissionRepository.saveAll(userPermissionsToNullify);
+        if (!userPermissionsToDelete.isEmpty()) {
+            log.info("Deleted {} user permissions", userPermissionsToDelete.size());
+        }
     }
 
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,8 +27,7 @@ public class AzureAppRoleCacheService {
             AzureUserCacheRepository azureUserCacheRepository,
             AzureAppRoleCacheRepository azureAppRoleCacheRepository,
             AzureAppRoleAssignmentCacheRepository azureAppRoleAssignmentCacheRepository,
-            AzureGroupMembersCacheRepository azureGroupMembersCacheRepository
-    ) {
+            AzureGroupMembersCacheRepository azureGroupMembersCacheRepository) {
         this.azureAppRoleService = azureAppRoleService;
         this.azureUserCacheRepository = azureUserCacheRepository;
         this.azureAppRoleCacheRepository = azureAppRoleCacheRepository;
@@ -37,7 +37,7 @@ public class AzureAppRoleCacheService {
 
     public void storeAzureAppRoleDataInCache(String appId) {
         List<AppRoleAssignment> appRoleAssignments = azureAppRoleService.getAppRoleAssignments(appId);
-        azureAppRoleAssignmentCacheRepository.saveAll(appRoleAssignments);
+        azureAppRoleAssignmentCacheRepository.saveAll(appId, appRoleAssignments);
 
         appRoleAssignments.forEach(appRoleAssignment -> {
             if (appRoleAssignment.principalType == null || appRoleAssignment.principalId == null) {
@@ -65,11 +65,11 @@ public class AzureAppRoleCacheService {
     ) {
         List<String> roles = new ArrayList<>();
 
-        List<AppRoleAssignment> appRoleAssignments = this.azureAppRoleAssignmentCacheRepository.findAll();
+        List<AppRoleAssignment> appRoleAssignments = this.azureAppRoleAssignmentCacheRepository.findAllByAppId(appId);
 
         appRoleAssignments.forEach(assignment -> {
             if (assignment.principalType == null || assignment.principalId == null) {
-                log.warn("Assignment principalType or principalId is null for assignment {}", assignment);
+                log.debug("Assignment principalType or principalId is null for assignment {}", assignment);
                 return;
             }
 
@@ -89,9 +89,9 @@ public class AzureAppRoleCacheService {
         });
 
         if (roles.isEmpty()) {
-            log.info("User {} has no roles assigned in app {}", email, appId);
+            log.debug("User with email {} has no roles assigned in app {}", email, appId);
         } else {
-            log.info("User {} has the following roles in app {}: {}", email, appId, roles);
+            log.info("User with email {} has the following roles in app {}: {}", email, appId, roles);
         }
 
         return roles;
@@ -102,22 +102,25 @@ public class AzureAppRoleCacheService {
         if (roleName != null) {
             roles.add(roleName);
         } else {
-            log.warn("Role name for appRoleId {} not found", assignment.appRoleId);
+            log.debug("Role name for appRoleId {} not found", assignment.appRoleId);
         }
     }
 
     private String getAppRoleValue(UUID appRoleId, String appId) {
-        List<AppRole> appRoles = azureAppRoleCacheRepository.findAll();
-        if (appRoles == null) {
-            log.warn("App roles are null for appId: {}", appId);
-            return null;
-        }
-        for (AppRole appRole : appRoles) {
+        Map<String, AppRole> appRoles = azureAppRoleCacheRepository.findAll();
+//        if (appRoles == null) {
+//            log.debug("App roles are null for appId: {}", appId);
+//            return null;
+//        }
+
+        for (Map.Entry<String, AppRole> entry : appRoles.entrySet()) {
+            AppRole appRole = entry.getValue();
             if (appRole.id != null && appRole.id.equals(appRoleId)) {
                 return appRole.value;
             }
         }
-        log.warn("Role with appRoleId: {} not found in appId: {}", appRoleId, appId);
+
+        log.debug("Role with appRoleId: {} not found in appId: {}", appRoleId, appId);
         return null;
     }
 

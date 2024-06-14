@@ -29,4 +29,4 @@ fint:
       user-scheduler:
         pull:
           initial-delay-ms: 1000
-          fixed-delay-ms: 3600000
+          fixed-delay-ms: 900000
