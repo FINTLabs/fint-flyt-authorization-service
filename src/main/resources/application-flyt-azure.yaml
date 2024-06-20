@@ -1,9 +1,9 @@
 azure:
   credentials:
-    clientid: ${fint.flyt.azure.client-id}
-    clientsecret: ${fint.flyt.azure.client-secret}
-    tenantid: ${fint.flyt.azure.tenant-id}
-    appid: ${fint.flyt.azure.app-id}
+    clientid: ${fint.flyt.azure.client-id:null}
+    clientsecret: ${fint.flyt.azure.client-secret:null}
+    tenantid: ${fint.flyt.azure.tenant-id:null}
+    appid: ${fint.flyt.azure.app-id:null}
 
 spring:
   security:

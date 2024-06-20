@@ -12,6 +12,7 @@ import okhttp3.Request;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class Config {
     }
 
     @Bean
+    @Conditional(RequiredPropertiesCondition.class)
     public GraphServiceClient<Request> graphService() {
         ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
                 .clientId(clientId)

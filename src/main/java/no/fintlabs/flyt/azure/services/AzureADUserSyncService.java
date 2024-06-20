@@ -37,6 +37,9 @@ public class AzureADUserSyncService {
             fixedDelayString = "${fint.flyt.azure-ad-gateway.user-scheduler.pull.fixed-delay-ms}"
     )
     private void pullUsersAndRoles() {
+
+        validateConfig();
+
         log.info("*** <<< Starting to pull users from Azure AD >>> ***");
         long startTime = System.currentTimeMillis();
 
@@ -60,6 +63,19 @@ public class AzureADUserSyncService {
         long seconds = elapsedTimeInSeconds % 60;
 
         log.info("*** <<< Finished pulling users from Azure AD in {} minutes and {} seconds >>> *** ", minutes, seconds);
+    }
+
+    private void validateConfig() {
+        if (isNullOrEmpty(config.getClientId()) ||
+                isNullOrEmpty(config.getClientSecret()) ||
+                isNullOrEmpty(config.getTenantId()) ||
+                isNullOrEmpty(config.getAppId())) {
+            throw new IllegalArgumentException("Azure AD configuration is not properly set.");
+        }
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value.isBlank() || "null".equalsIgnoreCase(value);
     }
 
     private void processUsers(UserCollectionPage userCollectionPage) {
