@@ -47,6 +47,18 @@ patches:
         value:
           secretRef:
             name: fint-flyt-vigo-oauth2-client
+      - op: add
+        path: "/spec/envFrom/2"
+        value:
+          secretRef:
+            name: fint-flyt-authorization-service
     target:
       kind: Application
+      name: fint-flyt-authorization-service
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-api-vault/items/fint-flyt-authorization-service-ofk-no"
+    target:
+      kind: OnePasswordItem
       name: fint-flyt-authorization-service
