@@ -45,7 +45,7 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/itemPath"
-        value: "vaults/vestfoldfylke-no/items/FINT-Flyt-Role-VestfoldFK"
+        value: "vaults/aks-api-vault/items/fint-flyt-authorization-service-vestfoldfylke-no"
     target:
       kind: OnePasswordItem
       name: fint-flyt-authorization-service
