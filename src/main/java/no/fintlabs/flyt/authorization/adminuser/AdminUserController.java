@@ -56,7 +56,7 @@ public class AdminUserController {
                                 .map(userPermissions -> {
                                     List<UserPermissionDto> userPermissionDtos = new java.util.ArrayList<>(List.of());
                                     userPermissions.forEach(userPermission -> userPermissionDtos.add(buildUserPermissionDto(userPermission)));
-                                    userPermissionDtos.sort(Comparator.comparing(UserPermissionDto::getEmail, Comparator.nullsLast(String::compareTo)));
+                                    userPermissionDtos.sort(Comparator.comparing(UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)));
                                     return ResponseEntity.ok().body(userPermissionDtos);
                                 });
                     } else {
@@ -98,7 +98,7 @@ public class AdminUserController {
                                 }).subscribeOn(Schedulers.boundedElastic()))
                                 .collectList()
                                 .map(userPermissionDtoList -> {
-                                    userPermissionDtoList.sort(Comparator.comparing(UserPermissionDto::getEmail, Comparator.nullsLast(String::compareTo)));
+                                    userPermissionDtoList.sort(Comparator.comparing(UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)));
                                     return ResponseEntity.ok().body(userPermissionDtoList);
                                 });
                     } else {
