@@ -84,52 +84,51 @@ public class AzureADUserSyncService {
 
         List<UserPermission> userPermissionList = new ArrayList<>();
         List<AzureUserCache> azureUserCaches = new ArrayList<>();
+        try {
+            do {
+                for (User user : currentPage.getCurrentPage()) {
 
-        do {
-            for (User user : currentPage.getCurrentPage()) {
+                    if (user.mail == null) {
+                        continue;
+                    }
 
-                if (user.mail == null) {
-                    continue;
+                    usersProcessed++;
+
+                    List<String> userRoles = azureAppRoleCacheService.getUserRoles(user.id, user.mail, config.getAppId());
+
+                    if (isPermittedRole(userRoles)) {
+                        UserPermission userPermission = UserPermission
+                                .builder()
+                                .objectIdentifier(user.id)
+                                .build();
+                        userPermissionList.add(userPermission);
+
+                        AzureUserCache azureUserCache = AzureUserCache
+                                .builder()
+                                .objectIdentifier(user.id)
+                                .email(Objects.requireNonNull(user.mail).toLowerCase())
+                                .build();
+                        azureUserCaches.add(azureUserCache);
+                    }
+
                 }
-
-                usersProcessed++;
-
-                List<String> userRoles = azureAppRoleCacheService.getUserRoles(user.id, user.mail, config.getAppId());
-
-                if (isPermittedRole(userRoles)) {
-                    UserPermission userPermission = UserPermission
-                            .builder()
-                            .objectIdentifier(user.id)
-                            .build();
-                    userPermissionList.add(userPermission);
-
-                    AzureUserCache azureUserCache = AzureUserCache
-                            .builder()
-                            .objectIdentifier(user.id)
-                            .email(Objects.requireNonNull(user.mail).toLowerCase())
-                            .build();
-                    azureUserCaches.add(azureUserCache);
+                if (currentPage.getNextPage() != null) {
+                    currentPage = currentPage.getNextPage().buildRequest().get();
+                } else {
+                    currentPage = null;
                 }
+            } while (currentPage != null);
 
-            }
-            if (currentPage.getNextPage() != null) {
-                currentPage = currentPage.getNextPage().buildRequest().get();
-            } else {
-                currentPage = null;
-            }
-        } while (currentPage != null);
-
-        if (!userPermissionList.isEmpty()) {
             userPermissionService.refreshUserPermissions(userPermissionList);
             userPermissionList.forEach(userPermission -> log.info("Saving user permission {} in db", userPermission.getObjectIdentifier()));
-        }
 
-        if (!azureUserCaches.isEmpty()) {
             azureUserCacheService.refreshAzureUserCaches(azureUserCaches);
             azureUserCaches.forEach(azureUserCache -> log.debug("Saving azure user {} in cache", azureUserCache.getEmail()));
-        }
 
-        log.info("{} User objects processed in Azure AD", usersProcessed);
+            log.info("{} User objects processed in Azure AD", usersProcessed);
+        } catch (Exception e) {
+            log.error("An error occurred while processing user permissions: {}", e.getMessage());
+        }
     }
 
     private boolean isPermittedRole(List<String> userRoles) {
