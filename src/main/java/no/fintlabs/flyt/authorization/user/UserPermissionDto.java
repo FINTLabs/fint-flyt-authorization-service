@@ -16,6 +16,7 @@ public class UserPermissionDto {
     @NotNull
     private String objectIdentifier;
     private String email;
+    private String name;
     @NotNull
     private List<Integer> sourceApplicationIds;
 }

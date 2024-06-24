@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.UserPermission;
 import no.fintlabs.flyt.authorization.user.UserPermissionService;
 import no.fintlabs.flyt.azure.Config;
+import no.fintlabs.flyt.azure.StringUtils;
 import no.fintlabs.flyt.azure.models.AzureUserCache;
 import no.fintlabs.flyt.azure.models.ConfigUser;
 import no.fintlabs.flyt.azure.models.PermittedAppRoles;
@@ -96,6 +97,8 @@ public class AzureADUserSyncService {
 
                     List<String> userRoles = azureAppRoleCacheService.getUserRoles(user.id, user.mail, config.getAppId());
 
+                    log.info("Mail: {} Given name: {} Surname: {}", user.mail, user.givenName, user.surname);
+
                     if (isPermittedRole(userRoles)) {
                         UserPermission userPermission = UserPermission
                                 .builder()
@@ -107,6 +110,7 @@ public class AzureADUserSyncService {
                                 .builder()
                                 .objectIdentifier(user.id)
                                 .email(Objects.requireNonNull(user.mail).toLowerCase())
+                                .name(StringUtils.capitalizeFirstLetterOfEachWord(user.givenName) + " " + user.surname)
                                 .build();
                         azureUserCaches.add(azureUserCache);
                     }

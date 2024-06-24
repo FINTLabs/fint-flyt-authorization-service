@@ -8,4 +8,5 @@ import lombok.Getter;
 public class AzureUserCache {
     private String objectIdentifier;
     private String email;
+    private String name;
 }

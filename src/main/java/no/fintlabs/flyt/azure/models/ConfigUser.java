@@ -14,7 +14,9 @@ public class ConfigUser {
 
     private static final List<String> userAttributes = Arrays.asList(
             "id",
-            "mail"
+            "mail",
+            "givenname",
+            "surname"
     );
 
     public List<String> allAttributes() {
