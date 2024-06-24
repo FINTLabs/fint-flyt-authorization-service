@@ -97,8 +97,6 @@ public class AzureADUserSyncService {
 
                     List<String> userRoles = azureAppRoleCacheService.getUserRoles(user.id, user.mail, config.getAppId());
 
-                    log.info("Mail: {} Given name: {} Surname: {}", user.mail, user.givenName, user.surname);
-
                     if (isPermittedRole(userRoles)) {
                         UserPermission userPermission = UserPermission
                                 .builder()
