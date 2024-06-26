@@ -54,16 +54,16 @@ public class AzureADUserSyncService {
                     .get();
 
             processUsers(usersPage);
+
+            long endTime = System.currentTimeMillis();
+            long elapsedTimeInSeconds = (endTime - startTime) / 1000;
+            long minutes = elapsedTimeInSeconds / 60;
+            long seconds = elapsedTimeInSeconds % 60;
+
+            log.info("*** <<< Finished pulling users from Azure AD in {} minutes and {} seconds >>> *** ", minutes, seconds);
         } catch (Exception e) {
             log.error("Error fetching users : {}", e.getMessage(), e);
         }
-
-        long endTime = System.currentTimeMillis();
-        long elapsedTimeInSeconds = (endTime - startTime) / 1000;
-        long minutes = elapsedTimeInSeconds / 60;
-        long seconds = elapsedTimeInSeconds % 60;
-
-        log.info("*** <<< Finished pulling users from Azure AD in {} minutes and {} seconds >>> *** ", minutes, seconds);
     }
 
     private void validateConfig() {
