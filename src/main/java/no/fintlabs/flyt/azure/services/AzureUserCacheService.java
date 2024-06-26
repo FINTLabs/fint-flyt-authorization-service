@@ -2,7 +2,7 @@ package no.fintlabs.flyt.azure.services;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.azure.repositories.AzureUserCacheRepository;
-import no.fintlabs.flyt.azure.models.AzureUserCache;
+import no.fintlabs.flyt.azure.models.UserDisplayText;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,16 +18,16 @@ public class AzureUserCacheService {
         this.azureUserCacheRepository = azureUserCacheRepository;
     }
 
-    public void refreshAzureUserCaches(List<AzureUserCache> azureUserCaches) {
-        deleteAzureUserCacheNotInList(azureUserCaches);
-        azureUserCacheRepository.saveAll(azureUserCaches);
+    public void refreshAzureUserCaches(List<UserDisplayText> userDisplayTextCaches) {
+        deleteAzureUserCacheNotInList(userDisplayTextCaches);
+        azureUserCacheRepository.saveAll(userDisplayTextCaches);
     }
 
-    private void deleteAzureUserCacheNotInList(List<AzureUserCache> azureUserCaches) {
-        Map<String, AzureUserCache> allCurrentAzureUserCaches = azureUserCacheRepository.findAll();
+    private void deleteAzureUserCacheNotInList(List<UserDisplayText> userDisplayTextCaches) {
+        Map<String, UserDisplayText> allCurrentAzureUserCaches = azureUserCacheRepository.findAll();
 
-        List<String> inputAzureUserCachesIdentifiers = azureUserCaches.stream()
-                .map(AzureUserCache::getObjectIdentifier)
+        List<String> inputAzureUserCachesIdentifiers = userDisplayTextCaches.stream()
+                .map(UserDisplayText::getObjectIdentifier)
                 .toList();
 
         List<String> azureUserCachesStringsToDelete = allCurrentAzureUserCaches.keySet().stream()

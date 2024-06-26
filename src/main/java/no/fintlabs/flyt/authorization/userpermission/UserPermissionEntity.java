@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.authorization.user;
+package no.fintlabs.flyt.authorization.userpermission;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -11,7 +11,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPermission {
+@Table(name = "user_permission")
+public class UserPermissionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore

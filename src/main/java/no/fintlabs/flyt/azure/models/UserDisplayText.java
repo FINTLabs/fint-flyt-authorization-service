@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AzureUserCache {
-    private String objectIdentifier;
+public class UserDisplayText {
     private String email;
     private String name;
 }

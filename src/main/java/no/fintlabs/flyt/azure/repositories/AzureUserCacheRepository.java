@@ -1,6 +1,6 @@
 package no.fintlabs.flyt.azure.repositories;
 
-import no.fintlabs.flyt.azure.models.AzureUserCache;
+import no.fintlabs.flyt.azure.models.UserDisplayText;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,21 +9,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class AzureUserCacheRepository {
-    private final Map<String, AzureUserCache> azureUserCacheMap = new ConcurrentHashMap<>();
+    private final Map<String, UserDisplayText> azureUserCacheMap = new ConcurrentHashMap<>();
 
-    public void save(AzureUserCache azureUserCache) {
-        azureUserCacheMap.put(azureUserCache.getObjectIdentifier(), azureUserCache);
-    }
+//    public void save(UserDisplayText userDisplayText) {
+//        azureUserCacheMap.put(userDisplayText.getObjectIdentifier(), userDisplayText);
+//    }
 
-    public void saveAll(List<AzureUserCache> azureUserCaches) {
-        azureUserCaches.forEach(this::save);
-    }
+//    public void saveAll(List<UserDisplayText> userDisplayTextCaches) {
+//        userDisplayTextCaches.forEach(this::save);
+//    }
 
-    public AzureUserCache findByObjectIdentifier(String objectIdentifier) {
+    public UserDisplayText findByObjectIdentifier(String objectIdentifier) {
         return azureUserCacheMap.get(objectIdentifier);
     }
 
-    public Map<String, AzureUserCache> findAll() {
+    public Map<String, UserDisplayText> findAll() {
         return azureUserCacheMap;
     }
 

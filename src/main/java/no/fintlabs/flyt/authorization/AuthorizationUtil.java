@@ -1,8 +1,8 @@
 package no.fintlabs.flyt.authorization;
 
-import no.fintlabs.flyt.authorization.user.UserPermission;
-import no.fintlabs.flyt.authorization.user.UserPermissionDto;
-import no.fintlabs.flyt.azure.models.AzureUserCache;
+import no.fintlabs.flyt.authorization.userpermission.UserPermissionEntity;
+import no.fintlabs.flyt.authorization.userpermission.UserPermission;
+import no.fintlabs.flyt.azure.models.UserDisplayText;
 import no.fintlabs.flyt.azure.repositories.AzureUserCacheRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -28,16 +28,16 @@ public class AuthorizationUtil {
                         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")));
     }
 
-    public UserPermissionDto buildUserPermissionDto(UserPermission userPermission) {
-
-        AzureUserCache azureUserCache = azureUserCacheRepository.findByObjectIdentifier(userPermission.getObjectIdentifier());
-
-        return UserPermissionDto
-                .builder()
-                .objectIdentifier(userPermission.getObjectIdentifier())
-                .email(azureUserCache != null ? azureUserCache.getEmail() : null)
-                .name(azureUserCache != null ? azureUserCache.getName() : null)
-                .sourceApplicationIds(userPermission.getSourceApplicationIds())
-                .build();
-    }
+//    public UserPermission buildUserPermissionDto(UserPermissionEntity userPermissionEntity) {
+//
+//        UserDisplayText userDisplayText = azureUserCacheRepository.findByObjectIdentifier(userPermissionEntity.getObjectIdentifier());
+//
+//        return UserPermission
+//                .builder()
+//                .objectIdentifier(userPermissionEntity.getObjectIdentifier())
+//                .email(userDisplayText != null ? userDisplayText.getEmail() : null)
+//                .name(userDisplayText != null ? userDisplayText.getName() : null)
+//                .sourceApplicationIds(userPermissionEntity.getSourceApplicationIds())
+//                .build();
+//    }
 }

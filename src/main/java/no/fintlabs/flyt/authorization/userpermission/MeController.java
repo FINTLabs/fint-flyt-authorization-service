@@ -1,7 +1,6 @@
-package no.fintlabs.flyt.authorization.user;
+package no.fintlabs.flyt.authorization.userpermission;
 
 import no.fintlabs.flyt.authorization.AuthorizationUtil;
-import no.fintlabs.flyt.authorization.adminuser.AdminUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,14 +13,14 @@ import reactor.core.scheduler.Schedulers;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@RequestMapping(INTERNAL_API + "/authorization/self-user")
+@RequestMapping(INTERNAL_API + "/authorization/me")
 @RestController
-public class UserPermissionController {
+public class MeController {
 
     private final UserPermissionRepository userPermissionRepository;
     private final AuthorizationUtil authorizationUtil;
 
-    public UserPermissionController(
+    public MeController(
             UserPermissionRepository userPermissionRepository,
             AuthorizationUtil authorizationUtil
     ) {
@@ -35,15 +34,15 @@ public class UserPermissionController {
     }
 
     @GetMapping("isAdmin")
-    public Mono<ResponseEntity<AdminUser>> checkAdminUser(
+    public Mono<ResponseEntity<RestrictedPageAccess>> checkAdminUser(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authorizationUtil.isAdmin(authenticationMono)
-                .map(isAdmin -> ResponseEntity.ok(AdminUser.builder().admin(isAdmin).build()));
+                .map(isAdmin -> ResponseEntity.ok(RestrictedPageAccess.builder().userPermission(isAdmin).build()));
     }
 
     @GetMapping
-    public Mono<ResponseEntity<UserPermissionDto>> getSourceApplications(
+    public Mono<ResponseEntity<UserPermission>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authenticationMono

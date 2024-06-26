@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.authorization.user;
+package no.fintlabs.flyt.authorization.userpermission;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 
 
 @Repository
-public interface UserPermissionRepository extends JpaRepository<UserPermission, Long> {
+public interface UserPermissionRepository extends JpaRepository<UserPermissionEntity, Long> {
 
-    Optional<UserPermission> findByObjectIdentifier(String sub);
+    Optional<UserPermissionEntity> findByObjectIdentifier(String sub);
 
-    default Map<String, UserPermission> findAllAsMapWithObjectIdentifierAsKey() {
+    default Map<String, UserPermissionEntity> findAllAsMapWithObjectIdentifierAsKey() {
         return findAll().stream()
                 .collect(Collectors.toMap(
-                        UserPermission::getObjectIdentifier,
+                        UserPermissionEntity::getObjectIdentifier,
                         Function.identity()
                 ));
     }

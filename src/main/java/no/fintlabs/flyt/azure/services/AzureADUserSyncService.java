@@ -5,11 +5,11 @@ import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.UserCollectionPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.flyt.authorization.user.UserPermission;
-import no.fintlabs.flyt.authorization.user.UserPermissionService;
+import no.fintlabs.flyt.authorization.userpermission.UserPermissionEntity;
+import no.fintlabs.flyt.authorization.userpermission.UserPermissionService;
 import no.fintlabs.flyt.azure.Config;
 import no.fintlabs.flyt.azure.StringUtils;
-import no.fintlabs.flyt.azure.models.AzureUserCache;
+import no.fintlabs.flyt.azure.models.UserDisplayText;
 import no.fintlabs.flyt.azure.models.ConfigUser;
 import no.fintlabs.flyt.azure.models.PermittedAppRoles;
 import okhttp3.Request;
@@ -83,8 +83,8 @@ public class AzureADUserSyncService {
         int usersProcessed = 0;
         UserCollectionPage currentPage = userCollectionPage;
 
-        List<UserPermission> userPermissionList = new ArrayList<>();
-        List<AzureUserCache> azureUserCaches = new ArrayList<>();
+        List<UserPermissionEntity> userPermissionEntityList = new ArrayList<>();
+        List<UserDisplayText> userDisplayTextCaches = new ArrayList<>();
         try {
             do {
                 for (User user : currentPage.getCurrentPage()) {
@@ -98,19 +98,19 @@ public class AzureADUserSyncService {
                     List<String> userRoles = azureAppRoleCacheService.getUserRoles(user.id, user.mail, config.getAppId());
 
                     if (isPermittedRole(userRoles)) {
-                        UserPermission userPermission = UserPermission
+                        UserPermissionEntity userPermissionEntity = UserPermissionEntity
                                 .builder()
                                 .objectIdentifier(user.id)
                                 .build();
-                        userPermissionList.add(userPermission);
+                        userPermissionEntityList.add(userPermissionEntity);
 
-                        AzureUserCache azureUserCache = AzureUserCache
+                        UserDisplayText userDisplayText = UserDisplayText
                                 .builder()
                                 .objectIdentifier(user.id)
                                 .email(Objects.requireNonNull(user.mail).toLowerCase())
                                 .name(StringUtils.capitalizeFirstLetterOfEachWord(user.givenName) + " " + user.surname)
                                 .build();
-                        azureUserCaches.add(azureUserCache);
+                        userDisplayTextCaches.add(userDisplayText);
                     }
 
                 }
@@ -121,11 +121,11 @@ public class AzureADUserSyncService {
                 }
             } while (currentPage != null);
 
-            userPermissionService.refreshUserPermissions(userPermissionList);
-            userPermissionList.forEach(userPermission -> log.info("Saving user permission {} in db", userPermission.getObjectIdentifier()));
+            userPermissionService.refreshUserPermissions(userPermissionEntityList);
+            userPermissionEntityList.forEach(userPermission -> log.info("Saving user permission {} in db", userPermission.getObjectIdentifier()));
 
-            azureUserCacheService.refreshAzureUserCaches(azureUserCaches);
-            azureUserCaches.forEach(azureUserCache -> log.debug("Saving azure user {} in cache", azureUserCache.getEmail()));
+            azureUserCacheService.refreshAzureUserCaches(userDisplayTextCaches);
+            userDisplayTextCaches.forEach(azureUserCache -> log.debug("Saving azure user {} in cache", azureUserCache.getEmail()));
 
             log.info("{} User objects processed in Azure AD", usersProcessed);
         } catch (Exception e) {

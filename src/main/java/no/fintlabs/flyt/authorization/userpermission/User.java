@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.authorization.user;
+package no.fintlabs.flyt.authorization.userpermission;
 
 import com.sun.istack.NotNull;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 @Jacksonized
-public class UserPermissionDto {
+public class User {
     @NotNull
     private String objectIdentifier;
     private String email;
