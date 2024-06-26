@@ -1,10 +1,9 @@
 package no.fintlabs.flyt.authorization.adminuser;
 
+import no.fintlabs.flyt.authorization.AuthorizationUtil;
 import no.fintlabs.flyt.authorization.user.UserPermission;
 import no.fintlabs.flyt.authorization.user.UserPermissionDto;
 import no.fintlabs.flyt.authorization.user.UserPermissionRepository;
-import no.fintlabs.flyt.azure.models.AzureUserCache;
-import no.fintlabs.flyt.azure.repositories.AzureUserCacheRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,42 +20,41 @@ import java.util.Optional;
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
 @RestController
-@RequestMapping(INTERNAL_API + "/authorization/adminuser")
+@RequestMapping(INTERNAL_API + "/admin/authorization")
 public class AdminUserController {
 
     private final UserPermissionRepository userPermissionRepository;
-    private final AzureUserCacheRepository azureUserCacheRepository;
+    private final AuthorizationUtil authorizationUtil;
 
     public AdminUserController(
             UserPermissionRepository userPermissionRepository,
-            AzureUserCacheRepository azureUserCacheRepository
+            AuthorizationUtil authorizationUtil
     ) {
         this.userPermissionRepository = userPermissionRepository;
-        this.azureUserCacheRepository = azureUserCacheRepository;
+        this.authorizationUtil = authorizationUtil;
     }
 
-
-    @GetMapping("check-is-admin")
-    public Mono<ResponseEntity<AdminUser>> checkAdminUser(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono
-    ) {
-        return isAdmin(authenticationMono)
-                .map(isAdmin -> ResponseEntity.ok(AdminUser.builder().admin(isAdmin).build()));
-    }
-
-    @GetMapping("userpermissions")
+    @GetMapping("users")
     public Mono<ResponseEntity<List<UserPermissionDto>>> getUserPermissions(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return isAdmin(authenticationMono)
+        return authorizationUtil.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (isAdmin) {
                         return Mono.fromCallable(userPermissionRepository::findAll)
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .map(userPermissions -> {
                                     List<UserPermissionDto> userPermissionDtos = new java.util.ArrayList<>(List.of());
-                                    userPermissions.forEach(userPermission -> userPermissionDtos.add(buildUserPermissionDto(userPermission)));
-                                    userPermissionDtos.sort(Comparator.comparing(UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)));
+                                    userPermissions.forEach(
+                                            userPermission -> userPermissionDtos.add(
+                                                    authorizationUtil.buildUserPermissionDto(userPermission)
+                                            )
+                                    );
+                                    userPermissionDtos.sort(
+                                            Comparator.comparing(
+                                                    UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)
+                                            )
+                                    );
                                     return ResponseEntity.ok().body(userPermissionDtos);
                                 });
                     } else {
@@ -65,40 +63,32 @@ public class AdminUserController {
                 });
     }
 
-    @PostMapping("userpermissions")
+    @PutMapping("users")
     public Mono<ResponseEntity<List<UserPermissionDto>>> setUserPermissions(
             @RequestBody List<UserPermissionDto> userPermissionDtos,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return isAdmin(authenticationMono)
+        return authorizationUtil.isAdmin(authenticationMono)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(isAdmin -> {
                     if (isAdmin) {
-
                         return Flux.fromIterable(userPermissionDtos)
                                 .flatMap(userPermissionDto -> Mono.fromCallable(() -> {
                                     Optional<UserPermission> userPermissionOptional = userPermissionRepository
                                             .findByObjectIdentifier(userPermissionDto.getObjectIdentifier());
-                                    if (userPermissionOptional.isPresent()) {
-                                        UserPermission userPermission = userPermissionOptional.get();
-                                        userPermission.setSourceApplicationIds(userPermissionDto
-                                                .getSourceApplicationIds());
+                                    return userPermissionOptional.map(userPermission -> {
+                                        userPermission.setSourceApplicationIds(userPermissionDto.getSourceApplicationIds());
                                         userPermissionRepository.save(userPermission);
-
-                                        return buildUserPermissionDto(userPermission);
-                                    } else {
-                                        UserPermission newUserPermission = UserPermission.builder()
-                                                .objectIdentifier(userPermissionDto.getObjectIdentifier())
-                                                .sourceApplicationIds(userPermissionDto.getSourceApplicationIds())
-                                                .build();
-                                        userPermissionRepository.save(newUserPermission);
-
-                                        return buildUserPermissionDto(newUserPermission);
-                                    }
+                                        return authorizationUtil.buildUserPermissionDto(userPermission);
+                                    }).orElse(null);
                                 }).subscribeOn(Schedulers.boundedElastic()))
                                 .collectList()
                                 .map(userPermissionDtoList -> {
-                                    userPermissionDtoList.sort(Comparator.comparing(UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)));
+                                    userPermissionDtoList.sort(
+                                            Comparator.comparing(
+                                                    UserPermissionDto::getName, Comparator.nullsLast(String::compareTo)
+                                            )
+                                    );
                                     return ResponseEntity.ok().body(userPermissionDtoList);
                                 });
                     } else {
@@ -107,23 +97,5 @@ public class AdminUserController {
                 });
     }
 
-    private UserPermissionDto buildUserPermissionDto(UserPermission userPermission) {
-
-        AzureUserCache azureUserCache = azureUserCacheRepository.findByObjectIdentifier(userPermission.getObjectIdentifier());
-
-        return UserPermissionDto
-                .builder()
-                .objectIdentifier(userPermission.getObjectIdentifier())
-                .email(azureUserCache != null ? azureUserCache.getEmail() : null)
-                .name(azureUserCache != null ? azureUserCache.getName() : null)
-                .sourceApplicationIds(userPermission.getSourceApplicationIds())
-                .build();
-    }
-
-    private Mono<Boolean> isAdmin(Mono<Authentication> authenticationMono) {
-        return authenticationMono
-                .map(authentication -> authentication != null && authentication.getAuthorities().stream()
-                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")));
-    }
 
 }

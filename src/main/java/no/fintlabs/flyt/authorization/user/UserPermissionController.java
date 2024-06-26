@@ -1,6 +1,7 @@
 package no.fintlabs.flyt.authorization.user;
 
 import no.fintlabs.flyt.authorization.AuthorizationUtil;
+import no.fintlabs.flyt.authorization.adminuser.AdminUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,7 +14,7 @@ import reactor.core.scheduler.Schedulers;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@RequestMapping(INTERNAL_API + "/authorization/user")
+@RequestMapping(INTERNAL_API + "/authorization/self-user")
 @RestController
 public class UserPermissionController {
 
@@ -28,12 +29,20 @@ public class UserPermissionController {
         this.authorizationUtil = authorizationUtil;
     }
 
-    @GetMapping("check-authorized")
+    @GetMapping("isAuthorized")
     public ResponseEntity<?> checkAuthorization() {
         return ResponseEntity.ok("User authorized");
     }
 
-    @GetMapping("permission")
+    @GetMapping("isAdmin")
+    public Mono<ResponseEntity<AdminUser>> checkAdminUser(
+            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    ) {
+        return authorizationUtil.isAdmin(authenticationMono)
+                .map(isAdmin -> ResponseEntity.ok(AdminUser.builder().admin(isAdmin).build()));
+    }
+
+    @GetMapping
     public Mono<ResponseEntity<UserPermissionDto>> getSourceApplications(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
@@ -43,11 +52,7 @@ public class UserPermissionController {
                 .publishOn(Schedulers.boundedElastic())
                 .map(userPermissionRepository::findByObjectIdentifier)
                 .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(
-                                UserPermissionDto
-                                        .builder()
-                                        .objectIdentifier(userPermission.getObjectIdentifier())
-                                        .sourceApplicationIds(userPermission.getSourceApplicationIds())
-                                        .build()
+                                authorizationUtil.buildUserPermissionDto(userPermission)
                         )).orElseGet(() -> ResponseEntity.notFound().build())
                 );
     }
