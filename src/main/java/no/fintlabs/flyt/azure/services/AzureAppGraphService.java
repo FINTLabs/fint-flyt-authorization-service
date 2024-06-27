@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,6 +85,10 @@ public class AzureAppGraphService {
                 .collect(Collectors.toList());
 
         return new GroupMembersWrapper(users);
+    }
+
+    public GroupMembersWrapper getGroupMembers(List<UUID> groupIds) {
+        graphService.
     }
 
 }

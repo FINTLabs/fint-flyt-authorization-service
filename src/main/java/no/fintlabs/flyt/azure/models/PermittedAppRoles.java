@@ -8,5 +8,5 @@ import java.util.Map;
 @Getter
 @Setter
 public class PermittedAppRoles {
-    private Map<String, String> permittedAppRoles;
+    private String flytUser;
 }

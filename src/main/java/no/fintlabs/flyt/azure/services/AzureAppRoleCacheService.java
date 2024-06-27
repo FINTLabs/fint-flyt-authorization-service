@@ -4,6 +4,7 @@ import com.microsoft.graph.models.AppRole;
 import com.microsoft.graph.models.AppRoleAssignment;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.cache.FintCache;
+import no.fintlabs.flyt.azure.models.PermittedAppRoles;
 import no.fintlabs.flyt.azure.models.wrappers.AppRoleAssignmentWrapper;
 import no.fintlabs.flyt.azure.models.wrappers.GroupMembersWrapper;
 import no.fintlabs.flyt.azure.repositories.AzureAppRoleAssignmentCacheRepository;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -34,6 +37,26 @@ public class AzureAppRoleCacheService {
         this.azureAppRoleCacheRepository = azureAppRoleCacheRepository;
         this.azureAppRoleAssignmentCacheRepository = azureAppRoleAssignmentCacheRepository;
         this.azureGroupMembersCacheRepository = azureGroupMembersCacheRepository;
+    }
+
+    public void getAbc(String appId, Set<UUID> permittedAppRoleIds) {
+
+        // todo: remove wrapper
+        List<AppRoleAssignment> appRoleAssignments = azureAppGraphService.getAppRoleAssignments(appId)
+                .getAppRoleAssignments();
+
+        List<UUID> permittedGroupIds = appRoleAssignments.stream()
+                .filter(appRoleAssignment -> "Group".equals(appRoleAssignment.principalType))
+                .filter(appRoleAssignment -> permittedAppRoleIds.contains(appRoleAssignment.appRoleId))
+                .map(appRoleAssignment -> appRoleAssignment.principalId)
+                .toList();
+
+        azureAppGraphService.getGroupMembers()
+
+        appRoleAssignments.stream()
+                .filter(appRoleAssignment -> "User".equals(appRoleAssignment.principalType))
+                .filter(appRoleAssignment -> permittedAppRoleIds.)
+
     }
 
     public void storeAzureAppRoleDataInCache(String appId) {

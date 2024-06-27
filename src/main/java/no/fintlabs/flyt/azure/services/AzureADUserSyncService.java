@@ -28,7 +28,6 @@ public class AzureADUserSyncService {
     protected final ConfigUser configUser;
     protected final PermittedAppRoles permittedAppRoles;
     protected final GraphServiceClient<Request> graphService;
-    protected final AzureAppGraphService azureAppGraphService;
     protected final UserPermissionService userPermissionService;
     protected final AzureAppRoleCacheService azureAppRoleCacheService;
     protected final AzureUserCacheService azureUserCacheService;

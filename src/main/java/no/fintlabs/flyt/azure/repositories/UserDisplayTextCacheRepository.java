@@ -34,5 +34,4 @@ public class UserDisplayTextCacheRepository {
     public void deleteByObjectIdentifier(String objectIdentifier) {
         userDisplayTextCache.remove(objectIdentifier);
     }
-
 }
