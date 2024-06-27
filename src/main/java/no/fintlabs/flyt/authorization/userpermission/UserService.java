@@ -5,6 +5,7 @@ import no.fintlabs.flyt.azure.models.UserDisplayText;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -20,8 +21,20 @@ public class UserService {
         this.userDisplayTextCache = userDisplayTextCache;
     }
 
+    public Optional<User> getUser(String objectIdentifier) {
+        return userPermissionService.get(objectIdentifier)
+                .map(this::mapToUserWithDisplayText);
+    }
+
     public List<User> getUsers() {
         return userPermissionService.getAll()
+                .stream()
+                .map(this::mapToUserWithDisplayText)
+                .toList();
+    }
+
+    public List<User> putUsers(List<UserPermission> userPermissions) {
+        return userPermissionService.putAll(userPermissions)
                 .stream()
                 .map(this::mapToUserWithDisplayText)
                 .toList();

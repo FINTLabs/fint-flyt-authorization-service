@@ -1,43 +1,49 @@
 package no.fintlabs.flyt.azure.services;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.flyt.azure.repositories.AzureUserCacheRepository;
+import no.fintlabs.cache.FintCache;
 import no.fintlabs.flyt.azure.models.UserDisplayText;
+import no.fintlabs.flyt.azure.repositories.UserDisplayTextCacheRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
 public class AzureUserCacheService {
 
-    private final AzureUserCacheRepository azureUserCacheRepository;
+    private final UserDisplayTextCacheRepository userDisplayTextCacheRepository;
 
-    public AzureUserCacheService(AzureUserCacheRepository azureUserCacheRepository) {
-        this.azureUserCacheRepository = azureUserCacheRepository;
+    public AzureUserCacheService(UserDisplayTextCacheRepository userDisplayTextCacheRepository) {
+        this.userDisplayTextCacheRepository = userDisplayTextCacheRepository;
     }
 
     public void refreshAzureUserCaches(List<UserDisplayText> userDisplayTextCaches) {
         deleteAzureUserCacheNotInList(userDisplayTextCaches);
-        azureUserCacheRepository.saveAll(userDisplayTextCaches);
+        userDisplayTextCacheRepository.saveAll(userDisplayTextCaches);
     }
 
     private void deleteAzureUserCacheNotInList(List<UserDisplayText> userDisplayTextCaches) {
-        Map<String, UserDisplayText> allCurrentAzureUserCaches = azureUserCacheRepository.findAll();
+        FintCache<String, UserDisplayText> allCurrentAzureUserCaches = userDisplayTextCacheRepository.findAll();
 
         List<String> inputAzureUserCachesIdentifiers = userDisplayTextCaches.stream()
                 .map(UserDisplayText::getObjectIdentifier)
                 .toList();
 
-        List<String> azureUserCachesStringsToDelete = allCurrentAzureUserCaches.keySet().stream()
-                .filter(identifier -> !inputAzureUserCachesIdentifiers.contains(identifier))
+        List<UserDisplayText> allCurrentEntries = allCurrentAzureUserCaches.getAll();
+
+        List<String> allCurrentKeys = allCurrentEntries.stream()
+                .map(UserDisplayText::getObjectIdentifier)
                 .toList();
 
-        azureUserCachesStringsToDelete.forEach(azureUserCacheRepository::deleteByObjectIdentifier);
+        List<String> keysToDelete = allCurrentKeys.stream()
+                .filter(key -> !inputAzureUserCachesIdentifiers.contains(key))
+                .toList();
 
-        if (!azureUserCachesStringsToDelete.isEmpty()) {
-            log.info("Deleted {} user permissions", azureUserCachesStringsToDelete.size());
+        keysToDelete.forEach(allCurrentAzureUserCaches::remove);
+
+        if (!keysToDelete.isEmpty()) {
+            log.info("Deleted {} user permissions", keysToDelete.size());
         }
     }
 }

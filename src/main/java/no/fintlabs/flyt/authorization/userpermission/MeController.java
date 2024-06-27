@@ -17,15 +17,15 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 @RestController
 public class MeController {
 
-    private final UserPermissionRepository userPermissionRepository;
     private final AuthorizationUtil authorizationUtil;
+    private final UserService userService;
 
     public MeController(
-            UserPermissionRepository userPermissionRepository,
-            AuthorizationUtil authorizationUtil
+            AuthorizationUtil authorizationUtil,
+            UserService userService
     ) {
-        this.userPermissionRepository = userPermissionRepository;
         this.authorizationUtil = authorizationUtil;
+        this.userService = userService;
     }
 
     @GetMapping("isAuthorized")
@@ -42,17 +42,16 @@ public class MeController {
     }
 
     @GetMapping
-    public Mono<ResponseEntity<UserPermission>> get(
+    public Mono<ResponseEntity<User>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authenticationMono
                 .map(authentication -> authorizationUtil
                         .getObjectIdentifierFromToken((JwtAuthenticationToken) authentication))
                 .publishOn(Schedulers.boundedElastic())
-                .map(userPermissionRepository::findByObjectIdentifier)
-                .map(optionalUserPermission -> optionalUserPermission.map(userPermission -> ResponseEntity.ok(
-                                authorizationUtil.buildUserPermissionDto(userPermission)
-                        )).orElseGet(() -> ResponseEntity.notFound().build())
+                .map(userService::getUser)
+                .map(optionalUserPermission -> optionalUserPermission.map(ResponseEntity::ok)
+                        .orElseGet(() -> ResponseEntity.notFound().build())
                 );
     }
 

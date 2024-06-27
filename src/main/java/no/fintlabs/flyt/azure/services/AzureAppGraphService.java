@@ -4,6 +4,8 @@ import com.microsoft.graph.models.*;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.ServicePrincipalCollectionPage;
+import no.fintlabs.flyt.azure.models.wrappers.AppRoleAssignmentWrapper;
+import no.fintlabs.flyt.azure.models.wrappers.GroupMembersWrapper;
 import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,7 @@ public class AzureAppGraphService {
         this.graphService = graphService;
     }
 
-    public List<AppRoleAssignment> getAppRoleAssignments(String appId) {
+    public AppRoleAssignmentWrapper getAppRoleAssignments(String appId) {
         List<QueryOption> requestOptions = new ArrayList<>();
         requestOptions.add(new QueryOption("$filter", "appId eq '" + appId + "'"));
 
@@ -34,24 +36,21 @@ public class AzureAppGraphService {
 
         Objects.requireNonNull(servicePrincipalCollectionPage);
 
-//        if (servicePrincipalCollectionPage.getCount()) {
-//
-//        }
-
         List<ServicePrincipal> servicePrincipals = servicePrincipalCollectionPage.getCurrentPage();
 
         if (!servicePrincipals.isEmpty()) {
             ServicePrincipal servicePrincipal = servicePrincipals.get(0);
             if (servicePrincipal != null && servicePrincipal.id != null) {
-                return Objects.requireNonNull(graphService
+                List<AppRoleAssignment> appRoleAssignments = Objects.requireNonNull(graphService
                                 .servicePrincipals(servicePrincipal.id)
                                 .appRoleAssignedTo()
                                 .buildRequest()
                                 .get())
                         .getCurrentPage();
+                return new AppRoleAssignmentWrapper(appRoleAssignments);
             }
         }
-        return new ArrayList<>();
+        return new AppRoleAssignmentWrapper(new ArrayList<>());
     }
 
     public List<AppRole> getAppRoles(String appId) {
@@ -71,7 +70,7 @@ public class AzureAppGraphService {
         return new ArrayList<>();
     }
 
-    public List<User> getGroupMembers(String groupId) {
+    public GroupMembersWrapper getGroupMembers(String groupId) {
         List<DirectoryObject> members = Objects.requireNonNull(graphService
                         .groups(groupId)
                         .members()
@@ -79,10 +78,12 @@ public class AzureAppGraphService {
                         .get())
                 .getCurrentPage();
 
-        return members.stream()
+        List<User> users = members.stream()
                 .filter(directoryObject -> directoryObject instanceof User)
                 .map(directoryObject -> (User) directoryObject)
                 .collect(Collectors.toList());
+
+        return new GroupMembersWrapper(users);
     }
 
 }

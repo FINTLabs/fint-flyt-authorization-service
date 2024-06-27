@@ -2,8 +2,10 @@ package no.fintlabs.flyt.azure.services;
 
 import com.microsoft.graph.models.AppRole;
 import com.microsoft.graph.models.AppRoleAssignment;
-import com.microsoft.graph.models.User;
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.cache.FintCache;
+import no.fintlabs.flyt.azure.models.wrappers.AppRoleAssignmentWrapper;
+import no.fintlabs.flyt.azure.models.wrappers.GroupMembersWrapper;
 import no.fintlabs.flyt.azure.repositories.AzureAppRoleAssignmentCacheRepository;
 import no.fintlabs.flyt.azure.repositories.AzureAppRoleCacheRepository;
 import no.fintlabs.flyt.azure.repositories.AzureGroupMembersCacheRepository;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -36,10 +37,10 @@ public class AzureAppRoleCacheService {
     }
 
     public void storeAzureAppRoleDataInCache(String appId) {
-        List<AppRoleAssignment> appRoleAssignments = azureAppGraphService.getAppRoleAssignments(appId);
+        AppRoleAssignmentWrapper appRoleAssignments = azureAppGraphService.getAppRoleAssignments(appId);
         azureAppRoleAssignmentCacheRepository.saveAll(appId, appRoleAssignments);
 
-        appRoleAssignments.forEach(appRoleAssignment -> {
+        appRoleAssignments.getAppRoleAssignments().forEach(appRoleAssignment -> {
             if (appRoleAssignment.principalType == null || appRoleAssignment.principalId == null) {
                 log.warn("Assignment principalType or principalId is null for appRoleAssignment {}", appRoleAssignment);
                 return;
@@ -49,7 +50,7 @@ public class AzureAppRoleCacheService {
             String principalId = appRoleAssignment.principalId.toString();
 
             if (principalType.equals("Group")) {
-                List<User> groupMembers = azureAppGraphService.getGroupMembers(principalId);
+                GroupMembersWrapper groupMembers = azureAppGraphService.getGroupMembers(principalId);
                 azureGroupMembersCacheRepository.saveAll(principalId, groupMembers);
             }
         });
@@ -65,9 +66,9 @@ public class AzureAppRoleCacheService {
     ) {
         List<String> roles = new ArrayList<>();
 
-        List<AppRoleAssignment> appRoleAssignments = this.azureAppRoleAssignmentCacheRepository.findAllByAppId(appId);
+        AppRoleAssignmentWrapper appRoleAssignments = this.azureAppRoleAssignmentCacheRepository.findAllByAppId(appId);
 
-        appRoleAssignments.forEach(assignment -> {
+        appRoleAssignments.getAppRoleAssignments().forEach(assignment -> {
             if (assignment.principalType == null || assignment.principalId == null) {
                 log.debug("Assignment principalType or principalId is null for assignment {}", assignment);
                 return;
@@ -79,8 +80,8 @@ public class AzureAppRoleCacheService {
             if (principalType.equals("User") && principalId.equals(userId)) {
                 addRoleIfNotNull(roles, assignment, appId);
             } else if (principalType.equals("Group")) {
-                List<User> groupMembers = azureGroupMembersCacheRepository.findAllByPrincipalId(principalId);
-                groupMembers.forEach(user -> {
+                GroupMembersWrapper groupMembers = azureGroupMembersCacheRepository.findAllByPrincipalId(principalId);
+                groupMembers.getGroupMembers().forEach(user -> {
                     if (user.id != null && user.id.equals(userId)) {
                         addRoleIfNotNull(roles, assignment, appId);
                     }
@@ -107,10 +108,9 @@ public class AzureAppRoleCacheService {
     }
 
     private String getAppRoleValue(UUID appRoleId, String appId) {
-        Map<String, AppRole> appRoles = azureAppRoleCacheRepository.findAll();
+        FintCache<String, AppRole> appRoles = azureAppRoleCacheRepository.findAll();
 
-        for (Map.Entry<String, AppRole> entry : appRoles.entrySet()) {
-            AppRole appRole = entry.getValue();
+        for (AppRole appRole : appRoles.getAll()) {
             if (appRole.id != null && appRole.id.equals(appRoleId)) {
                 return appRole.value;
             }

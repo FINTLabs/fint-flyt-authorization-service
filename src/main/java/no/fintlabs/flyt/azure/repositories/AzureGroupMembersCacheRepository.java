@@ -1,22 +1,23 @@
 package no.fintlabs.flyt.azure.repositories;
 
-import com.microsoft.graph.models.User;
+import no.fintlabs.cache.FintCache;
+import no.fintlabs.flyt.azure.models.wrappers.GroupMembersWrapper;
 import org.springframework.stereotype.Repository;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Repository
 public class AzureGroupMembersCacheRepository {
 
-    private final Map<String, List<User>> groupMembersCache = new HashMap<>();
+    private final FintCache<String, GroupMembersWrapper> groupMembersCache;
 
-    public void saveAll(String principalId, List<User> groupMembers) {
+    public AzureGroupMembersCacheRepository(FintCache<String, GroupMembersWrapper> groupMembersCache) {
+        this.groupMembersCache = groupMembersCache;
+    }
+
+    public void saveAll(String principalId, GroupMembersWrapper groupMembers) {
         groupMembersCache.put(principalId, groupMembers);
     }
 
-    public List<User> findAllByPrincipalId(String principalId) {
+    public GroupMembersWrapper findAllByPrincipalId(String principalId) {
         return groupMembersCache.get(principalId);
     }
 

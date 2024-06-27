@@ -2,21 +2,23 @@ package no.fintlabs.flyt.azure.repositories;
 
 import com.microsoft.graph.models.AppRole;
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.cache.FintCache;
 import no.fintlabs.flyt.azure.models.PermittedAppRoles;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @Slf4j
 public class AzureAppRoleCacheRepository {
 
-    private final Map<String, AppRole> appRoleCache = new HashMap<>();
+    private final FintCache<String, AppRole> appRoleCache;
     protected final PermittedAppRoles permittedAppRoles;
 
-    public AzureAppRoleCacheRepository(PermittedAppRoles permittedAppRoles) {
+    public AzureAppRoleCacheRepository(
+            FintCache<String, AppRole> appRoleCache, PermittedAppRoles permittedAppRoles
+    ) {
+        this.appRoleCache = appRoleCache;
         this.permittedAppRoles = permittedAppRoles;
     }
 
@@ -37,7 +39,7 @@ public class AzureAppRoleCacheRepository {
         );
     }
 
-    public Map<String, AppRole> findAll() {
+    public FintCache<String, AppRole> findAll() {
         return appRoleCache;
     }
 }

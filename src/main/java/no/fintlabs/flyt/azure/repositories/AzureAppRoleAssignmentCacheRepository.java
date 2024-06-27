@@ -1,22 +1,23 @@
 package no.fintlabs.flyt.azure.repositories;
 
-import com.microsoft.graph.models.AppRoleAssignment;
+import no.fintlabs.cache.FintCache;
+import no.fintlabs.flyt.azure.models.wrappers.AppRoleAssignmentWrapper;
 import org.springframework.stereotype.Repository;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Repository
 public class AzureAppRoleAssignmentCacheRepository {
 
-    private final Map<String, List<AppRoleAssignment>> appRoleAssignmentsCache = new HashMap<>();
+    private final FintCache<String, AppRoleAssignmentWrapper> appRoleAssignmentsCache;
 
-    public void saveAll(String appId, List<AppRoleAssignment> appRoleAssignments) {
+    public AzureAppRoleAssignmentCacheRepository(FintCache<String, AppRoleAssignmentWrapper> appRoleAssignmentsCache) {
+        this.appRoleAssignmentsCache = appRoleAssignmentsCache;
+    }
+
+    public void saveAll(String appId, AppRoleAssignmentWrapper appRoleAssignments) {
         appRoleAssignmentsCache.put(appId, appRoleAssignments);
     }
 
-    public List<AppRoleAssignment> findAllByAppId(String appId) {
+    public AppRoleAssignmentWrapper findAllByAppId(String appId) {
         return appRoleAssignmentsCache.get(appId);
     }
 
