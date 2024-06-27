@@ -40,7 +40,7 @@ public class AzureUserCacheService {
                 .filter(key -> !inputUserDisplayTextCachesIdentifiers.contains(key))
                 .toList();
 
-        keysToDelete.forEach(allCurrentUserDisplayTextCaches::remove);
+        keysToDelete.forEach(userDisplayTextCacheRepository::deleteByObjectIdentifier);
 
         if (!keysToDelete.isEmpty()) {
             log.info("Deleted {} user permissions", keysToDelete.size());
