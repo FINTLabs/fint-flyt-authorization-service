@@ -1,10 +1,13 @@
-package no.fintlabs.flyt.authorization.userpermission;
+package no.fintlabs.flyt.authorization.user.permission.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -18,9 +21,12 @@ public class UserPermissionEntity {
     @JsonIgnore
     @Setter(AccessLevel.NONE)
     private long id;
+
     @Setter
-    @Column(unique = true, nullable = false)
-    private String objectIdentifier;
+    @NaturalId
+    @Column(nullable = false, unique = true)
+    private UUID objectIdentifier;
+
     @ElementCollection
     @CollectionTable(
             name = "user_permission_source_application_ids",
@@ -29,5 +35,6 @@ public class UserPermissionEntity {
     )
     @Setter
     @Column(name = "source_application_ids")
-    private List<Integer> sourceApplicationIds;
+    @Builder.Default
+    private List<Integer> sourceApplicationIds = new ArrayList<>();
 }

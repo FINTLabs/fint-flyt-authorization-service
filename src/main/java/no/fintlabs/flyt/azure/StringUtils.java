@@ -4,6 +4,7 @@ import java.util.Locale;
 
 public class StringUtils {
 
+    // TODO eivindmorch 27/06/2024 : Trengs denne?
     public static String capitalizeFirstLetterOfEachWord(String input) {
         if (input == null || input.isEmpty()) {
             return input;

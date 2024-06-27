@@ -46,6 +46,9 @@ dependencies {
 
     implementation 'no.fintlabs:fint-flyt-cache:1.2.3'
 
+    implementation 'javax.validation:validation-api'
+    implementation 'org.hibernate.validator:hibernate-validator'
+
     implementation 'com.azure:azure-identity:1.10.2'
     implementation 'com.microsoft.graph:microsoft-graph:5.80.0'
 

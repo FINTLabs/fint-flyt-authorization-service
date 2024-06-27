@@ -1,4 +1,4 @@
-package no.fintlabs.flyt.authorization.userpermission;
+package no.fintlabs.flyt.authorization.user.model;
 
 import com.sun.istack.NotNull;
 import lombok.Builder;
@@ -7,14 +7,17 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
 @EqualsAndHashCode
 @Jacksonized
-public class UserPermission {
+public class User {
     @NotNull
-    private String objectIdentifier;
+    private UUID objectIdentifier;
+    private String email;
+    private String name;
     @NotNull
     private List<Integer> sourceApplicationIds;
 }

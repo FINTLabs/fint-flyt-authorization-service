@@ -1,6 +1,9 @@
-package no.fintlabs.flyt.authorization.userpermission;
+package no.fintlabs.flyt.authorization.user.controller;
 
 import no.fintlabs.flyt.authorization.AuthorizationUtil;
+import no.fintlabs.flyt.authorization.user.model.User;
+import no.fintlabs.flyt.authorization.user.permission.model.UserPermission;
+import no.fintlabs.flyt.authorization.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,7 +40,7 @@ public class UserController {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
 
-                    // todo: add pagable with sorting
+                    // TODO: add pagable with sorting
                     return Mono.fromCallable(userService::getUsers)
                             .map(ResponseEntity::ok);
                 });
@@ -54,7 +57,7 @@ public class UserController {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
 
-                    // todo: add pagable with sorting
+                    // TODO: add pagable with sorting
                     return Mono.just(ResponseEntity.ok(userService.putUsers(userPermissions)));
                 });
     }
