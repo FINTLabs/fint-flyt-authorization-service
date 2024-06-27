@@ -1,7 +1,6 @@
 package no.fintlabs.flyt.authorization.userpermission;
 
-import no.fintlabs.cache.FintCache;
-import no.fintlabs.flyt.azure.models.UserDisplayText;
+import no.fintlabs.flyt.azure.repositories.UserDisplayTextCacheRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,14 +10,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserPermissionService userPermissionService;
-    private final FintCache<String, UserDisplayText> userDisplayTextCache;
+    private final UserDisplayTextCacheRepository userDisplayTextCacheRepository;
 
     public UserService(
             UserPermissionService userPermissionService,
-            FintCache<String, UserDisplayText> userDisplayTextCache
+            UserDisplayTextCacheRepository userDisplayTextCacheRepository
     ) {
         this.userPermissionService = userPermissionService;
-        this.userDisplayTextCache = userDisplayTextCache;
+        this.userDisplayTextCacheRepository = userDisplayTextCacheRepository;
     }
 
     public Optional<User> getUser(String objectIdentifier) {
@@ -46,7 +45,7 @@ public class UserService {
                 .objectIdentifier(userPermission.getObjectIdentifier())
                 .sourceApplicationIds(userPermission.getSourceApplicationIds());
 
-        userDisplayTextCache.getOptional(userPermission.getObjectIdentifier())
+        userDisplayTextCacheRepository.findByObjectIdentifier(userPermission.getObjectIdentifier())
                 .ifPresent(userDisplayText -> userBuilder
                         .email(userDisplayText.getEmail())
                         .name(userDisplayText.getName()));

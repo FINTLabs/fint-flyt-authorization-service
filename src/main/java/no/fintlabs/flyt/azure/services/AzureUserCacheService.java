@@ -24,23 +24,23 @@ public class AzureUserCacheService {
     }
 
     private void deleteAzureUserCacheNotInList(List<UserDisplayText> userDisplayTextCaches) {
-        FintCache<String, UserDisplayText> allCurrentAzureUserCaches = userDisplayTextCacheRepository.findAll();
+        FintCache<String, UserDisplayText> allCurrentUserDisplayTextCaches = userDisplayTextCacheRepository.findAll();
 
-        List<String> inputAzureUserCachesIdentifiers = userDisplayTextCaches.stream()
+        List<String> inputUserDisplayTextCachesIdentifiers = userDisplayTextCaches.stream()
                 .map(UserDisplayText::getObjectIdentifier)
                 .toList();
 
-        List<UserDisplayText> allCurrentEntries = allCurrentAzureUserCaches.getAll();
+        List<UserDisplayText> allCurrentEntries = allCurrentUserDisplayTextCaches.getAll();
 
         List<String> allCurrentKeys = allCurrentEntries.stream()
                 .map(UserDisplayText::getObjectIdentifier)
                 .toList();
 
         List<String> keysToDelete = allCurrentKeys.stream()
-                .filter(key -> !inputAzureUserCachesIdentifiers.contains(key))
+                .filter(key -> !inputUserDisplayTextCachesIdentifiers.contains(key))
                 .toList();
 
-        keysToDelete.forEach(allCurrentAzureUserCaches::remove);
+        keysToDelete.forEach(allCurrentUserDisplayTextCaches::remove);
 
         if (!keysToDelete.isEmpty()) {
             log.info("Deleted {} user permissions", keysToDelete.size());

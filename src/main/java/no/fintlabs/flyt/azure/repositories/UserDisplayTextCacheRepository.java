@@ -5,6 +5,7 @@ import no.fintlabs.flyt.azure.models.UserDisplayText;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserDisplayTextCacheRepository {
@@ -22,8 +23,8 @@ public class UserDisplayTextCacheRepository {
         userDisplayTextCaches.forEach(this::save);
     }
 
-    public UserDisplayText findByObjectIdentifier(String objectIdentifier) {
-        return userDisplayTextCache.get(objectIdentifier);
+    public Optional<UserDisplayText> findByObjectIdentifier(String objectIdentifier) {
+        return userDisplayTextCache.getOptional(objectIdentifier);
     }
 
     public FintCache<String, UserDisplayText> findAll() {
