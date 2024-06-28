@@ -3,7 +3,6 @@ package no.fintlabs.flyt.authorization.user.controller;
 import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
-import no.fintlabs.flyt.authorization.user.model.UserPermission;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,14 +52,14 @@ public class UserController {
     @PostMapping("actions/userPermissionBatchPut")
     public Mono<ResponseEntity<?>> postUserPermissionBatchPutAction(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono,
-            @RequestBody List<UserPermission> userPermissions
+            @RequestBody List<User> users
     ) {
         return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
-                    azureAdUserAuthorizationComponent.batchPutUserPermissions(userPermissions);
+                    azureAdUserAuthorizationComponent.batchPutUserPermissions(users);
                     return Mono.just(ResponseEntity.ok().build());
                 });
     }

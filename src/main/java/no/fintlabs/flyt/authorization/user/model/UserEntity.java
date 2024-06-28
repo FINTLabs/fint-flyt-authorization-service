@@ -14,8 +14,8 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_permission")
-public class UserPermissionEntity {
+@Table(name = "user")
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -26,6 +26,12 @@ public class UserPermissionEntity {
     @NaturalId
     @Column(nullable = false, unique = true)
     private UUID objectIdentifier;
+
+    @Setter
+    private String email;
+
+    @Setter
+    private String name;
 
     @ElementCollection
     @CollectionTable(

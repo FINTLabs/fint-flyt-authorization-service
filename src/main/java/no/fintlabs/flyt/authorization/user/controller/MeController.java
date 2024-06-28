@@ -5,7 +5,6 @@ import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApp
 import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
 import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
-import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
@@ -86,12 +85,8 @@ public class MeController {
     }
 
     private User createUserWithAccessToAllApplications(JwtAuthenticationToken token) {
-        UserDisplayText userDisplayTextFromToken =
-                tokenParsingUtils.getUserDisplayTextFromToken(token);
-        return User.builder()
-                .objectIdentifier(userDisplayTextFromToken.getObjectIdentifier())
-                .name(userDisplayTextFromToken.getName())
-                .email(userDisplayTextFromToken.getEmail())
+        return tokenParsingUtils.getUserFromToken(token)
+                .toBuilder()
                 .sourceApplicationIds(sourceApplicationsWithoutUserPermissionSetup())
                 .build();
     }

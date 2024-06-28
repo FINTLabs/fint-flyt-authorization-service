@@ -1,22 +1,19 @@
 package no.fintlabs.flyt.authorization.user;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.cache.FintCache;
 import no.fintlabs.flyt.authorization.user.azure.models.GraphUserInfo;
-import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
 import no.fintlabs.flyt.authorization.user.azure.services.GraphService;
 import no.fintlabs.flyt.authorization.user.model.User;
-import no.fintlabs.flyt.authorization.user.model.UserPermission;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enable", havingValue = "true")
@@ -25,17 +22,12 @@ public class AzureAdUserAuthorizationComponent {
 
     private final GraphService graphService;
 
-    private final UserPermissionService userPermissionService;
+    private final UserService userService;
 
-    private final FintCache<UUID, UserDisplayText> userDisplayTextCache;
 
-    public AzureAdUserAuthorizationComponent(
-            GraphService graphService, UserPermissionService userPermissionService,
-            FintCache<UUID, UserDisplayText> userDisplayTextCache
-    ) {
+    public AzureAdUserAuthorizationComponent(GraphService graphService, UserService userService) {
         this.graphService = graphService;
-        this.userPermissionService = userPermissionService;
-        this.userDisplayTextCache = userDisplayTextCache;
+        this.userService = userService;
     }
 
     @Scheduled(
@@ -51,67 +43,29 @@ public class AzureAdUserAuthorizationComponent {
     private void updateUsers(Collection<GraphUserInfo> permittedUsersGraphUserInfo) {
         log.info("Updating users based on {} permitted user info", permittedUsersGraphUserInfo.size());
 
-        Set<UUID> objectIdentifiers = permittedUsersGraphUserInfo.stream()
-                .map(GraphUserInfo::getId)
-                .collect(Collectors.toSet());
+        List<User> usersToUpdate = permittedUsersGraphUserInfo.stream()
+                .map(graphUserInfo -> User
+                        .builder()
+                        .objectIdentifier(graphUserInfo.getId())
+                        .name(graphUserInfo.getDisplayName())
+                        .email(graphUserInfo.getMail())
+                        .build()
+                ).toList();
 
-        userPermissionService.updateUserPermissions(objectIdentifiers);
-
-        Set<UUID> objectIdentifiersAlreadyCachedButNotInNewUserInfo = userDisplayTextCache.getAll()
-                .stream()
-                .map(UserDisplayText::getObjectIdentifier)
-                .filter(objectIdentifier -> !objectIdentifiers.contains(objectIdentifier))
-                .collect(Collectors.toSet());
-
-        log.info("Removing {} user display text with objectIdentifiers: {}",
-                objectIdentifiersAlreadyCachedButNotInNewUserInfo.size(),
-                objectIdentifiersAlreadyCachedButNotInNewUserInfo
-        );
-        userDisplayTextCache.remove(objectIdentifiersAlreadyCachedButNotInNewUserInfo);
-        log.info("Putting {} user display text", permittedUsersGraphUserInfo);
-        userDisplayTextCache.put(permittedUsersGraphUserInfo
-                .stream()
-                .collect(toMap(
-                        GraphUserInfo::getId,
-                        graphUserInfo -> UserDisplayText
-                                .builder()
-                                .objectIdentifier(graphUserInfo.getId())
-                                .name(graphUserInfo.getDisplayName())
-                                .email(graphUserInfo.getMail())
-                                .build()
-                ))
-        );
+        userService.updateUsers(usersToUpdate);
+        log.info("Successfully updated users");
     }
 
     public Optional<User> getUser(UUID objectIdentifier) {
-        return userPermissionService.find(objectIdentifier)
-                .map(this::mapToUserWithDisplayText);
+        return userService.find(objectIdentifier);
     }
 
     public Page<User> getUsers(Pageable pageable) {
-        return userPermissionService.getAll(pageable)
-                .map(this::mapToUserWithDisplayText);
+        return userService.getAll(pageable);
     }
 
-    public List<User> batchPutUserPermissions(List<UserPermission> userPermissions) {
-        return userPermissionService.putAll(userPermissions)
-                .stream()
-                .map(this::mapToUserWithDisplayText)
-                .toList();
-    }
-
-    private User mapToUserWithDisplayText(UserPermission userPermission) {
-        User.UserBuilder userBuilder = User
-                .builder()
-                .objectIdentifier(userPermission.getObjectIdentifier())
-                .sourceApplicationIds(userPermission.getSourceApplicationIds());
-
-        userDisplayTextCache.getOptional(userPermission.getObjectIdentifier())
-                .ifPresent(userDisplayText -> userBuilder
-                        .email(userDisplayText.getEmail())
-                        .name(userDisplayText.getName()));
-
-        return userBuilder.build();
+    public void batchPutUserPermissions(List<User> users) {
+        userService.putAll(users);
     }
 
 }

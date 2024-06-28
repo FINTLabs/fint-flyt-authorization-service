@@ -10,14 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @EqualsAndHashCode
 @Jacksonized
 public class User {
     @NotNull
     private UUID objectIdentifier;
+
     private String email;
+
     private String name;
+
     @NotNull
     private List<Long> sourceApplicationIds;
 }

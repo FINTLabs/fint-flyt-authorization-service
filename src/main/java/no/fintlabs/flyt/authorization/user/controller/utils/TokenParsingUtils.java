@@ -1,6 +1,6 @@
 package no.fintlabs.flyt.authorization.user.controller.utils;
 
-import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
+import no.fintlabs.flyt.authorization.user.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -15,13 +15,13 @@ public class TokenParsingUtils {
         return jwtAuthenticationToken.getTokenAttributes().get("objectidentifier").toString();
     }
 
-    public UserDisplayText getUserDisplayTextFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
+    public User getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
         Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
-        return UserDisplayText
+        return User
                 .builder()
                 .objectIdentifier(UUID.fromString(tokenAttributes.get("objectidentifier").toString()))
-                .name(tokenAttributes.get("").toString()) // TODO eivindmorch 28/06/2024 :
-                .email(tokenAttributes.get("").toString()) // TODO eivindmorch 28/06/2024 :
+                .name(tokenAttributes.get("displayname").toString())
+                .email(tokenAttributes.get("email").toString())
                 .build();
     }
 
