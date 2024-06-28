@@ -24,7 +24,7 @@ public class AzureAdGatewayConfiguration {
     private Boolean enable;
 
     @Valid
-    private PermittedAppRolesProperties permittedAppRolesProperties;
+    private PermittedAppRolesProperties permittedAppRoles;
 
     @Getter
     @Setter

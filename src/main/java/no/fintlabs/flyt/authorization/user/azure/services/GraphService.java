@@ -54,7 +54,7 @@ public class GraphService {
 
         Set<UUID> permittedAppRoleIds = graphAppRoleService.getAppRoleIdsFromAppRoleValues(
                 servicePrincipalId,
-                Set.of(azureAdGatewayConfiguration.getPermittedAppRolesProperties().getFlytUser())
+                Set.of(azureAdGatewayConfiguration.getPermittedAppRoles().getFlytUser())
         );
 
         Set<UUID> permittedUserIds = getPermittedUserIds(
@@ -83,9 +83,9 @@ public class GraphService {
 
         return Stream.concat(
                 graphGroupService.getGroupUserMemberIds(
-                        idsOfPrincipalsWithPermittedAppRoleAssignmentsPerPrincipalType.get("Group")
+                        idsOfPrincipalsWithPermittedAppRoleAssignmentsPerPrincipalType.getOrDefault("Group", Set.of())
                 ).stream(),
-                idsOfPrincipalsWithPermittedAppRoleAssignmentsPerPrincipalType.get("User").stream()
+                idsOfPrincipalsWithPermittedAppRoleAssignmentsPerPrincipalType.getOrDefault("User", Set.of()).stream()
         ).collect(Collectors.toSet());
     }
 

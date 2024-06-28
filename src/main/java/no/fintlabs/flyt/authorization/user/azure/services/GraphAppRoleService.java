@@ -46,6 +46,7 @@ public class GraphAppRoleService {
         Map<String, String> appRoleIdPerValue = servicePrincipal.appRoles
                 .stream()
                 .filter(appRole -> Objects.nonNull(appRole.id))
+                .filter(appRole -> Objects.nonNull(appRole.value))
                 .filter(appRole -> appRoleValues.contains(appRole.value))
                 .collect(toMap(
                         appRole -> appRole.value,
