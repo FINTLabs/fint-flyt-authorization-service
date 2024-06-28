@@ -6,14 +6,12 @@ import com.microsoft.graph.requests.GraphServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.azure.models.GraphUserInfo;
 import okhttp3.Request;
-import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Service
 @Slf4j
 public class GraphUserService {
 

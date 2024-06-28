@@ -3,7 +3,6 @@ package no.fintlabs.flyt.authorization.user.azure.services;
 import com.microsoft.graph.requests.GraphServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
-import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -11,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
 public class GraphGroupService {
 

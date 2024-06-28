@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 
 
-@Service
 @Slf4j
 public class GraphAppRoleService {
 

@@ -1,10 +1,10 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.user.UserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserPermission;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,20 +16,20 @@ import java.util.List;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
+@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enable", havingValue = "true")
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/users")
-@ConditionalOnBean(UserAuthorizationComponent.class)
 public class UserController {
 
     private final TokenParsingUtils tokenParsingUtils;
-    private final UserAuthorizationComponent userAuthorizationComponent;
+    private final AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent;
 
     public UserController(
             TokenParsingUtils tokenParsingUtils,
-            UserAuthorizationComponent userAuthorizationComponent
+            AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
-        this.userAuthorizationComponent = userAuthorizationComponent;
+        this.azureAdUserAuthorizationComponent = azureAdUserAuthorizationComponent;
     }
 
     @GetMapping
@@ -43,7 +43,7 @@ public class UserController {
                     }
 
                     // TODO: add pagable with sorting
-                    return Mono.fromCallable(userAuthorizationComponent::getUsers)
+                    return Mono.fromCallable(azureAdUserAuthorizationComponent::getUsers)
                             .map(ResponseEntity::ok);
                 });
     }
@@ -60,7 +60,7 @@ public class UserController {
                     }
 
                     // TODO: add pagable with sorting
-                    return Mono.just(ResponseEntity.ok(userAuthorizationComponent.putUsers(userPermissions)));
+                    return Mono.just(ResponseEntity.ok(azureAdUserAuthorizationComponent.putUsers(userPermissions)));
                 });
     }
 }

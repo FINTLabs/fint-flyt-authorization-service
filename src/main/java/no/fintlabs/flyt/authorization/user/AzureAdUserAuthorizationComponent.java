@@ -7,7 +7,7 @@ import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
 import no.fintlabs.flyt.authorization.user.azure.services.GraphService;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserPermission;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
-@ConditionalOnBean(GraphService.class)
 @Component
+@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enable", havingValue = "true")
 @Slf4j
-public class UserAuthorizationComponent {
+public class AzureAdUserAuthorizationComponent {
 
     private final GraphService graphService;
 
@@ -27,7 +27,7 @@ public class UserAuthorizationComponent {
 
     private final FintCache<UUID, UserDisplayText> userDisplayTextCache;
 
-    public UserAuthorizationComponent(
+    public AzureAdUserAuthorizationComponent(
             GraphService graphService, UserPermissionService userPermissionService,
             FintCache<UUID, UserDisplayText> userDisplayTextCache
     ) {

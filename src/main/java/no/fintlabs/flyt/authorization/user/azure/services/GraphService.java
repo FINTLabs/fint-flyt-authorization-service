@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.azure.configuration.AzureAdGatewayConfiguration;
 import no.fintlabs.flyt.authorization.user.azure.configuration.AzureCredentialsConfiguration;
 import no.fintlabs.flyt.authorization.user.azure.models.GraphUserInfo;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -14,9 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Service
 @Slf4j
-@ConditionalOnBean(AzureCredentialsConfiguration.class)
 public class GraphService {
 
     private final AzureCredentialsConfiguration azureCredentialsConfiguration;

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 @Getter
@@ -18,8 +20,17 @@ import javax.validation.Valid;
 @ConfigurationProperties(prefix = "fint.flyt.azure-ad-gateway")
 public class AzureAdGatewayConfiguration {
 
-    // TODO eivindmorch 28/06/2024 : Split properties?
+    @NotNull
+    private Boolean enable;
+
     @Valid
     private PermittedAppRolesProperties permittedAppRolesProperties;
+
+    @Getter
+    @Setter
+    public static class PermittedAppRolesProperties {
+        @NotEmpty
+        private String flytUser;
+    }
 
 }

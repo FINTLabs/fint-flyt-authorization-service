@@ -23,6 +23,7 @@ spring:
 fint:
   flyt:
     azure-ad-gateway:
+      enable: true
       permitted-approles:
         flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
       sync-schedule:

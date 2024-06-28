@@ -2,13 +2,11 @@ package no.fintlabs.flyt.authorization.user.azure.services;
 
 import com.microsoft.graph.http.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-@Service
 @Slf4j
 public class GraphPageWalkerService {
 

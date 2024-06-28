@@ -4,12 +4,13 @@ import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplic
 import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
-import no.fintlabs.flyt.authorization.user.UserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
 import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,20 +26,23 @@ import java.util.UUID;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@RequestMapping(INTERNAL_API + "/authorization/me")
 @RestController
+@RequestMapping(INTERNAL_API + "/authorization/me")
 public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
 
-    private final UserAuthorizationComponent userAuthorizationComponent;
+    private final Boolean azureAdUserAuthorizationEnabled;
+    private final AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent;
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
-            @Autowired(required = false) UserAuthorizationComponent userAuthorizationComponent
+            @Value("${fint.flyt.azure-ad-gateway.enable}") Boolean azureAdUserAuthorizationEnabled,
+            @Autowired(required = false) AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
-        this.userAuthorizationComponent = userAuthorizationComponent;
+        this.azureAdUserAuthorizationEnabled = azureAdUserAuthorizationEnabled;
+        this.azureAdUserAuthorizationComponent = azureAdUserAuthorizationComponent;
     }
 
     @GetMapping("is-authorized")
@@ -50,30 +54,35 @@ public class MeController {
     public Mono<ResponseEntity<RestrictedPageAuthorization>> getRestrictedPageAuthorization(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return (userAuthorizationComponent == null
-                ? Mono.just(RestrictedPageAuthorization.builder().build())
-                : tokenParsingUtils.isAdmin(authenticationMono)
+        return (azureAdUserAuthorizationEnabled
+                ? tokenParsingUtils.isAdmin(authenticationMono)
                 .map(isAdmin -> RestrictedPageAuthorization
                         .builder()
                         .userPermissionPage(isAdmin)
-                        .build()
-                ))
-                .map(ResponseEntity::ok);
+                        .build())
+                : Mono.just(RestrictedPageAuthorization.builder().build())
+        ).map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public Mono<ResponseEntity<User>> getSourceApplicationIds(
+    public Mono<ResponseEntity<User>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authenticationMono
                 .map(authentication -> (JwtAuthenticationToken) authentication)
                 .map(authentication ->
-                        userAuthorizationComponent == null
-                                ? ResponseEntity.ok(createUserWithFullAccessFromToken(authentication))
-                                : getUserFromUserAuthorizationComponent(authentication)
+                        azureAdUserAuthorizationEnabled
+                                ? getUserFromUserAuthorizationComponent(authentication)
                                 .map(ResponseEntity::ok)
                                 .orElse(ResponseEntity.notFound().build())
+                                : ResponseEntity.ok(createUserWithFullAccessFromToken(authentication))
                 );
+    }
+
+    private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
+        return azureAdUserAuthorizationComponent.getUser(
+                UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
+        );
     }
 
     private User createUserWithFullAccessFromToken(JwtAuthenticationToken token) {
@@ -85,12 +94,6 @@ public class MeController {
                 .email(userDisplayTextFromToken.getEmail())
                 .sourceApplicationIds(sourceApplicationsWithoutUserPermissionSetup())
                 .build();
-    }
-
-    private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
-        return userAuthorizationComponent.getUser(
-                UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
-        );
     }
 
     private List<Long> sourceApplicationsWithoutUserPermissionSetup() {
