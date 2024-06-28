@@ -1,9 +1,15 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.AuthorizationUtil;
-import no.fintlabs.flyt.authorization.user.UserService;
+import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
+import no.fintlabs.flyt.authorization.user.UserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.azure.models.UserDisplayText;
+import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
+import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
-import no.fintlabs.flyt.authorization.user.permission.RestrictedPageAuthorization;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,8 +18,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
@@ -22,15 +29,16 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 @RestController
 public class MeController {
 
-    private final AuthorizationUtil authorizationUtil;
-    private final UserService userService;
+    private final TokenParsingUtils tokenParsingUtils;
+
+    private final UserAuthorizationComponent userAuthorizationComponent;
 
     public MeController(
-            AuthorizationUtil authorizationUtil,
-            UserService userService
+            TokenParsingUtils tokenParsingUtils,
+            @Autowired(required = false) UserAuthorizationComponent userAuthorizationComponent
     ) {
-        this.authorizationUtil = authorizationUtil;
-        this.userService = userService;
+        this.tokenParsingUtils = tokenParsingUtils;
+        this.userAuthorizationComponent = userAuthorizationComponent;
     }
 
     @GetMapping("is-authorized")
@@ -42,27 +50,56 @@ public class MeController {
     public Mono<ResponseEntity<RestrictedPageAuthorization>> getRestrictedPageAuthorization(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return authorizationUtil.isAdmin(authenticationMono)
-                .map(isAdmin -> ResponseEntity.ok(
-                        RestrictedPageAuthorization
-                                .builder()
-                                .userPermissionPage(isAdmin)
-                                .build())
-                );
+        return (userAuthorizationComponent == null
+                ? Mono.just(RestrictedPageAuthorization.builder().build())
+                : tokenParsingUtils.isAdmin(authenticationMono)
+                .map(isAdmin -> RestrictedPageAuthorization
+                        .builder()
+                        .userPermissionPage(isAdmin)
+                        .build()
+                ))
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping
-    public Mono<ResponseEntity<User>> get(
+    public Mono<ResponseEntity<User>> getSourceApplicationIds(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
         return authenticationMono
-                .map(authentication -> authorizationUtil
-                        .getObjectIdentifierFromToken((JwtAuthenticationToken) authentication))
-                .publishOn(Schedulers.boundedElastic())
-                .map(objectIdentifierString -> userService.getUser(UUID.fromString(objectIdentifierString))
-                        .map(ResponseEntity::ok)
-                        .orElse(ResponseEntity.notFound().build())
+                .map(authentication -> (JwtAuthenticationToken) authentication)
+                .map(authentication ->
+                        userAuthorizationComponent == null
+                                ? ResponseEntity.ok(createUserWithFullAccessFromToken(authentication))
+                                : getUserFromUserAuthorizationComponent(authentication)
+                                .map(ResponseEntity::ok)
+                                .orElse(ResponseEntity.notFound().build())
                 );
+    }
+
+    private User createUserWithFullAccessFromToken(JwtAuthenticationToken token) {
+        UserDisplayText userDisplayTextFromToken =
+                tokenParsingUtils.getUserDisplayTextFromToken(token);
+        return User.builder()
+                .objectIdentifier(userDisplayTextFromToken.getObjectIdentifier())
+                .name(userDisplayTextFromToken.getName())
+                .email(userDisplayTextFromToken.getEmail())
+                .sourceApplicationIds(sourceApplicationsWithoutUserPermissionSetup())
+                .build();
+    }
+
+    private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
+        return userAuthorizationComponent.getUser(
+                UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
+        );
+    }
+
+    private List<Long> sourceApplicationsWithoutUserPermissionSetup() {
+        return List.of(
+                AcosSourceApplication.SOURCE_APPLICATION_ID,
+                DigisakSourceApplication.SOURCE_APPLICATION_ID,
+                EgrunnervervSourceApplication.SOURCE_APPLICATION_ID,
+                VigoSourceApplication.SOURCE_APPLICATION_ID
+        );
     }
 
 }

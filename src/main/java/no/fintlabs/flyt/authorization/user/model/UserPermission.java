@@ -13,11 +13,9 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode
 @Jacksonized
-public class User {
+public class UserPermission {
     @NotNull
     private UUID objectIdentifier;
-    private String email;
-    private String name;
     @NotNull
     private List<Long> sourceApplicationIds;
 }

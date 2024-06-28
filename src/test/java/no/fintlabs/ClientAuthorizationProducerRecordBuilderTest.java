@@ -1,12 +1,15 @@
 package no.fintlabs;
 
+import no.fintlabs.flyt.authorization.client.ClientAuthorization;
+import no.fintlabs.flyt.authorization.client.ClientAuthorizationProducerRecordBuilder;
+import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
-import no.fintlabs.flyt.models.sourceapplication.AcosSourceApplication;
-import no.fintlabs.flyt.models.sourceapplication.EgrunnervervSourceApplication;
-import no.fintlabs.flyt.models.sourceapplication.DigisakSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClientAuthorizationProducerRecordBuilderTest {

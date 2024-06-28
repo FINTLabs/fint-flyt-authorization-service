@@ -1,9 +1,10 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.AuthorizationUtil;
+import no.fintlabs.flyt.authorization.user.UserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
-import no.fintlabs.flyt.authorization.user.permission.model.UserPermission;
-import no.fintlabs.flyt.authorization.user.UserService;
+import no.fintlabs.flyt.authorization.user.model.UserPermission;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,31 +18,32 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/users")
+@ConditionalOnBean(UserAuthorizationComponent.class)
 public class UserController {
 
-    private final AuthorizationUtil authorizationUtil;
-    private final UserService userService;
+    private final TokenParsingUtils tokenParsingUtils;
+    private final UserAuthorizationComponent userAuthorizationComponent;
 
     public UserController(
-            AuthorizationUtil authorizationUtil,
-            UserService userService
+            TokenParsingUtils tokenParsingUtils,
+            UserAuthorizationComponent userAuthorizationComponent
     ) {
-        this.authorizationUtil = authorizationUtil;
-        this.userService = userService;
+        this.tokenParsingUtils = tokenParsingUtils;
+        this.userAuthorizationComponent = userAuthorizationComponent;
     }
 
     @GetMapping
     public Mono<ResponseEntity<List<User>>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return authorizationUtil.isAdmin(authenticationMono)
+        return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
 
                     // TODO: add pagable with sorting
-                    return Mono.fromCallable(userService::getUsers)
+                    return Mono.fromCallable(userAuthorizationComponent::getUsers)
                             .map(ResponseEntity::ok);
                 });
     }
@@ -51,14 +53,14 @@ public class UserController {
             @RequestBody List<UserPermission> userPermissions,
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return authorizationUtil.isAdmin(authenticationMono)
+        return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
 
                     // TODO: add pagable with sorting
-                    return Mono.just(ResponseEntity.ok(userService.putUsers(userPermissions)));
+                    return Mono.just(ResponseEntity.ok(userAuthorizationComponent.putUsers(userPermissions)));
                 });
     }
 }

@@ -25,7 +25,6 @@ fint:
     azure-ad-gateway:
       permitted-approles:
         flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
-      user-scheduler:
-        pull:
-          initial-delay-ms: 1000
-          fixed-delay-ms: 900000
+      sync-schedule:
+        initial-delay-ms: 1000
+        fixed-delay-ms: 900000
