@@ -75,7 +75,7 @@ public class MeController {
                                 ? getUserFromUserAuthorizationComponent(authentication)
                                 .map(ResponseEntity::ok)
                                 .orElse(ResponseEntity.notFound().build())
-                                : ResponseEntity.ok(createUserWithFullAccessFromToken(authentication))
+                                : ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))
                 );
     }
 
@@ -85,7 +85,7 @@ public class MeController {
         );
     }
 
-    private User createUserWithFullAccessFromToken(JwtAuthenticationToken token) {
+    private User createUserWithAccessToAllApplications(JwtAuthenticationToken token) {
         UserDisplayText userDisplayTextFromToken =
                 tokenParsingUtils.getUserDisplayTextFromToken(token);
         return User.builder()

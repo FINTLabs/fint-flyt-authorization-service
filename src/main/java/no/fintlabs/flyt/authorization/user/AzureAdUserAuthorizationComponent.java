@@ -8,6 +8,8 @@ import no.fintlabs.flyt.authorization.user.azure.services.GraphService;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserPermission;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -86,14 +88,12 @@ public class AzureAdUserAuthorizationComponent {
                 .map(this::mapToUserWithDisplayText);
     }
 
-    public List<User> getUsers() {
-        return userPermissionService.getAll()
-                .stream()
-                .map(this::mapToUserWithDisplayText)
-                .toList();
+    public Page<User> getUsers(Pageable pageable) {
+        return userPermissionService.getAll(pageable)
+                .map(this::mapToUserWithDisplayText);
     }
 
-    public List<User> putUsers(List<UserPermission> userPermissions) {
+    public List<User> batchPutUserPermissions(List<UserPermission> userPermissions) {
         return userPermissionService.putAll(userPermissions)
                 .stream()
                 .map(this::mapToUserWithDisplayText)

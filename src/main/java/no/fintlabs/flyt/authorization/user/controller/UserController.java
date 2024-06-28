@@ -5,6 +5,8 @@ import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserPermission;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,34 +35,34 @@ public class UserController {
     }
 
     @GetMapping
-    public Mono<ResponseEntity<List<User>>> get(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    public Mono<ResponseEntity<Page<User>>> get(
+            @AuthenticationPrincipal Mono<Authentication> authenticationMono,
+            @RequestParam Pageable pageable
     ) {
         return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
-
-                    // TODO: add pagable with sorting
-                    return Mono.fromCallable(azureAdUserAuthorizationComponent::getUsers)
-                            .map(ResponseEntity::ok);
+                    return Mono.fromCallable(
+                            () -> azureAdUserAuthorizationComponent.getUsers(pageable)
+                    ).map(ResponseEntity::ok);
                 });
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<List<User>>> setUserPermissions(
-            @RequestBody List<UserPermission> userPermissions,
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    @PostMapping("actions/userPermissionBatchPut")
+    public Mono<ResponseEntity<?>> postUserPermissionBatchPutAction(
+            @AuthenticationPrincipal Mono<Authentication> authenticationMono,
+            @RequestBody List<UserPermission> userPermissions
     ) {
         return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
-
-                    // TODO: add pagable with sorting
-                    return Mono.just(ResponseEntity.ok(azureAdUserAuthorizationComponent.putUsers(userPermissions)));
+                    azureAdUserAuthorizationComponent.batchPutUserPermissions(userPermissions);
+                    return Mono.just(ResponseEntity.ok().build());
                 });
     }
+
 }

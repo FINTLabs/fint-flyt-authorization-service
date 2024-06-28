@@ -34,17 +34,16 @@ public class GraphGroupService {
         return groupUserMemberIds;
     }
 
-    // TODO eivindmorch 27/06/2024 : Only include of principal type User
     public Set<UUID> getGroupUserMemberIds(UUID groupId) {
         log.info("Retrieving group member ids for group with id: {}", groupId);
         Set<UUID> groupMemberIds = graphPageWalkerService.getContentFromCurrentAndNextPages(
                         graphServiceClient
                                 .groups(groupId.toString())
-                                .members()
+                                .membersAsUser()
                                 .buildRequest()
                                 .select("id"),
                         pageContent -> pageContent.stream()
-                                .map(directoryObject -> directoryObject.id)
+                                .map(user -> user.id)
                                 .filter(Objects::nonNull)
                                 .toList()
                 )

@@ -3,6 +3,8 @@ package no.fintlabs.flyt.authorization.user;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.model.UserPermission;
 import no.fintlabs.flyt.authorization.user.model.UserPermissionEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -51,11 +53,9 @@ public class UserPermissionService {
                 .map(this::mapFromEntity);
     }
 
-    public List<UserPermission> getAll() {
-        return this.userPermissionRepository.findAll()
-                .stream()
-                .map(this::mapFromEntity)
-                .toList();
+    public Page<UserPermission> getAll(Pageable pageable) {
+        return this.userPermissionRepository.findAll(pageable)
+                .map(this::mapFromEntity);
     }
 
     public List<UserPermission> putAll(List<UserPermission> userPermissions) {
