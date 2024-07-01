@@ -25,17 +25,17 @@ public class GraphGroupService {
     }
 
     public Set<UUID> getGroupUserMemberIds(Collection<UUID> groupIds) {
-        log.info("Retrieving group member ids for groups with ids: {}", groupIds);
+        log.info("Retrieving member IDs for groups with the following IDs: {}", groupIds);
         Set<UUID> groupUserMemberIds = groupIds.stream()
                 .map(this::getGroupUserMemberIds)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        log.info("Successfully retrieved {} group members' ids", groupUserMemberIds.size());
+        log.info("Successfully retrieved member IDs for {} groups, totaling {} member IDs", groupIds.size(), groupUserMemberIds.size());
         return groupUserMemberIds;
     }
 
     public Set<UUID> getGroupUserMemberIds(UUID groupId) {
-        log.info("Retrieving group member ids for group with id: {}", groupId);
+        log.info("Retrieving member IDs for group with ID: {}", groupId);
         Set<UUID> groupMemberIds = graphPageWalkerService.getContentFromCurrentAndNextPages(
                         graphServiceClient
                                 .groups(groupId.toString())
@@ -50,7 +50,7 @@ public class GraphGroupService {
                 .stream()
                 .map(UUID::fromString)
                 .collect(Collectors.toSet());
-        log.info("Successfully retrieved {} group member ids", groupMemberIds.size());
+        log.info("Successfully retrieved {} member IDs for group with ID: {}", groupMemberIds.size(), groupId);
         return groupMemberIds;
     }
 
