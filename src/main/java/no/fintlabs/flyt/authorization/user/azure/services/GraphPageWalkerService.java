@@ -78,16 +78,15 @@ public class GraphPageWalkerService {
         if (collectionPage == null) {
             throw new IllegalStateException("Page is null");
         }
-        List<R> content = contentProcessing.apply(new ArrayList<>(collectionPage.getCurrentPage()));
+        List<R> content = new ArrayList<>(contentProcessing.apply(new ArrayList<>(collectionPage.getCurrentPage())));
         COLLECTION_REQUEST_BUILDER nextBuilder = collectionPage.getNextPage();
         if (nextBuilder != null) {
             content.addAll(getContentFromCurrentAndNextPages(
-                    collectionPage.getNextPage().buildRequest(),
+                    nextBuilder.buildRequest(),
                     performRequest,
                     contentProcessing
             ));
         }
         return content;
     }
-
 }
