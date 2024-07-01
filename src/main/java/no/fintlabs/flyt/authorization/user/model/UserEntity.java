@@ -14,7 +14,6 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +34,9 @@ public class UserEntity {
 
     @ElementCollection
     @CollectionTable(
-            name = "user_permission_source_application_ids",
-            joinColumns = @JoinColumn(name = "user_permission_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_permission_id", "source_application_ids"})
+            name = "user_entity_source_application_ids",
+            joinColumns = @JoinColumn(name = "user_entity_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_entity_id", "source_application_ids"})
     )
     @Setter
     @Column(name = "source_application_ids")
