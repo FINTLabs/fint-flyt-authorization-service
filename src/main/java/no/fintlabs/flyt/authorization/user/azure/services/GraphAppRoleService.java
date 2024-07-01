@@ -89,7 +89,7 @@ public class GraphAppRoleService {
                 .stream()
                 .map(this::fromAppRoleAssignment)
                 .toList();
-        log.info("Successfully retrieved {} app role assignments: {}", appRoleAssignments.size(), appRoleAssignments);
+        log.info("Successfully retrieved {} app role assignments", appRoleAssignments.size());
         return appRoleAssignments;
     }
 
