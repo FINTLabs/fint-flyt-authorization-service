@@ -36,7 +36,7 @@ patches:
           }
       - op: replace
         path: "/spec/env/3/value"
-        value: false
+        value: 'false'
     target:
       kind: Application
       name: fint-flyt-authorization-service
