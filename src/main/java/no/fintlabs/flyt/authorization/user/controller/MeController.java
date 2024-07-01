@@ -36,7 +36,7 @@ public class MeController {
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
-            @Value("${fint.flyt.azure-ad-gateway.enable}") Boolean azureAdUserAuthorizationEnabled,
+            @Value("${fint.flyt.azure-ad-gateway.enabled}") Boolean azureAdUserAuthorizationEnabled,
             @Autowired(required = false) AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
     ) {
         this.tokenParsingUtils = tokenParsingUtils;

@@ -2,7 +2,7 @@ fint:
   org-id: fintlabs.no
   flyt:
     azure-ad-gateway:
-      enable: true
+      enabled: true
     resource-server:
       security:
         api:

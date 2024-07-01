@@ -22,7 +22,7 @@ import java.util.List;
 @Validated
 @EnableAutoConfiguration
 @Configuration
-@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enable", havingValue = "true")
+@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enabled", havingValue = "true")
 public class GraphServiceConfiguration {
 
     @Bean

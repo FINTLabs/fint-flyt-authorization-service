@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 public class AzureAdGatewayConfiguration {
 
     @NotNull
-    private Boolean enable;
+    private Boolean enabled;
 
     @Valid
     private PermittedAppRolesProperties permittedAppRoles;

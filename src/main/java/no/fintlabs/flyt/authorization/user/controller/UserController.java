@@ -17,7 +17,7 @@ import java.util.List;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enable", havingValue = "true")
+@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enabled", havingValue = "true")
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/users")
 public class UserController {
