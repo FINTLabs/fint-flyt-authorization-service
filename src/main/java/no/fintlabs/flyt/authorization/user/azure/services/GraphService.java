@@ -43,6 +43,15 @@ public class GraphService {
         this.graphUserService = graphUserService;
     }
 
+    public boolean areCredentialsAvailable() {
+        String appId = azureCredentialsConfiguration.getAppId();
+        if (appId == null || appId.isBlank() || "null".equals(appId)) {
+            log.error("AppId cannot be null, blank, or the string 'null'");
+            return false;
+        }
+        return true;
+    }
+
     public List<GraphUserInfo> getPermittedUsersInfo() {
         log.info("Retrieving permitted users info");
 

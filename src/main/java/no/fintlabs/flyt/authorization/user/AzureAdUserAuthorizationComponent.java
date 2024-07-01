@@ -21,11 +21,12 @@ import java.util.UUID;
 public class AzureAdUserAuthorizationComponent {
 
     private final GraphService graphService;
-
     private final UserService userService;
 
-
-    public AzureAdUserAuthorizationComponent(GraphService graphService, UserService userService) {
+    public AzureAdUserAuthorizationComponent(
+            GraphService graphService,
+            UserService userService
+    ) {
         this.graphService = graphService;
         this.userService = userService;
     }
@@ -35,6 +36,11 @@ public class AzureAdUserAuthorizationComponent {
             fixedDelayString = "${fint.flyt.azure-ad-gateway.sync-schedule.fixed-delay-ms}"
     )
     public void syncUsers() {
+        if (!graphService.areCredentialsAvailable()) {
+            log.warn("Skipping syncUsers because credentials are not available.");
+            return;
+        }
+
         log.info("Syncing users");
         updateUsers(graphService.getPermittedUsersInfo());
         log.info("Successfully synced users");
