@@ -5,7 +5,9 @@ import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -36,8 +38,11 @@ public class UserController {
     @GetMapping
     public Mono<ResponseEntity<Page<User>>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono,
-            @RequestParam Pageable pageable
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sort
     ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
         return tokenParsingUtils.isAdmin(authenticationMono)
                 .flatMap(isAdmin -> {
                     if (!isAdmin) {
