@@ -6,6 +6,7 @@ import no.fintlabs.flyt.authorization.user.model.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -26,6 +27,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void updateUsers(Collection<User> users) {
         log.info("Updating {} user entities", users.size());
 
