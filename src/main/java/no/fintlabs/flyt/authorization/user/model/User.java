@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,5 +23,6 @@ public class User {
     private String name;
 
     @NotNull
-    private List<Long> sourceApplicationIds;
+    @Builder.Default
+    private List<Long> sourceApplicationIds = new ArrayList<>();
 }
