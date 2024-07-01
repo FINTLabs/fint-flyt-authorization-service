@@ -24,7 +24,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_AcosSourceApplicationClientId() {
         String clientId = "acosClientId";
-        String sourceAppId = "1";
+        long sourceAppId = 1L;
         AcosSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
@@ -38,7 +38,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_EgrunnervervSourceApplicationClientId() {
         String clientId = "egrunnervervClientId";
-        String sourceAppId = "2";
+        long sourceAppId = 2L;
         EgrunnervervSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
@@ -52,7 +52,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_DigisakSourceApplicationClientId() {
         String clientId = "digisakClientId";
-        String sourceAppId = "3";
+        long sourceAppId = 3L;
         DigisakSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
