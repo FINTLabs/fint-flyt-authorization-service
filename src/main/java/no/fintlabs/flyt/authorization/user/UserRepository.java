@@ -14,10 +14,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> findAllByObjectIdentifierIn(Collection<UUID> objectIdentifiers);
 
-    interface ObjectIdentifierSelection {
-        UUID getObjectIdentifier();
-    }
-
     void deleteByObjectIdentifierNotIn(Set<UUID> objectIdentifiers);
 
 }
