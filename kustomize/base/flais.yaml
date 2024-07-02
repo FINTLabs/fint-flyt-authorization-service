@@ -41,6 +41,8 @@ spec:
         }
     - name: fint.flyt.resource-server.security.api.internal.enabled
       value: 'true'
+    - name: fint.flyt.azure-ad-gateway.enabled
+      value: 'true'
   onePassword:
     itemPath: path
   envFrom: []

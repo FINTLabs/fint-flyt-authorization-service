@@ -34,6 +34,18 @@ patches:
             "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
             "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
           }
+      - op: add
+        path: "/spec/envFrom/0"
+        value:
+          secretRef:
+            name: fint-flyt-authorization-service
     target:
       kind: Application
+      name: fint-flyt-authorization-service
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-api-vault/items/fint-flyt-authorization-service-vestfoldfylke-no"
+    target:
+      kind: OnePasswordItem
       name: fint-flyt-authorization-service

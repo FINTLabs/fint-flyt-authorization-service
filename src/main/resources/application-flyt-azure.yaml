@@ -1,0 +1,30 @@
+azure:
+  credentials:
+    clientid: ${fint.flyt.azure.client-id:null}
+    clientsecret: ${fint.flyt.azure.client-secret:null}
+    tenantid: ${fint.flyt.azure.tenant-id:null}
+    appid: ${fint.flyt.azure.app-id:null}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          azure:
+            client-id: ${azure.credentials.clientid}
+            client-secret: ${azure.credentials.clientsecret}
+            authorization-grant-type: client_credentials
+            scope: "https://graph.microsoft.com/.default"
+        provider:
+          azure:
+            authorization-uri: "https://login.microsoftonline.com/${azure.credentials.tenantid}/oauth2/v2.0/authorize"
+            token-uri: "https://login.microsoftonline.com/${azure.credentials.tenantid}/oauth2/v2.0/token"
+
+fint:
+  flyt:
+    azure-ad-gateway:
+      permitted-approles:
+        flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
+      sync-schedule:
+        initial-delay-ms: 1000
+        fixed-delay-ms: 900000

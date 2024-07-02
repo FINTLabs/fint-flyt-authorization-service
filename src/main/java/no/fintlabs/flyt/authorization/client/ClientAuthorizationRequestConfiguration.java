@@ -1,4 +1,4 @@
-package no.fintlabs;
+package no.fintlabs.flyt.authorization.client;
 
 import no.fintlabs.kafka.common.topic.TopicCleanupPolicyParameters;
 import no.fintlabs.kafka.requestreply.RequestConsumerFactoryService;

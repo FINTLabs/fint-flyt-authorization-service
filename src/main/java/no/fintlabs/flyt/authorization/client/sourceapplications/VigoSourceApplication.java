@@ -1,4 +1,4 @@
-package no.fintlabs.models.sourceapplication;
+package no.fintlabs.flyt.authorization.client.sourceapplications;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Getter
-public class AcosSourceApplication {
+public class VigoSourceApplication {
     public static String CLIENT_ID;
-    public static final String SOURCE_APPLICATION_ID = "1";
+    public static final long SOURCE_APPLICATION_ID = 4L;
 
-    @Value("${fint.flyt.acos.sso.client-id:#{null}}")
+    @Value("${fint.flyt.vigo.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }

@@ -1,17 +1,19 @@
-create table user_permission_source_application_ids
+create table user_entity_source_application_ids
 (
-    user_permission_id     int8 not null,
-    source_application_ids int4
+    user_entity_id         int8 not null,
+    source_application_ids int8
 );
-create table user_permission
+create table user_entity
 (
-    id                bigserial    not null,
-    object_identifier varchar(255) not null,
+    id                bigserial not null,
+    email             varchar(255),
+    name              varchar(255),
+    object_identifier uuid      not null,
     primary key (id)
 );
-alter table user_permission_source_application_ids
-    add constraint UK5w20jnmqeej62rhqsgyjahown unique (user_permission_id, source_application_ids);
-alter table user_permission
-    add constraint UK_3j9pvu47o30sbeqolxqgjsnj unique (object_identifier);
-alter table user_permission_source_application_ids
-    add constraint FKjpup6xop1xa25bcs8333uhsm8 foreign key (user_permission_id) references user_permission;
+alter table user_entity_source_application_ids
+    add constraint UKo3tx39i7fw3q0sr3f0rjp679f unique (user_entity_id, source_application_ids);
+alter table user_entity
+    add constraint UK_td2dvdf4t2le4cydfk7a1x17i unique (object_identifier);
+alter table user_entity_source_application_ids
+    add constraint FKisf0n8x0vsfohl0wkenll537s foreign key (user_entity_id) references user_entity;
