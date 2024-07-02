@@ -67,15 +67,25 @@ public class MeController {
     public Mono<ResponseEntity<User>> get(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return authenticationMono
-                .map(authentication -> (JwtAuthenticationToken) authentication)
-                .map(authentication ->
-                        azureAdUserAuthorizationEnabled
-                                ? getUserFromUserAuthorizationComponent(authentication)
-                                .map(ResponseEntity::ok)
-                                .orElse(ResponseEntity.notFound().build())
-                                : ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))
-                );
+        return tokenParsingUtils.isAdmin(authenticationMono)
+                .flatMap(isAdmin -> {
+                    if (isAdmin) {
+                        return authenticationMono
+                                .map(authentication -> (JwtAuthenticationToken) authentication)
+                                .flatMap(authentication ->
+                                        Mono.just(ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))));
+                    } else {
+                        return authenticationMono
+                                .map(authentication -> (JwtAuthenticationToken) authentication)
+                                .map(authentication ->
+                                        azureAdUserAuthorizationEnabled
+                                                ? getUserFromUserAuthorizationComponent(authentication)
+                                                .map(ResponseEntity::ok)
+                                                .orElse(ResponseEntity.notFound().build())
+                                                : ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))
+                                );
+                    }
+                });
     }
 
     private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
