@@ -1,12 +1,15 @@
 package no.fintlabs;
 
+import no.fintlabs.flyt.authorization.client.ClientAuthorization;
+import no.fintlabs.flyt.authorization.client.ClientAuthorizationProducerRecordBuilder;
+import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
-import no.fintlabs.models.sourceapplication.AcosSourceApplication;
-import no.fintlabs.models.sourceapplication.EgrunnervervSourceApplication;
-import no.fintlabs.models.sourceapplication.DigisakSourceApplication;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClientAuthorizationProducerRecordBuilderTest {
@@ -21,7 +24,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_AcosSourceApplicationClientId() {
         String clientId = "acosClientId";
-        String sourceAppId = "1";
+        long sourceAppId = 1L;
         AcosSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
@@ -35,7 +38,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_EgrunnervervSourceApplicationClientId() {
         String clientId = "egrunnervervClientId";
-        String sourceAppId = "2";
+        long sourceAppId = 2L;
         EgrunnervervSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
@@ -49,7 +52,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     @Test
     void testApply_DigisakSourceApplicationClientId() {
         String clientId = "digisakClientId";
-        String sourceAppId = "3";
+        long sourceAppId = 3L;
         DigisakSourceApplication.CLIENT_ID = clientId;
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);

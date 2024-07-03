@@ -1,4 +1,4 @@
-package no.fintlabs;
+package no.fintlabs.flyt.authorization.client;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,5 +8,5 @@ import lombok.Getter;
 public class ClientAuthorization {
     private final boolean authorized;
     private final String clientId;
-    private final String sourceApplicationId;
+    private final Long sourceApplicationId;
 }

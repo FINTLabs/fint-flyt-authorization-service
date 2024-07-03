@@ -1,4 +1,4 @@
-package no.fintlabs.models.sourceapplication;
+package no.fintlabs.flyt.authorization.client.sourceapplications;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 public class DigisakSourceApplication {
     public static String CLIENT_ID;
-    public static final String SOURCE_APPLICATION_ID = "3";
+    public static final long SOURCE_APPLICATION_ID = 3L;
 
     @Value("${fint.flyt.digisak.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
