@@ -1,6 +1,7 @@
 package no.fintlabs.flyt.authorization.user;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.flyt.authorization.user.kafka.UserPermissionsEntityProducerService;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserEntity;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,14 @@ public class UserService {
     //  ettersom horisontal skalering av synkingen vil skape problemer
 
     private final UserRepository userRepository;
+    private final UserPermissionsEntityProducerService userPermissionsEntityProducerService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            UserPermissionsEntityProducerService userPermissionsEntityProducerService
+    ) {
         this.userRepository = userRepository;
+        this.userPermissionsEntityProducerService = userPermissionsEntityProducerService;
     }
 
     @Transactional
@@ -73,6 +79,15 @@ public class UserService {
         );
 
         log.info("Successfully updated user entities");
+    }
+
+    public void publishUsers() {
+        this.userRepository
+                .findAll()
+                .stream()
+                .map(this::mapFromEntity)
+                .toList()
+                .forEach(userPermissionsEntityProducerService::send);
     }
 
     public Optional<User> find(UUID objectIdentifier) {
