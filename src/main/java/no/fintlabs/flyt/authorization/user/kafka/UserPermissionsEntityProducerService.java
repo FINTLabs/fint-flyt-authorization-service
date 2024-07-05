@@ -24,8 +24,10 @@ public class UserPermissionsEntityProducerService {
                 .builder()
                 .resource("user-permissions")
                 .build();
-        int retentionTimeInHours = 1;
-        long retentionTimeInMilliseconds = TimeUnit.HOURS.toMillis(retentionTimeInHours);
+//        int retentionTimeInHours = 1;
+        int retentionTimeInMinutes = 5;
+//        long retentionTimeInMilliseconds = TimeUnit.HOURS.toMillis(retentionTimeInHours);
+        long retentionTimeInMilliseconds = TimeUnit.MINUTES.toMillis(retentionTimeInMinutes);
         entityTopicService.ensureTopic(entityTopicNameParameters, retentionTimeInMilliseconds);
     }
 
