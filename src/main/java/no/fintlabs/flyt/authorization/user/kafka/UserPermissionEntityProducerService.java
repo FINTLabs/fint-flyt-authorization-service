@@ -10,24 +10,22 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class UserPermissionsEntityProducerService {
+public class UserPermissionEntityProducerService {
 
     private final EntityProducer<UserPermission> entityProducer;
     private final EntityTopicNameParameters entityTopicNameParameters;
 
-    public UserPermissionsEntityProducerService(
+    public UserPermissionEntityProducerService(
             EntityProducerFactory entityProducerFactory,
             EntityTopicService entityTopicService
     ) {
         this.entityProducer = entityProducerFactory.createProducer(UserPermission.class);
         entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
-                .resource("user-permissions")
+                .resource("userpermission")
                 .build();
-//        int retentionTimeInHours = 1;
-        int retentionTimeInMinutes = 5;
-//        long retentionTimeInMilliseconds = TimeUnit.HOURS.toMillis(retentionTimeInHours);
-        long retentionTimeInMilliseconds = TimeUnit.MINUTES.toMillis(retentionTimeInMinutes);
+        int retentionTimeInHours = 1;
+        long retentionTimeInMilliseconds = TimeUnit.HOURS.toMillis(retentionTimeInHours);
         entityTopicService.ensureTopic(entityTopicNameParameters, retentionTimeInMilliseconds);
     }
 

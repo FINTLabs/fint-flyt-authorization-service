@@ -2,7 +2,7 @@ package no.fintlabs.flyt.authorization.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.kafka.UserPermission;
-import no.fintlabs.flyt.authorization.user.kafka.UserPermissionsEntityProducerService;
+import no.fintlabs.flyt.authorization.user.kafka.UserPermissionEntityProducerService;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserEntity;
 import org.springframework.data.domain.Page;
@@ -24,14 +24,14 @@ public class UserService {
     //  ettersom horisontal skalering av synkingen vil skape problemer
 
     private final UserRepository userRepository;
-    private final UserPermissionsEntityProducerService userPermissionsEntityProducerService;
+    private final UserPermissionEntityProducerService userPermissionEntityProducerService;
 
     public UserService(
             UserRepository userRepository,
-            UserPermissionsEntityProducerService userPermissionsEntityProducerService
+            UserPermissionEntityProducerService userPermissionEntityProducerService
     ) {
         this.userRepository = userRepository;
-        this.userPermissionsEntityProducerService = userPermissionsEntityProducerService;
+        this.userPermissionEntityProducerService = userPermissionEntityProducerService;
     }
 
     @Transactional
@@ -88,7 +88,7 @@ public class UserService {
                 .stream()
                 .map(this::mapFromEntityToUserPermission)
                 .toList()
-                .forEach(userPermissionsEntityProducerService::send);
+                .forEach(userPermissionEntityProducerService::send);
     }
 
     public Optional<User> find(UUID objectIdentifier) {
