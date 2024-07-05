@@ -1,6 +1,5 @@
 package no.fintlabs.flyt.authorization.user.kafka;
 
-import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.kafka.entity.EntityProducer;
 import no.fintlabs.kafka.entity.EntityProducerFactory;
 import no.fintlabs.kafka.entity.EntityProducerRecord;
@@ -13,14 +12,14 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserPermissionsEntityProducerService {
 
-    private final EntityProducer<User> entityProducer;
+    private final EntityProducer<UserPermission> entityProducer;
     private final EntityTopicNameParameters entityTopicNameParameters;
 
     public UserPermissionsEntityProducerService(
             EntityProducerFactory entityProducerFactory,
             EntityTopicService entityTopicService
     ) {
-        this.entityProducer = entityProducerFactory.createProducer(User.class);
+        this.entityProducer = entityProducerFactory.createProducer(UserPermission.class);
         entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
                 .resource("user-permissions")
@@ -30,12 +29,12 @@ public class UserPermissionsEntityProducerService {
         entityTopicService.ensureTopic(entityTopicNameParameters, retentionTimeInMilliseconds);
     }
 
-    public void send(User user) {
+    public void send(UserPermission userPermission) {
         entityProducer.send(
-                EntityProducerRecord.<User>builder()
+                EntityProducerRecord.<UserPermission>builder()
                         .topicNameParameters(entityTopicNameParameters)
-                        .key(String.valueOf(user.getObjectIdentifier()))
-                        .value(user)
+                        .key(String.valueOf(userPermission.getObjectIdentifier()))
+                        .value(userPermission)
                         .build()
         );
     }
