@@ -1,6 +1,8 @@
 package no.fintlabs.flyt.authorization.user;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.flyt.authorization.user.kafka.UserPermission;
+import no.fintlabs.flyt.authorization.user.kafka.UserPermissionEntityProducerService;
 import no.fintlabs.flyt.authorization.user.model.User;
 import no.fintlabs.flyt.authorization.user.model.UserEntity;
 import org.springframework.data.domain.Page;
@@ -22,9 +24,14 @@ public class UserService {
     //  ettersom horisontal skalering av synkingen vil skape problemer
 
     private final UserRepository userRepository;
+    private final UserPermissionEntityProducerService userPermissionEntityProducerService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            UserPermissionEntityProducerService userPermissionEntityProducerService
+    ) {
         this.userRepository = userRepository;
+        this.userPermissionEntityProducerService = userPermissionEntityProducerService;
     }
 
     @Transactional
@@ -75,6 +82,15 @@ public class UserService {
         log.info("Successfully updated user entities");
     }
 
+    public void publishUsers() {
+        this.userRepository
+                .findAll()
+                .stream()
+                .map(this::mapFromEntityToUserPermission)
+                .toList()
+                .forEach(userPermissionEntityProducerService::send);
+    }
+
     public Optional<User> find(UUID objectIdentifier) {
         return this.userRepository.findByObjectIdentifier(objectIdentifier)
                 .map(this::mapFromEntity);
@@ -112,6 +128,14 @@ public class UserService {
                 .objectIdentifier(userEntity.getObjectIdentifier())
                 .name(userEntity.getName())
                 .email(userEntity.getEmail())
+                .sourceApplicationIds(userEntity.getSourceApplicationIds())
+                .build();
+    }
+
+    private UserPermission mapFromEntityToUserPermission(UserEntity userEntity) {
+        return UserPermission
+                .builder()
+                .objectIdentifier(userEntity.getObjectIdentifier())
                 .sourceApplicationIds(userEntity.getSourceApplicationIds())
                 .build();
     }
