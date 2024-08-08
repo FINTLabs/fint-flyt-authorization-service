@@ -1,6 +1,7 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
+import lombok.RequiredArgsConstructor;
+import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,21 +20,14 @@ import java.util.List;
 
 import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
-@ConditionalOnProperty(value = "fint.flyt.azure-ad-gateway.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "fint.flyt.authorization.access-control.enabled", havingValue = "true")
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final TokenParsingUtils tokenParsingUtils;
-    private final AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent;
-
-    public UserController(
-            TokenParsingUtils tokenParsingUtils,
-            AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
-    ) {
-        this.tokenParsingUtils = tokenParsingUtils;
-        this.azureAdUserAuthorizationComponent = azureAdUserAuthorizationComponent;
-    }
+    private final UserService userService;
 
     @GetMapping
     public Mono<ResponseEntity<Page<User>>> get(
@@ -49,7 +43,7 @@ public class UserController {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
                     return Mono.fromCallable(
-                            () -> azureAdUserAuthorizationComponent.getUsers(pageable)
+                            () -> userService.getAll(pageable)
                     ).map(ResponseEntity::ok);
                 });
     }
@@ -64,7 +58,8 @@ public class UserController {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
-                    azureAdUserAuthorizationComponent.batchPutUserPermissions(users);
+                    userService.putAll(users);
+                    userService.publishUsers();
                     return Mono.just(ResponseEntity.ok().build());
                 });
     }

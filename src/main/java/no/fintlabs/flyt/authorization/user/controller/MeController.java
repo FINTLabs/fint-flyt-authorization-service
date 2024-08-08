@@ -4,11 +4,10 @@ import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplic
 import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
-import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,17 +30,17 @@ public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
 
-    private final Boolean azureAdUserAuthorizationEnabled;
-    private final AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent;
+    private final Boolean acesscontrolEnabled;
+    private final UserService userService;
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
-            @Value("${fint.flyt.azure-ad-gateway.enabled}") Boolean azureAdUserAuthorizationEnabled,
-            @Autowired(required = false) AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
+            @Value("${fint.flyt.authorization.access-control.enabled}") Boolean accessControlEnabled,
+            UserService userService
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
-        this.azureAdUserAuthorizationEnabled = azureAdUserAuthorizationEnabled;
-        this.azureAdUserAuthorizationComponent = azureAdUserAuthorizationComponent;
+        this.acesscontrolEnabled = accessControlEnabled;
+        this.userService = userService;
     }
 
     @GetMapping("is-authorized")
@@ -53,7 +52,7 @@ public class MeController {
     public Mono<ResponseEntity<RestrictedPageAuthorization>> getRestrictedPageAuthorization(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return (azureAdUserAuthorizationEnabled
+        return (acesscontrolEnabled
                 ? tokenParsingUtils.isAdmin(authenticationMono)
                 .map(isAdmin -> RestrictedPageAuthorization
                         .builder()
@@ -78,7 +77,7 @@ public class MeController {
                         return authenticationMono
                                 .map(authentication -> (JwtAuthenticationToken) authentication)
                                 .map(authentication ->
-                                        azureAdUserAuthorizationEnabled
+                                        acesscontrolEnabled
                                                 ? getUserFromUserAuthorizationComponent(authentication)
                                                 .map(ResponseEntity::ok)
                                                 .orElse(ResponseEntity.notFound().build())
@@ -89,9 +88,7 @@ public class MeController {
     }
 
     private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
-        return azureAdUserAuthorizationComponent.getUser(
-                UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
-        );
+        return userService.find(UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token)));
     }
 
     private User createUserWithAccessToAllApplications(JwtAuthenticationToken token) {
