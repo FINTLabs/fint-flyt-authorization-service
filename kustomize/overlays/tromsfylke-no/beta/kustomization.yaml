@@ -35,9 +35,6 @@ patches:
             "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
             "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
           }
-      - op: replace
-        path: "/spec/env/3/value"
-        value: 'false'
       - op: add
         path: "/spec/envFrom/0"
         value:
