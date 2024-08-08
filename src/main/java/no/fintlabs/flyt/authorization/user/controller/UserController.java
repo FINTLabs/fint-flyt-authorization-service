@@ -1,6 +1,7 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
 import no.fintlabs.flyt.authorization.user.UserPublishingComponent;
+import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,13 +27,15 @@ public class UserController {
 
     private final TokenParsingUtils tokenParsingUtils;
     private final UserPublishingComponent userPublishingComponent;
+    private final UserService userService;
 
     public UserController(
             TokenParsingUtils tokenParsingUtils,
-            UserPublishingComponent userPublishingComponent
+            UserPublishingComponent userPublishingComponent, UserService userService
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
         this.userPublishingComponent = userPublishingComponent;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -65,6 +68,7 @@ public class UserController {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
                     userPublishingComponent.batchPutUserPermissions(users);
+                    userService.publishUsers();
                     return Mono.just(ResponseEntity.ok().build());
                 });
     }
