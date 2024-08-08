@@ -1,6 +1,6 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.user.UserPublishingComponent;
+import lombok.RequiredArgsConstructor;
 import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.User;
@@ -23,20 +23,11 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 @ConditionalOnProperty(value = "fint.flyt.authorization.access-control.enabled", havingValue = "true")
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final TokenParsingUtils tokenParsingUtils;
-    private final UserPublishingComponent userPublishingComponent;
     private final UserService userService;
-
-    public UserController(
-            TokenParsingUtils tokenParsingUtils,
-            UserPublishingComponent userPublishingComponent, UserService userService
-    ) {
-        this.tokenParsingUtils = tokenParsingUtils;
-        this.userPublishingComponent = userPublishingComponent;
-        this.userService = userService;
-    }
 
     @GetMapping
     public Mono<ResponseEntity<Page<User>>> get(
@@ -52,7 +43,7 @@ public class UserController {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
                     return Mono.fromCallable(
-                            () -> userPublishingComponent.getUsers(pageable)
+                            () -> userService.getAll(pageable)
                     ).map(ResponseEntity::ok);
                 });
     }
@@ -67,7 +58,7 @@ public class UserController {
                     if (!isAdmin) {
                         return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
                     }
-                    userPublishingComponent.batchPutUserPermissions(users);
+                    userService.putAll(users);
                     userService.publishUsers();
                     return Mono.just(ResponseEntity.ok().build());
                 });

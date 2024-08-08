@@ -4,11 +4,10 @@ import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplic
 import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
-import no.fintlabs.flyt.authorization.user.UserPublishingComponent;
+import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,16 +31,16 @@ public class MeController {
     private final TokenParsingUtils tokenParsingUtils;
 
     private final Boolean acesscontrolEnabled;
-    private final UserPublishingComponent userPublishingComponent;
+    private final UserService userService;
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
             @Value("${fint.flyt.authorization.access-control.enabled}") Boolean accessControlEnabled,
-            @Autowired(required = false) UserPublishingComponent userPublishingComponent
+            UserService userService
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
         this.acesscontrolEnabled = accessControlEnabled;
-        this.userPublishingComponent = userPublishingComponent;
+        this.userService = userService;
     }
 
     @GetMapping("is-authorized")
@@ -89,9 +88,7 @@ public class MeController {
     }
 
     private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
-        return userPublishingComponent.getUser(
-                UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
-        );
+        return userService.find(UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token)));
     }
 
     private User createUserWithAccessToAllApplications(JwtAuthenticationToken token) {

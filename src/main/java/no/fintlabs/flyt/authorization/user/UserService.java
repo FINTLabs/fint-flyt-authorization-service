@@ -1,5 +1,6 @@
 package no.fintlabs.flyt.authorization.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.kafka.UserPermission;
 import no.fintlabs.flyt.authorization.user.kafka.UserPermissionEntityProducerService;
@@ -18,21 +19,11 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
-
-    // TODO eivindmorch 27/06/2024 : Azure sync og tjeneste som leverer til frontend burde være separate
-    //  ettersom horisontal skalering av synkingen vil skape problemer
 
     private final UserRepository userRepository;
     private final UserPermissionEntityProducerService userPermissionEntityProducerService;
-
-    public UserService(
-            UserRepository userRepository,
-            UserPermissionEntityProducerService userPermissionEntityProducerService
-    ) {
-        this.userRepository = userRepository;
-        this.userPermissionEntityProducerService = userPermissionEntityProducerService;
-    }
 
     @Transactional
     public void updateUsers(Collection<User> users) {
@@ -83,12 +74,21 @@ public class UserService {
     }
 
     public void publishUsers() {
-        this.userRepository
-                .findAll()
-                .stream()
-                .map(this::mapFromEntityToUserPermission)
-                .toList()
-                .forEach(userPermissionEntityProducerService::send);
+        log.info("Starting publishing users");
+        try {
+            List<UserPermission> userPermissions = this.userRepository
+                    .findAll()
+                    .stream()
+                    .map(this::mapFromEntityToUserPermission)
+                    .toList();
+
+            log.info("Retrieved and mapped {} user entities", userPermissions.size());
+            userPermissions.forEach(userPermissionEntityProducerService::send);
+            log.info("Successfully published users");
+
+        } catch (Exception e) {
+            log.error("Error while publishing users", e);
+        }
     }
 
     public Optional<User> find(UUID objectIdentifier) {
