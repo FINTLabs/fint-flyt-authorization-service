@@ -42,7 +42,7 @@ public class AzureAdUserAuthorizationComponent {
         }
 
         log.info("Syncing users");
-//        updateUsers(graphService.getPermittedUsersInfo());
+        updateUsers(graphService.getPermittedUsersInfo());
         userService.publishUsers();
         log.info("Successfully synced users");
     }
