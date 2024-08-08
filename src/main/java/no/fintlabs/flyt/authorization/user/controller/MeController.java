@@ -4,7 +4,7 @@ import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplic
 import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
 import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
-import no.fintlabs.flyt.authorization.user.AzureAdUserAuthorizationComponent;
+import no.fintlabs.flyt.authorization.user.UserPublishingComponent;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
 import no.fintlabs.flyt.authorization.user.model.User;
@@ -31,17 +31,17 @@ public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
 
-    private final Boolean azureAdUserAuthorizationEnabled;
-    private final AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent;
+    private final Boolean acesscontrolEnabled;
+    private final UserPublishingComponent userPublishingComponent;
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
-            @Value("${fint.flyt.azure-ad-gateway.enabled}") Boolean azureAdUserAuthorizationEnabled,
-            @Autowired(required = false) AzureAdUserAuthorizationComponent azureAdUserAuthorizationComponent
+            @Value("${fint.flyt.authorization.access-control.enabled}") Boolean accessControlEnabled,
+            @Autowired(required = false) UserPublishingComponent userPublishingComponent
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
-        this.azureAdUserAuthorizationEnabled = azureAdUserAuthorizationEnabled;
-        this.azureAdUserAuthorizationComponent = azureAdUserAuthorizationComponent;
+        this.acesscontrolEnabled = accessControlEnabled;
+        this.userPublishingComponent = userPublishingComponent;
     }
 
     @GetMapping("is-authorized")
@@ -53,7 +53,7 @@ public class MeController {
     public Mono<ResponseEntity<RestrictedPageAuthorization>> getRestrictedPageAuthorization(
             @AuthenticationPrincipal Mono<Authentication> authenticationMono
     ) {
-        return (azureAdUserAuthorizationEnabled
+        return (acesscontrolEnabled
                 ? tokenParsingUtils.isAdmin(authenticationMono)
                 .map(isAdmin -> RestrictedPageAuthorization
                         .builder()
@@ -78,7 +78,7 @@ public class MeController {
                         return authenticationMono
                                 .map(authentication -> (JwtAuthenticationToken) authentication)
                                 .map(authentication ->
-                                        azureAdUserAuthorizationEnabled
+                                        acesscontrolEnabled
                                                 ? getUserFromUserAuthorizationComponent(authentication)
                                                 .map(ResponseEntity::ok)
                                                 .orElse(ResponseEntity.notFound().build())
@@ -89,7 +89,7 @@ public class MeController {
     }
 
     private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
-        return azureAdUserAuthorizationComponent.getUser(
+        return userPublishingComponent.getUser(
                 UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token))
         );
     }

@@ -1,9 +1,17 @@
 fint:
   application-id: fint-flyt-authorization-service
+  flyt:
+    authorization:
+      access-control:
+        enabled: true
+        permitted-approles:
+          flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
+        sync-schedule:
+          initial-delay-ms: 1000
+          fixed-delay-ms: 900000
 spring:
   profiles:
     include:
-      - flyt-azure
       - flyt-kafka
       - flyt-logging
       - flyt-postgres

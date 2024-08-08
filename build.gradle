@@ -47,9 +47,6 @@ dependencies {
     implementation 'javax.validation:validation-api'
     implementation 'org.hibernate.validator:hibernate-validator'
 
-    implementation 'com.azure:azure-identity:1.10.2'
-    implementation 'com.microsoft.graph:microsoft-graph:5.80.0'
-
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
