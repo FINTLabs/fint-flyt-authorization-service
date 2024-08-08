@@ -9,11 +9,11 @@ import no.fintlabs.flyt.authorization.user.model.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -24,54 +24,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserPermissionEntityProducerService userPermissionEntityProducerService;
-
-    @Transactional
-    public void updateUsers(Collection<User> users) {
-        log.info("Updating {} user entities", users.size());
-
-        Map<UUID, User> usersToUpdatePerObjectIdentifier = users.stream()
-                .collect(toMap(
-                        User::getObjectIdentifier,
-                        Function.identity()
-                ));
-
-        userRepository.deleteByObjectIdentifierNotIn(usersToUpdatePerObjectIdentifier.keySet());
-
-        Map<UUID, UserEntity> updatedUserEntitiesPerObjectIdentifier =
-                userRepository.findAllByObjectIdentifierIn(usersToUpdatePerObjectIdentifier.keySet()).stream()
-                        .peek(userEntity -> {
-                            User newUser = usersToUpdatePerObjectIdentifier.get(userEntity.getObjectIdentifier());
-                            userEntity.setName(newUser.getName());
-                            userEntity.setEmail(newUser.getEmail());
-                        })
-                        .collect(toMap(
-                                UserEntity::getObjectIdentifier,
-                                Function.identity()
-                        ));
-
-        Set<UUID> objectIdentifiersForUsersNotExisting = usersToUpdatePerObjectIdentifier.keySet();
-        objectIdentifiersForUsersNotExisting.removeAll(updatedUserEntitiesPerObjectIdentifier.keySet());
-
-        List<UserEntity> newUserEntities = objectIdentifiersForUsersNotExisting.stream()
-                .map(usersToUpdatePerObjectIdentifier::get)
-                .map(user -> UserEntity
-                        .builder()
-                        .objectIdentifier(user.getObjectIdentifier())
-                        .name(user.getName())
-                        .email(user.getEmail())
-                        .build()
-                )
-                .toList();
-
-        userRepository.saveAll(
-                Stream.concat(
-                        updatedUserEntitiesPerObjectIdentifier.values().stream(),
-                        newUserEntities.stream()
-                ).toList()
-        );
-
-        log.info("Successfully updated user entities");
-    }
 
     public void publishUsers() {
         log.info("Starting publishing users");
@@ -89,6 +41,10 @@ public class UserService {
         } catch (Exception e) {
             log.error("Error while publishing users", e);
         }
+    }
+
+    public void save(User user) {
+        this.userRepository.save(mapFromUser(user));
     }
 
     public Optional<User> find(UUID objectIdentifier) {
@@ -120,6 +76,16 @@ public class UserService {
         ));
 
         userRepository.saveAll(entities);
+    }
+
+    private UserEntity mapFromUser(User user) {
+        return UserEntity
+                .builder()
+                .objectIdentifier(user.getObjectIdentifier())
+                .name(user.getName())
+                .email(user.getEmail())
+                .sourceApplicationIds(user.getSourceApplicationIds())
+                .build();
     }
 
     private User mapFromEntity(UserEntity userEntity) {

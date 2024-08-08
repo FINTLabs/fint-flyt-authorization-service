@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -30,38 +29,31 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Mono<ResponseEntity<Page<User>>> get(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono,
+    public ResponseEntity<Page<User>> get(
+            @AuthenticationPrincipal Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") String sort
     ) {
+        if (!tokenParsingUtils.isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
-        return tokenParsingUtils.isAdmin(authenticationMono)
-                .flatMap(isAdmin -> {
-                    if (!isAdmin) {
-                        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
-                    }
-                    return Mono.fromCallable(
-                            () -> userService.getAll(pageable)
-                    ).map(ResponseEntity::ok);
-                });
+        Page<User> users = userService.getAll(pageable);
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping("actions/userPermissionBatchPut")
-    public Mono<ResponseEntity<?>> postUserPermissionBatchPutAction(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono,
+    public ResponseEntity<?> postUserPermissionBatchPutAction(
+            @AuthenticationPrincipal Authentication authentication,
             @RequestBody List<User> users
     ) {
-        return tokenParsingUtils.isAdmin(authenticationMono)
-                .flatMap(isAdmin -> {
-                    if (!isAdmin) {
-                        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
-                    }
-                    userService.putAll(users);
-                    userService.publishUsers();
-                    return Mono.just(ResponseEntity.ok().build());
-                });
+        if (!tokenParsingUtils.isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        userService.putAll(users);
+        userService.publishUsers();
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +29,7 @@ public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
 
-    private final Boolean acesscontrolEnabled;
+    private final Boolean accessControlEnabled;
     private final UserService userService;
 
     public MeController(
@@ -39,52 +38,55 @@ public class MeController {
             UserService userService
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
-        this.acesscontrolEnabled = accessControlEnabled;
+        this.accessControlEnabled = accessControlEnabled;
         this.userService = userService;
     }
 
     @GetMapping("is-authorized")
-    public ResponseEntity<?> checkAuthorization() {
+    public ResponseEntity<?> checkAuthorization(
+            @AuthenticationPrincipal Authentication authentication
+    ) {
+        if (accessControlEnabled) {
+            JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
+            Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
+
+            if (userOptional.isEmpty() && tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
+                User newUser = createUserWithAccessToNoApplications(jwtAuthToken);
+                userService.save(newUser);
+            }
+        }
         return ResponseEntity.ok("User authorized");
     }
 
     @GetMapping("restricted-page-authorization")
-    public Mono<ResponseEntity<RestrictedPageAuthorization>> getRestrictedPageAuthorization(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    public ResponseEntity<RestrictedPageAuthorization> getRestrictedPageAuthorization(
+            @AuthenticationPrincipal Authentication authentication
     ) {
-        return (acesscontrolEnabled
-                ? tokenParsingUtils.isAdmin(authenticationMono)
-                .map(isAdmin -> RestrictedPageAuthorization
-                        .builder()
-                        .userPermissionPage(isAdmin)
-                        .build())
-                : Mono.just(RestrictedPageAuthorization.builder().build())
-        ).map(ResponseEntity::ok);
+        boolean isAdmin = tokenParsingUtils.isAdmin(authentication);
+        RestrictedPageAuthorization authorization = RestrictedPageAuthorization
+                .builder()
+                .userPermissionPage(isAdmin)
+                .build();
+        return ResponseEntity.ok(authorization);
     }
 
     @GetMapping
-    public Mono<ResponseEntity<User>> get(
-            @AuthenticationPrincipal Mono<Authentication> authenticationMono
+    public ResponseEntity<User> get(
+            @AuthenticationPrincipal Authentication authentication
     ) {
-        return tokenParsingUtils.isAdmin(authenticationMono)
-                .flatMap(isAdmin -> {
-                    if (isAdmin) {
-                        return authenticationMono
-                                .map(authentication -> (JwtAuthenticationToken) authentication)
-                                .flatMap(authentication ->
-                                        Mono.just(ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))));
-                    } else {
-                        return authenticationMono
-                                .map(authentication -> (JwtAuthenticationToken) authentication)
-                                .map(authentication ->
-                                        acesscontrolEnabled
-                                                ? getUserFromUserAuthorizationComponent(authentication)
-                                                .map(ResponseEntity::ok)
-                                                .orElse(ResponseEntity.notFound().build())
-                                                : ResponseEntity.ok(createUserWithAccessToAllApplications(authentication))
-                                );
-                    }
-                });
+        JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
+        if (tokenParsingUtils.isAdmin(authentication)) {
+            return ResponseEntity.ok(createUserWithAccessToAllApplications(jwtAuthToken));
+        } else {
+            Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
+            if (userOptional.isPresent()) {
+                return ResponseEntity.ok(userOptional.get());
+            } else {
+                User newUser = createUserWithAccessToAllApplications(jwtAuthToken);
+                userService.save(newUser);
+                return ResponseEntity.ok(newUser);
+            }
+        }
     }
 
     private Optional<User> getUserFromUserAuthorizationComponent(JwtAuthenticationToken token) {
@@ -95,6 +97,12 @@ public class MeController {
         return tokenParsingUtils.getUserFromToken(token)
                 .toBuilder()
                 .sourceApplicationIds(sourceApplicationsWithoutUserPermissionSetup())
+                .build();
+    }
+
+    private User createUserWithAccessToNoApplications(JwtAuthenticationToken token) {
+        return tokenParsingUtils.getUserFromToken(token)
+                .toBuilder()
                 .build();
     }
 

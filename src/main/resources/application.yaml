@@ -6,6 +6,7 @@ fint:
         enabled: true
         permitted-approles:
           flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
+          flyt-developer: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
         sync-schedule:
           initial-delay-ms: 1000
           fixed-delay-ms: 900000
