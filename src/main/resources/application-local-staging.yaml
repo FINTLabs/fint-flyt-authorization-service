@@ -21,8 +21,3 @@ spring:
     password: password
 server:
   port: 8086
-
-logging:
-  level:
-    com.microsoft.aad.msal4j: warn
-    com.azure.identity: warn
