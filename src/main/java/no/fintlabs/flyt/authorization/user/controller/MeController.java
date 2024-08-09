@@ -28,7 +28,6 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
-
     private final Boolean accessControlEnabled;
     private final UserService userService;
 
@@ -51,8 +50,7 @@ public class MeController {
             Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
 
             if (userOptional.isEmpty() && tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
-                User newUser = createUserWithAccessToNoApplications(jwtAuthToken);
-                userService.save(newUser);
+                createUserFromToken(authentication);
             }
         }
         return ResponseEntity.ok("User authorized");
@@ -75,17 +73,12 @@ public class MeController {
             @AuthenticationPrincipal Authentication authentication
     ) {
         JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
-        if (tokenParsingUtils.isAdmin(authentication)) {
-            return ResponseEntity.ok(createUserWithAccessToAllApplications(jwtAuthToken));
+        Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
         } else {
-            Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
-            if (userOptional.isPresent()) {
-                return ResponseEntity.ok(userOptional.get());
-            } else {
-                User newUser = createUserWithAccessToAllApplications(jwtAuthToken);
-                userService.save(newUser);
-                return ResponseEntity.ok(newUser);
-            }
+            User newUser = createUserFromToken(authentication);
+            return ResponseEntity.ok(newUser);
         }
     }
 
@@ -93,20 +86,19 @@ public class MeController {
         return userService.find(UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token)));
     }
 
-    private User createUserWithAccessToAllApplications(JwtAuthenticationToken token) {
-        return tokenParsingUtils.getUserFromToken(token)
-                .toBuilder()
-                .sourceApplicationIds(sourceApplicationsWithoutUserPermissionSetup())
-                .build();
+    private User createUserFromToken(Authentication authentication) {
+        JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
+        User.UserBuilder userBuilder = tokenParsingUtils.getUserFromToken(jwtAuthToken).toBuilder();
+        boolean isAdmin = tokenParsingUtils.isAdmin(authentication);
+        if (isAdmin) {
+            userBuilder.sourceApplicationIds(allSourceApplicationIds());
+        }
+        User newUser = userBuilder.build();
+        userService.save(newUser);
+        return newUser;
     }
 
-    private User createUserWithAccessToNoApplications(JwtAuthenticationToken token) {
-        return tokenParsingUtils.getUserFromToken(token)
-                .toBuilder()
-                .build();
-    }
-
-    private List<Long> sourceApplicationsWithoutUserPermissionSetup() {
+    private List<Long> allSourceApplicationIds() {
         return List.of(
                 AcosSourceApplication.SOURCE_APPLICATION_ID,
                 DigisakSourceApplication.SOURCE_APPLICATION_ID,
