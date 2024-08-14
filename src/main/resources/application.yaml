@@ -1,5 +1,8 @@
 fint:
   application-id: fint-flyt-authorization-service
+  cache:
+    defaultCacheEntryTimeToLiveMillis: 600000
+    defaultCacheHeapSize: 1000000
   flyt:
     authorization:
       access-control:
