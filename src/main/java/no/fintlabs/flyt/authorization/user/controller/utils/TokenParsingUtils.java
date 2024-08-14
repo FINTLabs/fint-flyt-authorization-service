@@ -28,7 +28,7 @@ public class TokenParsingUtils {
         return User
                 .builder()
                 .objectIdentifier(UUID.fromString(tokenAttributes.get("objectidentifier").toString()))
-                .name(tokenAttributes.get("displayname").toString())
+                .name(tokenAttributes.getOrDefault("displayname", "").toString())
                 .email(tokenAttributes.get("email").toString())
                 .build();
     }
