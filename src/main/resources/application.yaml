@@ -9,7 +9,7 @@ fint:
           flyt-developer: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
         sync-schedule:
           initial-delay-ms: 1000
-          fixed-delay-ms: 900000
+          fixed-delay-ms: 86400000
 spring:
   profiles:
     include:
