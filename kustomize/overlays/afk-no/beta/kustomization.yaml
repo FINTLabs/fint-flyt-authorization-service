@@ -1,0 +1,64 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: afk-no
+
+resources:
+  - ../../../base
+  - acos-oauth2-client.yaml
+  - vigo-oauth2-client.yaml
+
+commonLabels:
+  app.kubernetes.io/instance: fint-flyt-authorization-service_afk_no
+  fintlabs.no/org-id: afk.no
+
+patches:
+  - patch: |-
+      - op: replace
+        path: "/spec/kafka/acls/0/topic"
+        value: "afk-no.flyt.*"
+      - op: replace
+        path: "/spec/orgId"
+        value: "afk.no"
+      - op: replace
+        path: "/spec/url/basePath"
+        value: "/beta/afk-no"
+      - op: replace
+        path: "/spec/ingress/basePath"
+        value: "/beta/afk-no/api/intern/authorization"
+      - op: replace
+        path: "/spec/onePassword/itemPath"
+        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+      - op: replace
+        path: "/spec/env/1/value"
+        value: |
+          {
+            "afk.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
+            "viken.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
+            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
+            "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
+          }
+      - op: add
+        path: "/spec/envFrom/0"
+        value:
+          secretRef:
+            name: fint-flyt-acos-oauth2-client
+      - op: add
+        path: "/spec/envFrom/1"
+        value:
+          secretRef:
+            name: fint-flyt-vigo-oauth2-client
+      - op: add
+        path: "/spec/envFrom/2"
+        value:
+          secretRef:
+            name: fint-flyt-authorization-service
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-beta-vault/items/fint-flyt-authorization-service-afk-no"
+    target:
+      kind: OnePasswordItem
+      name: fint-flyt-authorization-service
