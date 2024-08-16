@@ -42,10 +42,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-authorization-service-rogfk-no"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-authorization-service

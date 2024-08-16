@@ -59,10 +59,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-authorization-service-fintlabs-no"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-authorization-service
