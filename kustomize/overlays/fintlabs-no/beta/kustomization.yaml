@@ -51,11 +51,6 @@ patches:
         value:
           secretRef:
             name: fint-flyt-vigo-oauth2-client
-      - op: add
-        path: "/spec/envFrom/2"
-        value:
-          secretRef:
-            name: fint-flyt-authorization-service
     target:
       kind: Application
       name: fint-flyt-authorization-service
