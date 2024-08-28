@@ -4,7 +4,6 @@ namespace: tromsfylke-no
 
 resources:
   - ../../../base
-  - vigo-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_tromsfylke_no
@@ -35,11 +34,6 @@ patches:
             "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
             "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
           }
-      - op: add
-        path: "/spec/envFrom/0"
-        value:
-          secretRef:
-            name: fint-flyt-vigo-oauth2-client
     target:
       kind: Application
       name: fint-flyt-authorization-service

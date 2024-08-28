@@ -41,7 +41,7 @@ patches:
           name: "logging.level.no.fintlabs"
           value: "DEBUG"
       - op: add
-        path: "/spec/envFrom/0"
+        path: "/spec/envFrom/1"
         value:
           secretRef:
             name: fint-flyt-digisak-oauth2-client

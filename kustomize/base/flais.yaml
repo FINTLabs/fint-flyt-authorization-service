@@ -43,7 +43,9 @@ spec:
       value: 'true'
   onePassword:
     itemPath: path
-  envFrom: []
+  envFrom:
+    - secretRef:
+        name: fint-flyt-vigo-oauth2-client
   resources:
     limits:
       memory: "2048Mi"
