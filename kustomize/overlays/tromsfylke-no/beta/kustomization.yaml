@@ -31,7 +31,6 @@ patches:
         value: |
           {
             "tromsfylke.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
-            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
             "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
             "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
           }
