@@ -44,6 +44,10 @@ spec:
   envFrom:
     - secretRef:
         name: fint-flyt-vigo-oauth2-client
+    - secretRef:
+        name: fint-flyt-altinn-oauth2-client
+    - secretRef:
+        name: fint-flyt-egrunnerverv-oauth2-client
   resources:
     limits:
       memory: "2048Mi"
