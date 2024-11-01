@@ -41,8 +41,6 @@ spec:
         }
     - name: fint.flyt.resource-server.security.api.internal.enabled
       value: 'true'
-  onePassword:
-    itemPath: path
   envFrom:
     - secretRef:
         name: fint-flyt-vigo-oauth2-client
