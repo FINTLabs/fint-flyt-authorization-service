@@ -5,7 +5,6 @@ namespace: vlfk-no
 resources:
   - ../../../base
   - digisak-oauth2-client.yaml
-  - altinn-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
@@ -25,9 +24,6 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/vlfk-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/onePassword/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
       - op: replace
         path: "/spec/env/1/value"
         value: |
