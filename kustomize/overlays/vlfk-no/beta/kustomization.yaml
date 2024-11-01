@@ -5,6 +5,8 @@ namespace: vlfk-no
 resources:
   - ../../../base
   - digisak-oauth2-client.yaml
+  - altinn-onepassword.yaml
+  - egrunnerverv-onepassword.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
