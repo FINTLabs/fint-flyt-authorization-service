@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - flais.yaml
   - vigo-oauth2-client.yaml
+  - altinn-onepassword.yaml
+  - egrunnerverv-onepassword.yaml
