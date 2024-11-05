@@ -10,7 +10,7 @@ public class AltinnSourceApplication {
     public static String CLIENT_ID;
     public static final long SOURCE_APPLICATION_ID = 5L;
 
-    @Value("${fint.flyt.vigo.sso.client-id:#{null}}")
+    @Value("${fint.flyt.altinn.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }

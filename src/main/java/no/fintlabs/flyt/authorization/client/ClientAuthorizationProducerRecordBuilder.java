@@ -1,5 +1,6 @@
 package no.fintlabs.flyt.authorization.client;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.client.sourceapplications.*;
 import no.fintlabs.kafka.requestreply.ReplyProducerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
+@Slf4j
 public class ClientAuthorizationProducerRecordBuilder {
 
     public ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {

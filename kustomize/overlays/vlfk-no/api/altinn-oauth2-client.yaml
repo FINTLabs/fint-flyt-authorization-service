@@ -1,9 +1,0 @@
-apiVersion: "fintlabs.no/v1alpha1"
-kind: NamOAuthClientApplicationResource
-metadata:
-  name: fint-flyt-altinn-oauth2-client
-spec:
-  clientIdProperty: fint.flyt.altinn.sso.client-id
-  clientSecretProperty: fint.flyt.altinn.sso.client-secret
-  grantTypes:
-    - client_credentials
