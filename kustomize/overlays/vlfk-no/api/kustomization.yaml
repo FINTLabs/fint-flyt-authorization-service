@@ -4,6 +4,7 @@ namespace: vlfk-no
 
 resources:
   - ../../../base
+  - altinn-oauth2-client.yaml
 
 commonLabels:
   app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
