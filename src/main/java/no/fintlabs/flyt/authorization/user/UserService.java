@@ -44,7 +44,8 @@ public class UserService {
     }
 
     public void save(User user) {
-        this.userRepository.save(mapFromUser(user));
+        UserEntity userEntity = this.userRepository.save(mapFromUser(user));
+        userPermissionEntityProducerService.send(mapFromEntityToUserPermission(userEntity));
     }
 
     public Optional<User> find(UUID objectIdentifier) {
