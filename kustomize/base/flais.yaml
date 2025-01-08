@@ -33,7 +33,7 @@ spec:
       - fint-flyt-auth-forward-sso
   env:
     - name: JAVA_TOOL_OPTIONS
-      value: '-XX:+ExitOnOutOfMemoryError -Xmx1840M'
+      value: '-XX:+ExitOnOutOfMemoryError -Xmx500M -Xms400M'
     - name: fint.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json
       value: |
         {
@@ -50,11 +50,11 @@ spec:
         name: fint-flyt-egrunnerverv-oauth2-client
   resources:
     limits:
-      memory: "2048Mi"
-      cpu: "1"
+      memory: "600Mi"
+      cpu: "150m"
     requests:
-      memory: "512Mi"
-      cpu: "100m"
+      memory: "400Mi"
+      cpu: "50m"
   restartPolicy: Always
   replicas: 1
   strategy:
