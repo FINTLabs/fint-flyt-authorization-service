@@ -1,0 +1,9 @@
+apiVersion: "fintlabs.no/v1alpha1"
+kind: NamOAuthClientApplicationResource
+metadata:
+  name: fint-flyt-hmsreg-oauth2-client
+spec:
+  clientIdProperty: fint.flyt.vigo.sso.client-id
+  clientSecretProperty: fint.flyt.vigo.sso.client-secret
+  grantTypes:
+    - client_credentials
