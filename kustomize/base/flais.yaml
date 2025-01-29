@@ -48,6 +48,8 @@ spec:
         name: fint-flyt-altinn-oauth2-client
     - secretRef:
         name: fint-flyt-egrunnerverv-oauth2-client
+    - secretRef:
+        name: fint-flyt-hmsreg-oauth2-client
   resources:
     limits:
       memory: "600Mi"

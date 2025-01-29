@@ -1,9 +1,6 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
-import no.fintlabs.flyt.authorization.client.sourceapplications.AcosSourceApplication;
-import no.fintlabs.flyt.authorization.client.sourceapplications.DigisakSourceApplication;
-import no.fintlabs.flyt.authorization.client.sourceapplications.EgrunnervervSourceApplication;
-import no.fintlabs.flyt.authorization.client.sourceapplications.VigoSourceApplication;
+import no.fintlabs.flyt.authorization.client.sourceapplications.*;
 import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.fintlabs.flyt.authorization.user.model.RestrictedPageAuthorization;
@@ -103,7 +100,9 @@ public class MeController {
                 AcosSourceApplication.SOURCE_APPLICATION_ID,
                 DigisakSourceApplication.SOURCE_APPLICATION_ID,
                 EgrunnervervSourceApplication.SOURCE_APPLICATION_ID,
-                VigoSourceApplication.SOURCE_APPLICATION_ID
+                VigoSourceApplication.SOURCE_APPLICATION_ID,
+                AltinnSourceApplication.SOURCE_APPLICATION_ID,
+                HMSRegSourceApplication.SOURCE_APPLICATION_ID
         );
     }
 
