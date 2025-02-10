@@ -48,15 +48,15 @@ public class MeController {
             JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
             Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
 
+            String orgId = tokenParsingUtils.getOrgIdFromToken(jwtAuthToken);
+            log.info("OrgId: {}", orgId);
+
             List<String> roles = tokenParsingUtils.getRolesFromToken(jwtAuthToken);
+            log.info("Logging roles: {}", roles);
             if (roles == null || roles.isEmpty()) {
                 log.warn("Roles are null or empty in token");
             }
 
-            String orgId = tokenParsingUtils.getOrgIdFromToken(jwtAuthToken);
-
-            log.info("OrgId: {}", orgId);
-            log.info("Logging roles: {}", roles);
 
             if (userOptional.isEmpty() && tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
                 createUserFromToken(authentication);
