@@ -1,5 +1,6 @@
 package no.fintlabs.flyt.authorization.user.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.client.sourceapplications.*;
 import no.fintlabs.flyt.authorization.user.UserService;
 import no.fintlabs.flyt.authorization.user.controller.utils.TokenParsingUtils;
@@ -22,6 +23,7 @@ import static no.fintlabs.resourceserver.UrlPaths.INTERNAL_API;
 
 @RestController
 @RequestMapping(INTERNAL_API + "/authorization/me")
+@Slf4j
 public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
@@ -45,6 +47,16 @@ public class MeController {
         if (accessControlEnabled) {
             JwtAuthenticationToken jwtAuthToken = (JwtAuthenticationToken) authentication;
             Optional<User> userOptional = getUserFromUserAuthorizationComponent(jwtAuthToken);
+
+            List<String> roles = tokenParsingUtils.getRolesFromToken(jwtAuthToken);
+            if (roles == null || roles.isEmpty()) {
+                log.warn("Roles are null or empty in token");
+            }
+
+            String orgId = tokenParsingUtils.getOrgIdFromToken(jwtAuthToken);
+
+            log.info("OrgId: {}", orgId);
+            log.info("Logging roles: {}", roles);
 
             if (userOptional.isEmpty() && tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
                 createUserFromToken(authentication);

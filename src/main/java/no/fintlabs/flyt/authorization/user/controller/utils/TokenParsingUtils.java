@@ -40,6 +40,10 @@ public class TokenParsingUtils {
                 .toList();
     }
 
+    public String getOrgIdFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
+        return jwtAuthenticationToken.getTokenAttributes().get("organizationid").toString();
+    }
+
     public boolean hasPermittedRole(JwtAuthenticationToken jwtAuthenticationToken) {
         List<String> roles = getRolesFromToken(jwtAuthenticationToken);
         if (roles == null || roles.isEmpty()) {
