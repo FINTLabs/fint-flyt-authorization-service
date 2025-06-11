@@ -6,9 +6,10 @@ resources:
   - ../../../base
   - digisak-oauth2-client.yaml
 
-commonLabels:
-  app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
-  fintlabs.no/org-id: vlfk.no
+labels:
+  - pairs:
+      app.kubernetes.io/instance: fint-flyt-authorization-service_vlfk_no
+      fintlabs.no/org-id: vlfk.no
 
 patches:
   - patch: |-
@@ -42,6 +43,9 @@ patches:
         value:
           secretRef:
             name: fint-flyt-digisak-oauth2-client
+      - op: replace
+        path: "/spec/probes/readiness/path"
+        value: "/beta/vlfk-no/actuator/health"
     target:
       kind: Application
       name: fint-flyt-authorization-service
