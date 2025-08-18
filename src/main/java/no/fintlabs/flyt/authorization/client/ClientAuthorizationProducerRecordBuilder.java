@@ -26,6 +26,8 @@ public class ClientAuthorizationProducerRecordBuilder {
             return buildReplyProducerRecord(AltinnSourceApplication.CLIENT_ID, AltinnSourceApplication.SOURCE_APPLICATION_ID);
         } else if (HMSRegSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), HMSRegSourceApplication.CLIENT_ID)) {
             return buildReplyProducerRecord(HMSRegSourceApplication.CLIENT_ID, HMSRegSourceApplication.SOURCE_APPLICATION_ID);
+        } else if (IsyGravingSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), IsyGravingSourceApplication.CLIENT_ID)) {
+            return buildReplyProducerRecord(IsyGravingSourceApplication.CLIENT_ID, IsyGravingSourceApplication.SOURCE_APPLICATION_ID);
         } else {
             return ReplyProducerRecord.<ClientAuthorization>builder()
                     .value(ClientAuthorization

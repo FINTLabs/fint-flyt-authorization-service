@@ -102,7 +102,8 @@ public class MeController {
                 EgrunnervervSourceApplication.SOURCE_APPLICATION_ID,
                 VigoSourceApplication.SOURCE_APPLICATION_ID,
                 AltinnSourceApplication.SOURCE_APPLICATION_ID,
-                HMSRegSourceApplication.SOURCE_APPLICATION_ID
+                HMSRegSourceApplication.SOURCE_APPLICATION_ID,
+                IsyGravingSourceApplication.SOURCE_APPLICATION_ID
         );
     }
 
