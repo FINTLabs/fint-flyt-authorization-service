@@ -6,8 +6,10 @@ fint:
         api:
           internal:
             enabled: true
-            authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"https://role-catalog.vigoiks.no/vigo/flyt/developer\"]}"
-            admin-role: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
+            authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"DEVELOPER\"]}"
+  cache:
+    defaultCacheEntryTimeToLiveMillis: 600000
+    defaultCacheHeapSize: 1000000
   kafka:
     default-replicas: 1
 spring:

@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.18'
+    id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
     id 'com.github.ben-manes.versions' version '0.52.0'
@@ -10,7 +10,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -39,16 +39,16 @@ dependencies {
 
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-    implementation 'io.netty:netty-resolver-dns-native-macos:4.2.6.Final:osx-aarch_64'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'org.postgresql:postgresql:42.7.7'
+    runtimeOnly 'org.postgresql:postgresql'
 
     implementation 'org.flywaydb:flyway-core'
-    implementation 'no.fintlabs:fint-kafka:4.0.3'
-    implementation 'no.fintlabs:fint-flyt-resource-server:5.1.1'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
-    implementation 'javax.validation:validation-api'
+    implementation 'no.fintlabs:fint-kafka:4.0.3'
+    implementation 'no.fintlabs:fint-flyt-resource-server:unspecified'
+
     implementation 'org.hibernate.validator:hibernate-validator'
 
     compileOnly 'org.projectlombok:lombok'

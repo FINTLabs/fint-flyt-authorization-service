@@ -1,6 +1,6 @@
 package no.fintlabs.flyt.authorization.user.model;
 
-import com.sun.istack.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
