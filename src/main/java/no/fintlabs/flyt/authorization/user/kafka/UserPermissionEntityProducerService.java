@@ -7,6 +7,7 @@ import no.fintlabs.kafka.topic.EntityTopicService;
 import no.fintlabs.kafka.topic.configuration.EntityCleanupFrequency;
 import no.fintlabs.kafka.topic.configuration.EntityTopicConfiguration;
 import no.fintlabs.kafka.topic.name.EntityTopicNameParameters;
+import no.fintlabs.kafka.topic.name.TopicNamePrefixParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -27,6 +28,11 @@ public class UserPermissionEntityProducerService {
 
         entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
+                .topicNamePrefixParameters(TopicNamePrefixParameters
+                        .builder()
+                        .orgIdApplicationDefault()
+                        .domainContextApplicationDefault()
+                        .build())
                 .resourceName("userpermission")
                 .build();
 
