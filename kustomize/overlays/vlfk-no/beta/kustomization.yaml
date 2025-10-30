@@ -29,9 +29,9 @@ patches:
         path: "/spec/env/1/value"
         value: |
           {
-            "vlfk.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
-            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
-            "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
+            "vlfk.no":["USER"],
+            "vigo.no":["DEVELOPER"],
+            "novari.no":["DEVELOPER"]
           }
       - op: add
         path: "/spec/env/-"

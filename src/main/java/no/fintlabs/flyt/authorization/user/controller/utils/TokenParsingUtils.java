@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.flyt.authorization.user.AccessControlProperties;
 import no.fintlabs.flyt.authorization.user.model.User;
+import no.fintlabs.resourceserver.security.user.UserClaim;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -20,21 +21,21 @@ public class TokenParsingUtils {
     private final AccessControlProperties accessControlProperties;
 
     public String getObjectIdentifierFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-        return jwtAuthenticationToken.getTokenAttributes().get("objectidentifier").toString();
+        return jwtAuthenticationToken.getTokenAttributes().get(UserClaim.OBJECT_IDENTIFIER.getJwtTokenClaimName()).toString();
     }
 
     public User getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
         Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
         return User
                 .builder()
-                .objectIdentifier(UUID.fromString(tokenAttributes.get("objectidentifier").toString()))
+                .objectIdentifier(UUID.fromString(tokenAttributes.get(UserClaim.OBJECT_IDENTIFIER.getJwtTokenClaimName()).toString()))
                 .name(tokenAttributes.getOrDefault("displayname", "").toString())
                 .email(tokenAttributes.get("email").toString())
                 .build();
     }
 
     public List<String> getRolesFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-        return ((List<?>) jwtAuthenticationToken.getTokenAttributes().get("roles"))
+        return ((List<?>) jwtAuthenticationToken.getTokenAttributes().get(UserClaim.ROLES.getJwtTokenClaimName()))
                 .stream()
                 .map(Object::toString)
                 .toList();
