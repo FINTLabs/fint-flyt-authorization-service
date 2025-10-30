@@ -6,7 +6,6 @@ plugins {
 }
 
 group = 'no.fintlabs'
-version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
@@ -47,7 +46,7 @@ dependencies {
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
     implementation 'no.fintlabs:fint-kafka:4.0.3'
-    implementation 'no.fintlabs:fint-flyt-resource-server:unspecified'
+    implementation 'no.fintlabs:fint-flyt-resource-server:6.0.0-rc-2'
 
     implementation 'org.hibernate.validator:hibernate-validator'
 
@@ -58,7 +57,6 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'cglib:cglib-nodep:3.3.0'
 }
 
 test {

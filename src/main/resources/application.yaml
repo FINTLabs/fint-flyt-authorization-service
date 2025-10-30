@@ -10,6 +10,11 @@ fint:
         sync-schedule:
           initial-delay-ms: 1000
           fixed-delay-ms: 4320000
+
+  cache:
+    defaultCacheEntryTimeToLiveMillis: 518400000
+    defaultCacheHeapSize: 1000000
+
 spring:
   profiles:
     include:
