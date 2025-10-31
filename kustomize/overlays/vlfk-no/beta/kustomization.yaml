@@ -33,6 +33,9 @@ patches:
             "vigo.no":["DEVELOPER"],
             "novari.no":["DEVELOPER"]
           }
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "vlfk-no"
       - op: add
         path: "/spec/env/-"
         value:

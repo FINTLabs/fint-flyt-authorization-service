@@ -35,6 +35,9 @@ patches:
             "vigo.no":["DEVELOPER"],
             "novari.no":["DEVELOPER"]
           }
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "afk-no"
       - op: add
         path: "/spec/envFrom/1"
         value:

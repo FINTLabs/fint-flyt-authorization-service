@@ -33,6 +33,9 @@ patches:
             "novari.no":["DEVELOPER"]
           }
       - op: replace
+        path: "/spec/env/3/value"
+        value: "trondelagfylke-no"
+      - op: replace
         path: "/spec/probes/readiness/path"
         value: "/trondelagfylke-no/actuator/health"
       - op: replace

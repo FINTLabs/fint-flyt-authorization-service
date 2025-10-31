@@ -9,6 +9,8 @@ fint:
             authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"DEVELOPER\"]}"
 
   kafka:
+    topic:
+      org-id: fintlabs-no
     default-replicas: 1
 spring:
   kafka:
