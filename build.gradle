@@ -45,8 +45,8 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
-    implementation 'no.fintlabs:fint-kafka:5.0.0-rc-13'
-    implementation 'no.fintlabs:fint-flyt-resource-server:6.0.0-rc-3'
+    implementation 'no.fintlabs:fint-kafka:5.0.0-rc-15'
+    implementation 'no.fintlabs:fint-flyt-resource-server:6.0.0-rc-6'
 
     implementation 'org.hibernate.validator:hibernate-validator'
 
