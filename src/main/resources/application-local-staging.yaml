@@ -11,6 +11,9 @@ novari:
     default-replicas: 1
     topic:
       org-id: fintlabs-no
+fint:
+  kafka:
+    enable-ssl: false
 spring:
   kafka:
     bootstrap-servers: localhost:9092
