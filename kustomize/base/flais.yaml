@@ -34,12 +34,12 @@ spec:
   env:
     - name: JAVA_TOOL_OPTIONS
       value: '-XX:+ExitOnOutOfMemoryError -Xmx768M -Xms512M'
-    - name: fint.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json
+    - name: novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json
       value: |
         {
           "fintlabs.no":["DEVELOPER"]
         }
-    - name: fint.flyt.resource-server.security.api.internal.enabled
+    - name: novari.flyt.resource-server.security.api.internal.enabled
       value: 'true'
     - name: fint.kafka.topic.orgId
       value: 'fintlabs-no'

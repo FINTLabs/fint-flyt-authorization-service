@@ -4,7 +4,6 @@ namespace: bfk-no
 
 resources:
   - ../../../base
-  - acos-oauth2-client.yaml
 
 labels:
   - pairs:
@@ -32,8 +31,8 @@ patches:
             "bfk.no":["USER"],
             "viken.no":["USER"],
             "frid-iks.no":["USER"],
-            "vigo.no":["DEVELOPER", "USER"],
-            "novari.no":["DEVELOPER", "USER"]
+            "vigo.no":["DEVELOPER","USER"],
+            "novari.no":["DEVELOPER","USER"]
           }
       - op: replace
         path: "/spec/env/3/value"

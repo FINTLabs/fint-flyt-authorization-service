@@ -29,8 +29,8 @@ patches:
         value: |
           {
             "rogfk.no":["USER"],
-            "vigo.no":["DEVELOPER", "USER"],
-            "novari.no":["DEVELOPER", "USER"]
+            "vigo.no":["DEVELOPER","USER"],
+            "novari.no":["DEVELOPER","USER"]
           }
       - op: replace
         path: "/spec/env/3/value"
