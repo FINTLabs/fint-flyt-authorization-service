@@ -1,5 +1,10 @@
-novari:
+fint:
   org-id: fintlabs.no
+  kafka:
+    topic:
+      org-id: fintlabs-no
+    enable-ssl: false
+novari:
   flyt:
     resource-server:
       security:
@@ -9,11 +14,6 @@ novari:
             authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"DEVELOPER\", \"USER\"]}"
   kafka:
     default-replicas: 1
-    topic:
-      org-id: fintlabs-no
-fint:
-  kafka:
-    enable-ssl: false
 spring:
   kafka:
     bootstrap-servers: localhost:9092
