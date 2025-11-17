@@ -39,8 +39,6 @@ spec:
         {
           "fintlabs.no":["DEVELOPER"]
         }
-    - name: novari.flyt.resource-server.security.api.internal.enabled
-      value: 'true'
   envFrom:
     - secretRef:
         name: fint-flyt-vigo-oauth2-client

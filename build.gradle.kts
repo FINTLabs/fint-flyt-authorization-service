@@ -46,8 +46,8 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    implementation("no.novari:kafka:5.0.0-rc-18")
-    implementation("no.novari:flyt-resource-server:6.0.0-rc-22")
+    implementation("no.novari:kafka:5.0.0-rc-19")
+    implementation("no.novari:flyt-resource-server:6.0.0-rc-25")
 
     implementation("org.hibernate.validator:hibernate-validator")
 

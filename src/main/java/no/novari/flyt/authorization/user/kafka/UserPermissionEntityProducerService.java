@@ -29,14 +29,14 @@ public class UserPermissionEntityProducerService {
         entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
                 .topicNamePrefixParameters(TopicNamePrefixParameters
-                        .builder()
+                        .stepBuilder()
                         .orgIdApplicationDefault()
                         .domainContextApplicationDefault()
                         .build())
                 .resourceName("userpermission")
                 .build();
 
-        entityTopicService.createOrModifyTopic(entityTopicNameParameters, EntityTopicConfiguration.builder()
+        entityTopicService.createOrModifyTopic(entityTopicNameParameters, EntityTopicConfiguration.stepBuilder()
                 .partitions(1)
                 .lastValueRetentionTime(RETENTION_TIME)
                 .nullValueRetentionTime(RETENTION_TIME)

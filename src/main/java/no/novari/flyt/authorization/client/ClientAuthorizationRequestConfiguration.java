@@ -32,7 +32,7 @@ public class ClientAuthorizationRequestConfiguration {
             ErrorHandlerFactory errorHandlerFactory) {
         RequestTopicNameParameters topicNameParameters = RequestTopicNameParameters.builder()
                 .topicNamePrefixParameters(TopicNamePrefixParameters
-                        .builder()
+                        .stepBuilder()
                         .orgIdApplicationDefault()
                         .domainContextApplicationDefault()
                         .build())
