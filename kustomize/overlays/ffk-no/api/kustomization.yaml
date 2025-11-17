@@ -32,9 +32,11 @@ patches:
             "vigo.no":["DEVELOPER","USER"],
             "novari.no":["DEVELOPER","USER"]
           }
-      - op: replace
-        path: "/spec/env/3/value"
-        value: "ffk-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "novari.kafka.topic.orgId"
+         value: "ffk-no"
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/ffk-no/actuator/health"
@@ -44,19 +46,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-altinn-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client

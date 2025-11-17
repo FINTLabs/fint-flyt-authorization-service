@@ -41,8 +41,6 @@ spec:
         }
     - name: novari.flyt.resource-server.security.api.internal.enabled
       value: 'true'
-    - name: novari.kafka.topic.orgId
-      value: 'fintlabs-no'
   envFrom:
     - secretRef:
         name: fint-flyt-vigo-oauth2-client

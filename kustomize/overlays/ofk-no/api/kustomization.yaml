@@ -35,11 +35,13 @@ patches:
             "vigo.no":["DEVELOPER","USER"],
             "novari.no":["DEVELOPER","USER"]
           }
-      - op: replace
-        path: "/spec/env/3/value"
-        value: "ofk-no"
       - op: add
-        path: "/spec/envFrom/1"
+        path: "/spec/env/-"
+        value:
+         name: "novari.kafka.topic.orgId"
+         value: "ofk-no"
+      - op: add
+        path: "/spec/envFrom/-"
         value:
           secretRef:
             name: fint-flyt-acos-oauth2-client
