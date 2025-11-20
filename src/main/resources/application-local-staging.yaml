@@ -1,5 +1,6 @@
 fint:
   org-id: fintlabs.no
+
 novari:
   flyt:
     resource-server:
@@ -11,6 +12,7 @@ novari:
     topic:
       org-id: fintlabs-no
     default-replicas: 1
+
 spring:
   kafka:
     bootstrap-servers: localhost:9092
@@ -20,5 +22,10 @@ spring:
     url: jdbc:postgresql://localhost:5435/fint-flyt-authorization-service
     username: postgres
     password: password
+
+  output:
+    ansi:
+      enabled: always
+
 server:
   port: 8086

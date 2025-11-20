@@ -24,29 +24,21 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/fintlabs-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/env/1/value"
-        value: |
-          {
-            "fintlabs.no":["USER"],
-            "vigo.no":["DEVELOPER","USER"],
-            "novari.no":["DEVELOPER","USER"]
-          }
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          value: |
+            {
+              "fintlabs.no":["USER"],
+              "vigo.no":["DEVELOPER","USER"],
+              "novari.no":["DEVELOPER","USER"]
+            }
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "fintlabs-no"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "logging.level.no.novari"
-          value: "DEBUG"
-      - op: add
-        path: "/spec/envFrom/-"
-        value:
-          secretRef:
-            name: fint-flyt-digisak-oauth2-client
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/fintlabs-no/actuator/health"
@@ -56,19 +48,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-altinn-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client

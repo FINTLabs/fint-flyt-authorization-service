@@ -4,7 +4,6 @@ namespace: bfk-no
 
 resources:
   - ../../../base
-  - acos-oauth2-client.yaml
 
 labels:
   - pairs:
@@ -25,26 +24,23 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/bfk-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/env/1/value"
-        value: |
-          {
-            "bfk.no":["USER"],
-            "viken.no":["USER"],
-            "frid-iks.no":["USER"],
-            "vigo.no":["DEVELOPER","USER"],
-            "novari.no":["DEVELOPER","USER"]
-          }
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          value: |
+            {
+              "bfk.no":["USER"],
+              "viken.no":["USER"],
+              "frid-iks.no":["USER"],
+              "vigo.no":["DEVELOPER","USER"],
+              "novari.no":["DEVELOPER","USER"]
+            }
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "bfk-no"
-      - op: add
-        path: "/spec/envFrom/-"
-        value:
-          secretRef:
-            name: fint-flyt-acos-oauth2-client
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/bfk-no/actuator/health"

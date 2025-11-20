@@ -24,29 +24,21 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/vlfk-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/env/1/value"
-        value: |
-          {
-            "vlfk.no":["USER"],
-            "vigo.no":["DEVELOPER","USER"],
-            "novari.no":["DEVELOPER","USER"]
-          }
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          value: |
+            {
+              "vlfk.no":["USER"],
+              "vigo.no":["DEVELOPER","USER"],
+              "novari.no":["DEVELOPER","USER"]
+            }
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "vlfk-no"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "logging.level.no.fintlabs"
-          value: "DEBUG"
-      - op: add
-        path: "/spec/envFrom/-"
-        value:
-          secretRef:
-            name: fint-flyt-digisak-oauth2-client
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/beta/vlfk-no/actuator/health"
