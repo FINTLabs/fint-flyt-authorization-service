@@ -1,6 +1,6 @@
 package no.novari.flyt.authorization.user.kafka;
 
-import no.novari.kafka.model.ParameterizedProducerRecord;
+import no.novari.kafka.producing.ParameterizedProducerRecord;
 import no.novari.kafka.producing.ParameterizedTemplate;
 import no.novari.kafka.producing.ParameterizedTemplateFactory;
 import no.novari.kafka.topic.EntityTopicService;
