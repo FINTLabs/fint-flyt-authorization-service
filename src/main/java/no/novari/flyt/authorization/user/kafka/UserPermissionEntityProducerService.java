@@ -18,7 +18,8 @@ public class UserPermissionEntityProducerService {
     private final ParameterizedTemplate<UserPermission> parameterizedTemplate;
     private final EntityTopicNameParameters entityTopicNameParameters;
 
-    private static final Duration RETENTION_TIME = Duration.ofDays(1);
+    private static final Duration RETENTION_TIME = Duration.ofDays(4);
+    private static final int PARTITIONS = 1;
 
     public UserPermissionEntityProducerService(
             ParameterizedTemplateFactory parameterizedTemplateFactory,
@@ -37,7 +38,7 @@ public class UserPermissionEntityProducerService {
                 .build();
 
         entityTopicService.createOrModifyTopic(entityTopicNameParameters, EntityTopicConfiguration.stepBuilder()
-                .partitions(1)
+                .partitions(PARTITIONS)
                 .lastValueRetentionTime(RETENTION_TIME)
                 .nullValueRetentionTime(RETENTION_TIME)
                 .cleanupFrequency(EntityCleanupFrequency.FREQUENT)
