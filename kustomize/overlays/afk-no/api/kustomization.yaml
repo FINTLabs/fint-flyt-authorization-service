@@ -4,6 +4,7 @@ namespace: afk-no
 
 resources:
   - ../../../base
+  - acos-oauth2-client.yaml
 
 labels:
   - pairs:
