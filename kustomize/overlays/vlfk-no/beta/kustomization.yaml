@@ -4,6 +4,7 @@ namespace: vlfk-no
 
 resources:
   - ../../../base
+  - digisak-oauth2-client.yaml
 
 labels:
   - pairs:

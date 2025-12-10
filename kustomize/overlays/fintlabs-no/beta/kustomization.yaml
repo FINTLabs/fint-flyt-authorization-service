@@ -4,6 +4,7 @@ namespace: fintlabs-no
 
 resources:
   - ../../../base
+  - digisak-oauth2-client.yaml
 
 labels:
   - pairs:
