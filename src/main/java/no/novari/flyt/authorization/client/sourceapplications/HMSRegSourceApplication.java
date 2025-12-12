@@ -10,7 +10,7 @@ public class HMSRegSourceApplication {
     public static String CLIENT_ID;
     public static final long SOURCE_APPLICATION_ID = 6L;
 
-    @Value("${fint.flyt.isygraving.sso.client-id:#{null}}")
+    @Value("${fint.flyt.hmsreg.sso.client-id:#{null}}")
     public void setClientId(String clientId) {
         CLIENT_ID = clientId;
     }
