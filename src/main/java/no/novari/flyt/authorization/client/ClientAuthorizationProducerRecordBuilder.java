@@ -6,7 +6,8 @@ import no.novari.kafka.requestreply.ReplyProducerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
@@ -14,27 +15,11 @@ public class ClientAuthorizationProducerRecordBuilder {
 
     public ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
 
-        if (AcosSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), AcosSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(AcosSourceApplication.CLIENT_ID, AcosSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (EgrunnervervSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), EgrunnervervSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (DigisakSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), DigisakSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(DigisakSourceApplication.CLIENT_ID, DigisakSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (VigoSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), VigoSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(VigoSourceApplication.CLIENT_ID, VigoSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (AltinnSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), AltinnSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(AltinnSourceApplication.CLIENT_ID, AltinnSourceApplication.SOURCE_APPLICATION_ID);
-        } else if (HMSRegSourceApplication.CLIENT_ID != null && Objects.equals(consumerRecord.value(), HMSRegSourceApplication.CLIENT_ID)) {
-            return buildReplyProducerRecord(HMSRegSourceApplication.CLIENT_ID, HMSRegSourceApplication.SOURCE_APPLICATION_ID);
-        } else {
-            return ReplyProducerRecord.<ClientAuthorization>builder()
-                    .value(ClientAuthorization
-                            .builder()
-                            .authorized(false)
-                            .clientId(consumerRecord.value())
-                            .build())
-                    .build();
-        }
+        String clientId = consumerRecord.value();
+
+        return resolveSourceApplicationId(clientId)
+                .map(sourceApplicationId -> buildReplyProducerRecord(clientId, sourceApplicationId))
+                .orElseGet(() -> buildUnauthorizedReplyProducerRecord(clientId));
     }
 
     private ReplyProducerRecord<ClientAuthorization> buildReplyProducerRecord(String clientId, Long sourceApplicationId) {
@@ -46,5 +31,36 @@ public class ClientAuthorizationProducerRecordBuilder {
                         .sourceApplicationId(sourceApplicationId)
                         .build())
                 .build();
+    }
+
+    private ReplyProducerRecord<ClientAuthorization> buildUnauthorizedReplyProducerRecord(String clientId) {
+        return ReplyProducerRecord.<ClientAuthorization>builder()
+                .value(ClientAuthorization
+                        .builder()
+                        .authorized(false)
+                        .clientId(clientId)
+                        .build())
+                .build();
+    }
+
+    private Optional<Long> resolveSourceApplicationId(String clientId) {
+        return Stream.of(
+                        matchClientId(clientId, AcosSourceApplication.CLIENT_ID, AcosSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, DigisakSourceApplication.CLIENT_ID, DigisakSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, VigoSourceApplication.CLIENT_ID, VigoSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, AltinnSourceApplication.CLIENT_ID, AltinnSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, HMSRegSourceApplication.CLIENT_ID, HMSRegSourceApplication.SOURCE_APPLICATION_ID),
+                        matchClientId(clientId, IsyGravingSourceApplication.CLIENT_ID, IsyGravingSourceApplication.SOURCE_APPLICATION_ID)
+                )
+                .flatMap(Optional::stream)
+                .findFirst();
+    }
+
+    private Optional<Long> matchClientId(String clientId, String sourceApplicationClientId, Long sourceApplicationId) {
+        if (sourceApplicationClientId == null || !sourceApplicationClientId.equals(clientId)) {
+            return Optional.empty();
+        }
+        return Optional.of(sourceApplicationId);
     }
 }
