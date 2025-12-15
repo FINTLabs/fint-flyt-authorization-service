@@ -24,14 +24,21 @@ patches:
       - op: replace
         path: "/spec/ingress/basePath"
         value: "/mrfylke-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/env/1/value"
-        value: |
-          {
-            "mrfylke.no":["https://role-catalog.vigoiks.no/vigo/flyt/user"],
-            "vigo.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"],
-            "novari.no":["https://role-catalog.vigoiks.no/vigo/flyt/developer"]
-          }
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          value: |
+            {
+              "mrfylke.no":["USER"],
+              "vigo.no":["DEVELOPER","USER"],
+              "novari.no":["DEVELOPER","USER"]
+            }
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "novari.kafka.topic.orgId"
+         value: "mrfylke-no"
       - op: replace
         path: "/spec/probes/readiness/path"
         value: "/mrfylke-no/actuator/health"
@@ -41,19 +48,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-altinn-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client

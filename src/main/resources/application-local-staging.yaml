@@ -1,15 +1,18 @@
 fint:
-  org-id: fintlabs.no
+  org-id: novari.no
+
+novari:
   flyt:
     resource-server:
       security:
         api:
           internal:
-            enabled: true
-            authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"https://role-catalog.vigoiks.no/vigo/flyt/developer\"]}"
-            admin-role: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
+            authorized-org-id-role-pairs-json: "{\"vigo.no\":[\"DEVELOPER\", \"USER\"]}"
   kafka:
+    topic:
+      org-id: novari-no
     default-replicas: 1
+
 spring:
   kafka:
     bootstrap-servers: localhost:9092
@@ -19,5 +22,10 @@ spring:
     url: jdbc:postgresql://localhost:5435/fint-flyt-authorization-service
     username: postgres
     password: password
+
+  output:
+    ansi:
+      enabled: always
+
 server:
   port: 8086

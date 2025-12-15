@@ -1,15 +1,16 @@
 fint:
   application-id: fint-flyt-authorization-service
+novari:
   flyt:
     authorization:
       access-control:
-        enabled: true
         permitted-approles:
           flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
           flyt-developer: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
         sync-schedule:
           initial-delay-ms: 1000
           fixed-delay-ms: 4320000
+
 spring:
   profiles:
     include:
