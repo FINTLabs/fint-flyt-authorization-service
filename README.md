@@ -47,7 +47,7 @@ Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the c
 
 ## Scheduled Tasks
 
-`UserPublishingComponent.publishUsers()` runs on a fixed delay when `novari.flyt.authorization.access-control.enabled=true`. Defaults: initial delay `1000ms`, fixed delay `4320000ms` (~72 minutes). Each run republishes all stored users as `UserPermission` events.
+`UserPublishingComponent.publishUsers()` Defaults: initial delay `1s`, fixed delay `12h`. Each run republishes all stored users as `UserPermission` events.
 
 ## Configuration
 
