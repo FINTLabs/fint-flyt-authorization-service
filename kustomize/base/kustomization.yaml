@@ -6,4 +6,3 @@ resources:
   - hmsreg-oauth2-client.yaml
   - altinn-onepassword.yaml
   - egrunnerverv-onepassword.yaml
-  - isygraving-oauth2-client.yaml

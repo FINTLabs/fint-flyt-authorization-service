@@ -4,6 +4,7 @@ namespace: vestfoldfylke-no
 
 resources:
   - ../../../base
+  - isygraving-oauth2-client.yaml
 
 labels:
   - pairs:
