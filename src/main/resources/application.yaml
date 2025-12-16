@@ -8,8 +8,8 @@ novari:
           flyt-user: "https://role-catalog.vigoiks.no/vigo/flyt/user"
           flyt-developer: "https://role-catalog.vigoiks.no/vigo/flyt/developer"
         sync-schedule:
-          initial-delay-ms: 1000
-          fixed-delay-ms: 4320000
+          initial-delay: 1s
+          fixed-delay: 12h
 
 spring:
   profiles:
