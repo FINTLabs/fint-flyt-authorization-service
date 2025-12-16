@@ -44,6 +44,11 @@ patches:
           secretRef:
             name: fint-flyt-acos-oauth2-client
       - op: add
+        path: "/spec/envFrom/1"
+        value:
+          secretRef:
+            name: fint-flyt-isygraving-oauth2-client
+      - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
