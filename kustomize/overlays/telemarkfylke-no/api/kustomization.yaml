@@ -4,6 +4,7 @@ namespace: telemarkfylke-no
 
 resources:
   - ../../../base
+  - isygraving-oauth2-client.yaml
 
 labels:
   - pairs:

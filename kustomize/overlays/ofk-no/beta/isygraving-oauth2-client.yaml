@@ -1,0 +1,9 @@
+apiVersion: "fintlabs.no/v1alpha1"
+kind: NamOAuthClientApplicationResource
+metadata:
+  name: fint-flyt-isygraving-oauth2-client
+spec:
+  clientIdProperty: fint.flyt.isygraving.sso.client-id
+  clientSecretProperty: fint.flyt.isygraving.sso.client-secret
+  grantTypes:
+    - client_credentials
