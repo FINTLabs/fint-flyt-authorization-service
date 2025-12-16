@@ -36,6 +36,11 @@ patches:
               "novari.no":["DEVELOPER","USER"]
             }
       - op: add
+        path: "/spec/envFrom/0"
+        value:
+          secretRef:
+            name: fint-flyt-isygraving-oauth2-client
+      - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
