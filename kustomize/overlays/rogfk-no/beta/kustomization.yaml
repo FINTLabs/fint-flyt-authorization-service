@@ -37,7 +37,7 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
-         name: "novari.kafka.topic.orgId"
+         name: "novari.kafka.topic.org-id"
          value: "rogfk-no"
       - op: replace
         path: "/spec/probes/readiness/path"
