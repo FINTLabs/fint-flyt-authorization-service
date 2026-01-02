@@ -5,6 +5,7 @@ namespace: agderfk-no
 resources:
   - ../../../base
 
+
 labels:
   - pairs:
       app.kubernetes.io/instance: fint-flyt-authorization-service_agderfk_no
@@ -34,32 +35,24 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
+
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "agderfk-no"
       - op: replace
-        path: "/spec/probes/readiness/path"
+        path: "/spec/probes/startup/path"
         value: "/beta/agderfk-no/actuator/health"
+      - op: replace
+        path: "/spec/probes/readiness/path"
+        value: "/beta/agderfk-no/actuator/health/readiness"
+      - op: replace
+        path: "/spec/probes/liveness/path"
+        value: "/beta/agderfk-no/actuator/health/liveness"
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/beta/agderfk-no/actuator/prometheus"
     target:
       kind: Application
       name: fint-flyt-authorization-service
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-altinn-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client

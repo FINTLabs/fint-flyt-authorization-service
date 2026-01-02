@@ -20,6 +20,41 @@ extra_user_orgs_for_namespace() {
   esac
 }
 
+extra_resources_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+  case "${namespace}:${env_path}" in
+    afk-no:*|bfk-no:*|ofk-no:*)
+      printf 'acos-oauth2-client.yaml isygraving-oauth2-client.yaml'
+      ;;
+    mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
+      printf 'isygraving-oauth2-client.yaml'
+      ;;
+    fintlabs-no:beta|vlfk-no:beta)
+      printf 'digisak-oauth2-client.yaml'
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
+}
+
+extra_env_from_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+  case "${namespace}:${env_path}" in
+    afk-no:*|bfk-no:*|ofk-no:*)
+      printf 'fint-flyt-acos-oauth2-client fint-flyt-isygraving-oauth2-client'
+      ;;
+    mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
+      printf 'fint-flyt-isygraving-oauth2-client'
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
+}
+
 render_authorized_role_pairs() {
   local org_id="$1"
   shift
@@ -90,8 +125,33 @@ while IFS= read -r file; do
   export KAFKA_TOPIC="${namespace}.flyt.*"
   export URL_BASE_PATH="$path_prefix"
   export INGRESS_BASE_PATH="${path_prefix}/api/intern/authorization"
-  export READINESS_PATH="${path_prefix}/actuator/health"
+  export STARTUP_PATH="${path_prefix}/actuator/health"
+  export READINESS_PATH="${path_prefix}/actuator/health/readiness"
+  export LIVENESS_PATH="${path_prefix}/actuator/health/liveness"
   export METRICS_PATH="${path_prefix}/actuator/prometheus"
+  extra_resources="$(extra_resources_for_overlay "$namespace" "$env_path")"
+  EXTRA_RESOURCES=""
+  if [[ -n "$extra_resources" ]]; then
+    for resource in $extra_resources; do
+      EXTRA_RESOURCES+=$'  - '"${resource}"$'\n'
+    done
+  fi
+  export EXTRA_RESOURCES
+
+  extra_env_from="$(extra_env_from_for_overlay "$namespace" "$env_path")"
+  EXTRA_ENV_FROM_PATCHES=""
+  if [[ -n "$extra_env_from" ]]; then
+    idx=0
+    for secret in $extra_env_from; do
+      EXTRA_ENV_FROM_PATCHES+=$'      - op: add\n'
+      EXTRA_ENV_FROM_PATCHES+=$'        path: "/spec/envFrom/'"${idx}"$'"\n'
+      EXTRA_ENV_FROM_PATCHES+=$'        value:\n'
+      EXTRA_ENV_FROM_PATCHES+=$'          secretRef:\n'
+      EXTRA_ENV_FROM_PATCHES+=$'            name: '"${secret}"$'\n'
+      idx=$((idx + 1))
+    done
+  fi
+  export EXTRA_ENV_FROM_PATCHES
   if ((${#additional_user_orgs[@]})); then
     AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$ORG_ID" "${additional_user_orgs[@]}")"
   else
@@ -103,7 +163,7 @@ while IFS= read -r file; do
   target_dir="$ROOT/kustomize/overlays/$dir"
 
   tmp="$(mktemp "$target_dir/.kustomization.yaml.XXXXXX")"
-  envsubst '$NAMESPACE $FINT_KAFKA_TOPIC_ORG_ID $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $URL_BASE_PATH $INGRESS_BASE_PATH $READINESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS' \
+  envsubst '$NAMESPACE $FINT_KAFKA_TOPIC_ORG_ID $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $URL_BASE_PATH $INGRESS_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_ENV_FROM_PATCHES' \
     < "$template" > "$tmp"
   mv "$tmp" "$target_dir/kustomization.yaml"
 done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)

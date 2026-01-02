@@ -7,6 +7,7 @@ resources:
   - acos-oauth2-client.yaml
   - isygraving-oauth2-client.yaml
 
+
 labels:
   - pairs:
       app.kubernetes.io/instance: fint-flyt-authorization-service_afk_no
@@ -48,32 +49,24 @@ patches:
         value:
           secretRef:
             name: fint-flyt-isygraving-oauth2-client
+
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "afk-no"
       - op: replace
-        path: "/spec/probes/readiness/path"
+        path: "/spec/probes/startup/path"
         value: "/afk-no/actuator/health"
+      - op: replace
+        path: "/spec/probes/readiness/path"
+        value: "/afk-no/actuator/health/readiness"
+      - op: replace
+        path: "/spec/probes/liveness/path"
+        value: "/afk-no/actuator/health/liveness"
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/afk-no/actuator/prometheus"
     target:
       kind: Application
       name: fint-flyt-authorization-service
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-altinn-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-api-vault/items/fint-flyt-egrunnerverv-oauth2-client"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-egrunnerverv-oauth2-client
