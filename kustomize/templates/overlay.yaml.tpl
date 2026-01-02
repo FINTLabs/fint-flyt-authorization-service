@@ -4,6 +4,7 @@ namespace: $NAMESPACE
 
 resources:
   - ../../../base
+$EXTRA_RESOURCES
 
 labels:
   - pairs:
@@ -30,14 +31,21 @@ patches:
           name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
           value: |
 $AUTHORIZED_ORG_ROLE_PAIRS
+$EXTRA_ENV_FROM_PATCHES
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "$FINT_KAFKA_TOPIC_ORG_ID"
       - op: replace
+        path: "/spec/probes/startup/path"
+        value: "$STARTUP_PATH"
+      - op: replace
         path: "/spec/probes/readiness/path"
         value: "$READINESS_PATH"
+      - op: replace
+        path: "/spec/probes/liveness/path"
+        value: "$LIVENESS_PATH"
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "$METRICS_PATH"
