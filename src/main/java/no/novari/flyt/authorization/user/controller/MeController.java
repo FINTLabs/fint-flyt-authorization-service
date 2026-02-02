@@ -1,6 +1,6 @@
 package no.novari.flyt.authorization.user.controller;
 
-import no.novari.flyt.authorization.client.sourceapplications.*;
+import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication;
 import no.novari.flyt.authorization.user.UserService;
 import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils;
 import no.novari.flyt.authorization.user.model.RestrictedPageAuthorization;
@@ -25,13 +25,16 @@ public class MeController {
 
     private final TokenParsingUtils tokenParsingUtils;
     private final UserService userService;
+    private final List<SourceApplication> sourceApplications;
 
     public MeController(
             TokenParsingUtils tokenParsingUtils,
-            UserService userService
+            UserService userService,
+            List<SourceApplication> sourceApplications
     ) {
         this.tokenParsingUtils = tokenParsingUtils;
         this.userService = userService;
+        this.sourceApplications = sourceApplications;
     }
 
     @GetMapping("is-authorized")
@@ -90,14 +93,10 @@ public class MeController {
     }
 
     private List<Long> allSourceApplicationIds() {
-        return List.of(
-                AcosSourceApplication.SOURCE_APPLICATION_ID,
-                DigisakSourceApplication.SOURCE_APPLICATION_ID,
-                EgrunnervervSourceApplication.SOURCE_APPLICATION_ID,
-                VigoSourceApplication.SOURCE_APPLICATION_ID,
-                AltinnSourceApplication.SOURCE_APPLICATION_ID,
-                HMSRegSourceApplication.SOURCE_APPLICATION_ID
-        );
+        return sourceApplications.stream()
+                .map(SourceApplication::getSourceApplicationId)
+                .sorted()
+                .toList();
     }
 
 }
