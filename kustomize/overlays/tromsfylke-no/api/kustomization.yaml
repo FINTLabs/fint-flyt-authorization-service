@@ -5,7 +5,6 @@ namespace: tromsfylke-no
 resources:
   - ../../../base
 
-
 labels:
   - pairs:
       app.kubernetes.io/instance: fint-flyt-authorization-service_tromsfylke_no
@@ -35,7 +34,6 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
-
       - op: add
         path: "/spec/env/-"
         value:

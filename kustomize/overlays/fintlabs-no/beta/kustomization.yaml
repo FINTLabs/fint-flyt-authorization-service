@@ -6,7 +6,6 @@ resources:
   - ../../../base
   - digisak-oauth2-client.yaml
 
-
 labels:
   - pairs:
       app.kubernetes.io/instance: fint-flyt-authorization-service_fintlabs_no
@@ -36,7 +35,11 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
-
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.digisak.available"
+          value: "true"
       - op: add
         path: "/spec/envFrom/0"
         value:
