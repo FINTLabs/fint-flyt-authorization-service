@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class FSkyssSourceApplication extends BaseSourceApplication {
     public FSkyssSourceApplication(
             @Value("${fint.flyt.fskyss.sso.client-id:#{null}}") String clientId,
-            @Value("${fint.flyt.fskyss.available:true}") boolean available
+            @Value("${fint.flyt.fskyss.available:false}") boolean available
     ) {
         super(8L, "FSkyss", clientId, available);
     }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class SIDESourceApplication extends BaseSourceApplication {
     public SIDESourceApplication(
             @Value("${fint.flyt.side.sso.client-id:#{null}}") String clientId,
-            @Value("${fint.flyt.side.available:true}") boolean available
+            @Value("${fint.flyt.side.available:false}") boolean available
     ) {
         super(9L, "sIDE", clientId, available);
     }
