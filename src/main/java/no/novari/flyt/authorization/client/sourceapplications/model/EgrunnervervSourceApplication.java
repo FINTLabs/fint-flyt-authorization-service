@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EgrunnervervSourceApplication extends BaseSourceApplication {
-    public EgrunnervervSourceApplication(@Value("${fint.flyt.egrunnerverv.sso.client-id:#{null}}") String clientId) {
-        super(2L, "eGrunnerverv", clientId);
+    public EgrunnervervSourceApplication(
+            @Value("${fint.flyt.egrunnerverv.sso.client-id:#{null}}") String clientId,
+            @Value("${fint.flyt.egrunnerverv.available:true}") boolean available
+    ) {
+        super(2L, "eGrunnerverv", clientId, available);
     }
 }

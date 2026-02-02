@@ -24,13 +24,14 @@ public class SourceApplicationController {
         List<SourceApplicationResponse> response = sourceApplications.stream()
                 .map(sourceApplication -> new SourceApplicationResponse(
                         sourceApplication.getSourceApplicationId(),
-                        sourceApplication.getDisplayName()
+                        sourceApplication.getDisplayName(),
+                        sourceApplication.isAvailable()
                 ))
                 .sorted(Comparator.comparing(SourceApplicationResponse::displayName, String.CASE_INSENSITIVE_ORDER))
                 .toList();
         return ResponseEntity.ok(response);
     }
 
-    public record SourceApplicationResponse(long sourceApplicationId, String displayName) {
+    public record SourceApplicationResponse(long sourceApplicationId, String displayName, boolean available) {
     }
 }

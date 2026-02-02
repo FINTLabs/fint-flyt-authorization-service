@@ -17,7 +17,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_AcosSourceApplicationClientId() {
         String clientId = "acosClientId";
         long sourceAppId = 1L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new AcosSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new AcosSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -31,7 +31,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_EgrunnervervSourceApplicationClientId() {
         String clientId = "egrunnervervClientId";
         long sourceAppId = 2L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new EgrunnervervSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new EgrunnervervSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -45,7 +45,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_DigisakSourceApplicationClientId() {
         String clientId = "digisakClientId";
         long sourceAppId = 3L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new DigisakSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new DigisakSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -59,7 +59,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_VigoSourceApplicationClientId() {
         String clientId = "vigoClientId";
         long sourceAppId = 4L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new VigoSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new VigoSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -73,7 +73,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_AltinnSourceApplicationClientId() {
         String clientId = "altinnClientId";
         long sourceAppId = 5L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new AltinnSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new AltinnSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -87,7 +87,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_HMSregSourceApplicationClientId() {
         String clientId = "hmsregClientId";
         long sourceAppId = 6L;
-        ClientAuthorizationProducerRecordBuilder builder = builderFor(new HMSRegSourceApplication(clientId));
+        ClientAuthorizationProducerRecordBuilder builder = builderFor(new HMSRegSourceApplication(clientId, true));
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);
         ReplyProducerRecord<ClientAuthorization> result = builder.apply(record);
@@ -101,8 +101,8 @@ class ClientAuthorizationProducerRecordBuilderTest {
     void testApply_OtherClientId() {
         String clientId = "otherClientId";
         ClientAuthorizationProducerRecordBuilder builder = builderFor(
-                new AcosSourceApplication(null),
-                new EgrunnervervSourceApplication(null)
+                new AcosSourceApplication(null, true),
+                new EgrunnervervSourceApplication(null, true)
         );
 
         ConsumerRecord<String, String> record = new ConsumerRecord<>("topic", 0, 0, "", clientId);

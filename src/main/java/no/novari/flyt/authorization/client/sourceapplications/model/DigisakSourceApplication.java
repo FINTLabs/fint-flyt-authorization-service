@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DigisakSourceApplication extends BaseSourceApplication {
-    public DigisakSourceApplication(@Value("${fint.flyt.digisak.sso.client-id:#{null}}") String clientId) {
-        super(3L, "Digisak", clientId);
+    public DigisakSourceApplication(
+            @Value("${fint.flyt.digisak.sso.client-id:#{null}}") String clientId,
+            @Value("${fint.flyt.digisak.available:true}") boolean available
+    ) {
+        super(3L, "Digisak", clientId, available);
     }
 }

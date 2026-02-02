@@ -4,4 +4,5 @@ public interface SourceApplication {
     long getSourceApplicationId();
     String getClientId();
     String getDisplayName();
+    boolean isAvailable();
 }
