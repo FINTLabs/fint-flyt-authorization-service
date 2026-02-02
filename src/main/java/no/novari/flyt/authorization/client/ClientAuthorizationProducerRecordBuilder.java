@@ -1,17 +1,23 @@
 package no.novari.flyt.authorization.client;
 
 import lombok.extern.slf4j.Slf4j;
-import no.novari.flyt.authorization.client.sourceapplications.*;
+import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication;
 import no.novari.kafka.requestreply.ReplyProducerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Component
 @Slf4j
 public class ClientAuthorizationProducerRecordBuilder {
+
+    private final List<SourceApplication> sourceApplications;
+
+    public ClientAuthorizationProducerRecordBuilder(List<SourceApplication> sourceApplications) {
+        this.sourceApplications = sourceApplications;
+    }
 
     public ReplyProducerRecord<ClientAuthorization> apply(ConsumerRecord<String, String> consumerRecord) {
 
@@ -44,23 +50,13 @@ public class ClientAuthorizationProducerRecordBuilder {
     }
 
     private Optional<Long> resolveSourceApplicationId(String clientId) {
-        return Stream.of(
-                        matchClientId(clientId, AcosSourceApplication.CLIENT_ID, AcosSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, EgrunnervervSourceApplication.CLIENT_ID, EgrunnervervSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, DigisakSourceApplication.CLIENT_ID, DigisakSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, VigoSourceApplication.CLIENT_ID, VigoSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, AltinnSourceApplication.CLIENT_ID, AltinnSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, HMSRegSourceApplication.CLIENT_ID, HMSRegSourceApplication.SOURCE_APPLICATION_ID),
-                        matchClientId(clientId, IsyGravingSourceApplication.CLIENT_ID, IsyGravingSourceApplication.SOURCE_APPLICATION_ID)
-                )
-                .flatMap(Optional::stream)
+        return sourceApplications.stream()
+                .filter(sourceApplication -> matchClientId(clientId, sourceApplication.getClientId()))
+                .map(SourceApplication::getSourceApplicationId)
                 .findFirst();
     }
 
-    private Optional<Long> matchClientId(String clientId, String sourceApplicationClientId, Long sourceApplicationId) {
-        if (sourceApplicationClientId == null || !sourceApplicationClientId.equals(clientId)) {
-            return Optional.empty();
-        }
-        return Optional.of(sourceApplicationId);
+    private boolean matchClientId(String clientId, String sourceApplicationClientId) {
+        return sourceApplicationClientId != null && sourceApplicationClientId.equals(clientId);
     }
 }
