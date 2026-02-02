@@ -8,7 +8,6 @@ resources:
   - fskyss-oauth2-client.yaml
   - isygraving-oauth2-client.yaml
 
-
 labels:
   - pairs:
       app.kubernetes.io/instance: fint-flyt-authorization-service_bfk_no
@@ -40,6 +39,21 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.acos.available"
+          value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.isygraving.available"
+          value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.fskyss.available"
+          value: "true"
       - op: add
         path: "/spec/envFrom/0"
         value:

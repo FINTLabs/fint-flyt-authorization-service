@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class IsyGravingSourceApplication extends BaseSourceApplication {
     public IsyGravingSourceApplication(
             @Value("${fint.flyt.isygraving.sso.client-id:#{null}}") String clientId,
-            @Value("${fint.flyt.isygraving.available:true}") boolean available
+            @Value("${fint.flyt.isygraving.available:false}") boolean available
     ) {
         super(7L, "ISY Graving", clientId, available);
     }
