@@ -40,7 +40,7 @@ patches:
         path: "/spec/envFrom/0"
         value:
             secretRef:
-                name: fint-flyt-fskyss-oauth2-client
+                name: fint-flyt-side-oauth2-client
 
       - op: add
         path: "/spec/env/-"
