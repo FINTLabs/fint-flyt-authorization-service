@@ -23,7 +23,7 @@ public class SourceApplicationController {
     public ResponseEntity<List<SourceApplicationResponse>> getAll() {
         List<SourceApplicationResponse> response = sourceApplications.stream()
                 .map(sourceApplication -> new SourceApplicationResponse(
-                        sourceApplication.getSourceApplicationId(),
+                        sourceApplication.getId(),
                         sourceApplication.getDisplayName(),
                         sourceApplication.isAvailable()
                 ))
@@ -32,6 +32,6 @@ public class SourceApplicationController {
         return ResponseEntity.ok(response);
     }
 
-    public record SourceApplicationResponse(long sourceApplicationId, String displayName, boolean available) {
+    public record SourceApplicationResponse(long id, String displayName, boolean available) {
     }
 }

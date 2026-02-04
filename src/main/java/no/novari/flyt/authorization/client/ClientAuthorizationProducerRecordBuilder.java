@@ -52,7 +52,7 @@ public class ClientAuthorizationProducerRecordBuilder {
     private Optional<Long> resolveSourceApplicationId(String clientId) {
         return sourceApplications.stream()
                 .filter(sourceApplication -> matchClientId(clientId, sourceApplication.getClientId()))
-                .map(SourceApplication::getSourceApplicationId)
+                .map(SourceApplication::getId)
                 .findFirst();
     }
 
