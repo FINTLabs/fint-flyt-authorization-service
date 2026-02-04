@@ -94,7 +94,7 @@ public class MeController {
 
     private List<Long> allSourceApplicationIds() {
         return sourceApplications.stream()
-                .map(SourceApplication::getSourceApplicationId)
+                .map(SourceApplication::getId)
                 .sorted()
                 .toList();
     }
