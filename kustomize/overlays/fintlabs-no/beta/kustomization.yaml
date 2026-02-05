@@ -5,6 +5,7 @@ namespace: fintlabs-no
 resources:
   - ../../../base
   - digisak-oauth2-client.yaml
+  - side-oauth2-client.yaml
 
 labels:
   - pairs:
@@ -41,10 +42,20 @@ patches:
           name: "fint.flyt.digisak.available"
           value: "true"
       - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.side.available"
+          value: "true"
+      - op: add
         path: "/spec/envFrom/0"
         value:
           secretRef:
             name: fint-flyt-digisak-oauth2-client
+      - op: add
+        path: "/spec/envFrom/1"
+        value:
+          secretRef:
+            name: fint-flyt-side-oauth2-client
       - op: add
         path: "/spec/env/-"
         value:
