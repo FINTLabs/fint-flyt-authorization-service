@@ -3,8 +3,7 @@ kind: Kustomization
 namespace: $NAMESPACE
 
 resources:
-  - ../../../base
-$EXTRA_RESOURCES
+  - ../../../base$EXTRA_RESOURCES
 
 labels:
   - pairs:
@@ -30,8 +29,7 @@ patches:
         value:
           name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
           value: |
-$AUTHORIZED_ORG_ROLE_PAIRS
-$EXTRA_ENV_FROM_PATCHES
+$AUTHORIZED_ORG_ROLE_PAIRS$EXTRA_APP_PATCHES
       - op: add
         path: "/spec/env/-"
         value:
@@ -51,4 +49,4 @@ $EXTRA_ENV_FROM_PATCHES
         value: "$METRICS_PATH"
     target:
       kind: Application
-      name: fint-flyt-authorization-service
+      name: fint-flyt-authorization-service$EXTRA_PATCHES

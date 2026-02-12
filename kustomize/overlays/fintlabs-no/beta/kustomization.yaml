@@ -56,6 +56,7 @@ patches:
         value:
           secretRef:
             name: fint-flyt-side-oauth2-client
+
       - op: add
         path: "/spec/env/-"
         value:
@@ -76,3 +77,10 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
+    target:
+      kind: OnePasswordItem
+      name: fint-flyt-egrunnerverv-oauth2-client
