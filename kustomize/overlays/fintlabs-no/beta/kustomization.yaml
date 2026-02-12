@@ -47,6 +47,11 @@ patches:
           name: "fint.flyt.side.available"
           value: "true"
       - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.fskyss.available"
+          value: "true"
+      - op: add
         path: "/spec/envFrom/0"
         value:
           secretRef:
