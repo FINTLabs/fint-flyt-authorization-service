@@ -62,13 +62,13 @@ patches:
       - op: add
         path: "/spec/envFrom/1"
         value:
-            secretRef:
-                name: fint-flyt-isygraving-oauth2-client
+          secretRef:
+            name: fint-flyt-isygraving-oauth2-client
       - op: add
         path: "/spec/envFrom/2"
         value:
-            secretRef:
-                name: fint-flyt-fskyss-oauth2-client
+          secretRef:
+            name: fint-flyt-fskyss-oauth2-client
 
       - op: add
         path: "/spec/env/-"

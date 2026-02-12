@@ -24,14 +24,51 @@ extra_resources_for_overlay() {
   local namespace="$1"
   local env_path="$2"
   case "${namespace}:${env_path}" in
-    afk-no:*|bfk-no:*|ofk-no:*)
+    afk-no:*|ofk-no:*)
       printf 'acos-oauth2-client.yaml isygraving-oauth2-client.yaml'
+      ;;
+    bfk-no:*)
+      printf 'acos-oauth2-client.yaml fskyss-oauth2-client.yaml isygraving-oauth2-client.yaml'
       ;;
     mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
       printf 'isygraving-oauth2-client.yaml'
       ;;
-    fintlabs-no:beta|vlfk-no:beta)
+    nfk-no:api)
+      printf 'side-oauth2-client.yaml'
+      ;;
+    fintlabs-no:beta)
+      printf 'digisak-oauth2-client.yaml side-oauth2-client.yaml'
+      ;;
+    vlfk-no:beta)
       printf 'digisak-oauth2-client.yaml'
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
+}
+
+extra_env_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+  case "${namespace}:${env_path}" in
+    afk-no:*|ofk-no:*)
+      printf 'fint.flyt.acos.available fint.flyt.isygraving.available'
+      ;;
+    bfk-no:*)
+      printf 'fint.flyt.acos.available fint.flyt.isygraving.available fint.flyt.fskyss.available'
+      ;;
+    mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
+      printf 'fint.flyt.isygraving.available'
+      ;;
+    nfk-no:api)
+      printf 'fint.flyt.side.available'
+      ;;
+    fintlabs-no:beta)
+      printf 'fint.flyt.digisak.available fint.flyt.side.available'
+      ;;
+    vlfk-no:beta)
+      printf 'fint.flyt.digisak.available'
       ;;
     *)
       printf ''
@@ -43,11 +80,36 @@ extra_env_from_for_overlay() {
   local namespace="$1"
   local env_path="$2"
   case "${namespace}:${env_path}" in
-    afk-no:*|bfk-no:*|ofk-no:*)
+    afk-no:*|ofk-no:*)
       printf 'fint-flyt-acos-oauth2-client fint-flyt-isygraving-oauth2-client'
+      ;;
+    bfk-no:*)
+      printf 'fint-flyt-acos-oauth2-client fint-flyt-isygraving-oauth2-client fint-flyt-fskyss-oauth2-client'
       ;;
     mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
       printf 'fint-flyt-isygraving-oauth2-client'
+      ;;
+    nfk-no:api)
+      printf 'fint-flyt-side-oauth2-client'
+      ;;
+    fintlabs-no:beta)
+      printf 'fint-flyt-digisak-oauth2-client fint-flyt-side-oauth2-client'
+      ;;
+    vlfk-no:beta)
+      printf 'fint-flyt-digisak-oauth2-client'
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
+}
+
+onepassword_item_path_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+  case "${namespace}:${env_path}" in
+    *:beta)
+      printf 'vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client'
       ;;
     *)
       printf ''
@@ -133,10 +195,23 @@ while IFS= read -r file; do
   EXTRA_RESOURCES=""
   if [[ -n "$extra_resources" ]]; then
     for resource in $extra_resources; do
-      EXTRA_RESOURCES+=$'  - '"${resource}"$'\n'
+      EXTRA_RESOURCES+=$'\n  - '"${resource}"
     done
   fi
   export EXTRA_RESOURCES
+
+  extra_env="$(extra_env_for_overlay "$namespace" "$env_path")"
+  EXTRA_ENV_PATCHES=""
+  if [[ -n "$extra_env" ]]; then
+    for env_name in $extra_env; do
+      EXTRA_ENV_PATCHES+=$'      - op: add\n'
+      EXTRA_ENV_PATCHES+=$'        path: "/spec/env/-"\n'
+      EXTRA_ENV_PATCHES+=$'        value:\n'
+      EXTRA_ENV_PATCHES+=$'          name: "'"${env_name}"$'"\n'
+      EXTRA_ENV_PATCHES+=$'          value: "true"\n'
+    done
+    EXTRA_ENV_PATCHES="${EXTRA_ENV_PATCHES%$'\n'}"
+  fi
 
   extra_env_from="$(extra_env_from_for_overlay "$namespace" "$env_path")"
   EXTRA_ENV_FROM_PATCHES=""
@@ -150,8 +225,36 @@ while IFS= read -r file; do
       EXTRA_ENV_FROM_PATCHES+=$'            name: '"${secret}"$'\n'
       idx=$((idx + 1))
     done
+    EXTRA_ENV_FROM_PATCHES="${EXTRA_ENV_FROM_PATCHES%$'\n'}"
   fi
-  export EXTRA_ENV_FROM_PATCHES
+
+  EXTRA_APP_PATCHES=""
+  if [[ -n "$EXTRA_ENV_PATCHES" ]]; then
+    EXTRA_APP_PATCHES+=$'\n'"$EXTRA_ENV_PATCHES"
+  fi
+  if [[ -n "$EXTRA_ENV_FROM_PATCHES" ]]; then
+    EXTRA_APP_PATCHES+=$'\n'"$EXTRA_ENV_FROM_PATCHES"
+  fi
+  if [[ -n "$EXTRA_APP_PATCHES" ]]; then
+    EXTRA_APP_PATCHES+=$'\n'
+  fi
+  export EXTRA_APP_PATCHES
+
+  onepassword_item_path="$(onepassword_item_path_for_overlay "$namespace" "$env_path")"
+  EXTRA_PATCHES=""
+  if [[ -n "$onepassword_item_path" ]]; then
+    EXTRA_PATCHES+=$'\n'
+    EXTRA_PATCHES+=$'  - patch: |-\n'
+    EXTRA_PATCHES+=$'      - op: replace\n'
+    EXTRA_PATCHES+=$'        path: "/spec/itemPath"\n'
+    EXTRA_PATCHES+=$'        value: "'"${onepassword_item_path}"$'"\n'
+    EXTRA_PATCHES+=$'    target:\n'
+    EXTRA_PATCHES+=$'      kind: OnePasswordItem\n'
+    EXTRA_PATCHES+=$'      name: fint-flyt-egrunnerverv-oauth2-client\n'
+    EXTRA_PATCHES="${EXTRA_PATCHES%$'\n'}"
+  fi
+  export EXTRA_PATCHES
+
   if ((${#additional_user_orgs[@]})); then
     AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$ORG_ID" "${additional_user_orgs[@]}")"
   else
@@ -163,7 +266,7 @@ while IFS= read -r file; do
   target_dir="$ROOT/kustomize/overlays/$dir"
 
   tmp="$(mktemp "$target_dir/.kustomization.yaml.XXXXXX")"
-  envsubst '$NAMESPACE $FINT_KAFKA_TOPIC_ORG_ID $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $URL_BASE_PATH $INGRESS_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_ENV_FROM_PATCHES' \
+  envsubst '$NAMESPACE $FINT_KAFKA_TOPIC_ORG_ID $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $URL_BASE_PATH $INGRESS_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_APP_PATCHES $EXTRA_PATCHES' \
     < "$template" > "$tmp"
   mv "$tmp" "$target_dir/kustomization.yaml"
 done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)
