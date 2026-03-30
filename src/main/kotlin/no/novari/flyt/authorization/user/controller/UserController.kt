@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,7 +26,7 @@ class UserController(
 ) {
     @GetMapping
     fun get(
-        @AuthenticationPrincipal authentication: Authentication,
+        authentication: Authentication?,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "name") sort: String,
@@ -40,7 +39,7 @@ class UserController(
     @PostMapping("actions/userPermissionBatchPut")
     @ResponseStatus(HttpStatus.OK)
     fun postUserPermissionBatchPutAction(
-        @AuthenticationPrincipal authentication: Authentication,
+        authentication: Authentication?,
         @RequestBody users: List<User>,
     ) {
         requireAdmin(authentication)
@@ -48,7 +47,7 @@ class UserController(
         userService.publishUsers()
     }
 
-    private fun requireAdmin(authentication: Authentication) {
+    private fun requireAdmin(authentication: Authentication?) {
         if (!tokenParsingUtils.isAdmin(authentication)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN)
         }

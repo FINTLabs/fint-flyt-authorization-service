@@ -6,12 +6,13 @@ import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.RestrictedPageAuthorization
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_API
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
@@ -22,10 +23,8 @@ class MeController(
     private val sourceApplications: List<SourceApplication>,
 ) {
     @GetMapping("is-authorized")
-    fun checkAuthorization(
-        @AuthenticationPrincipal authentication: Authentication,
-    ): String {
-        val jwtAuthToken = authentication as JwtAuthenticationToken
+    fun checkAuthorization(authentication: Authentication?): String {
+        val jwtAuthToken = requireJwtAuthenticationToken(authentication)
         if (getUserFromUserAuthorizationComponent(jwtAuthToken) == null &&
             tokenParsingUtils.hasPermittedRole(jwtAuthToken)
         ) {
@@ -36,19 +35,15 @@ class MeController(
     }
 
     @GetMapping("restricted-page-authorization")
-    fun getRestrictedPageAuthorization(
-        @AuthenticationPrincipal authentication: Authentication,
-    ): RestrictedPageAuthorization {
+    fun getRestrictedPageAuthorization(authentication: Authentication?): RestrictedPageAuthorization {
         return RestrictedPageAuthorization(
             userPermissionPage = tokenParsingUtils.isAdmin(authentication),
         )
     }
 
     @GetMapping
-    fun get(
-        @AuthenticationPrincipal authentication: Authentication,
-    ): User {
-        val jwtAuthToken = authentication as JwtAuthenticationToken
+    fun get(authentication: Authentication?): User {
+        val jwtAuthToken = requireJwtAuthenticationToken(authentication)
 
         return getUserFromUserAuthorizationComponent(jwtAuthToken) ?: createUserFromToken(authentication)
     }
@@ -57,8 +52,8 @@ class MeController(
         return userService.find(UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token)))
     }
 
-    private fun createUserFromToken(authentication: Authentication): User {
-        val jwtAuthToken = authentication as JwtAuthenticationToken
+    private fun createUserFromToken(authentication: Authentication?): User {
+        val jwtAuthToken = requireJwtAuthenticationToken(authentication)
         val user = tokenParsingUtils.getUserFromToken(jwtAuthToken)
         val newUser =
             if (tokenParsingUtils.isAdmin(authentication)) {
@@ -73,5 +68,10 @@ class MeController(
 
     private fun allSourceApplicationIds(): List<Long> {
         return sourceApplications.map(SourceApplication::id).sorted()
+    }
+
+    private fun requireJwtAuthenticationToken(authentication: Authentication?): JwtAuthenticationToken {
+        return authentication as? JwtAuthenticationToken
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required")
     }
 }
