@@ -181,16 +181,16 @@ while IFS= read -r file; do
   fi
 
   export NAMESPACE="$namespace"
-  export FINT_KAFKA_TOPIC_ORG_ID="$namespace"
   export ORG_ID="${namespace//-/.}"
   export APP_INSTANCE_LABEL="fint-flyt-authorization-service_${namespace//-/_}"
   export KAFKA_TOPIC="${namespace}.flyt.*"
-  export URL_BASE_PATH="$path_prefix"
   export INGRESS_BASE_PATH="${path_prefix}/api/intern/authorization"
+  export SERVLET_CONTEXT_PATH="$path_prefix"
   export STARTUP_PATH="${path_prefix}/actuator/health"
   export READINESS_PATH="${path_prefix}/actuator/health/readiness"
   export LIVENESS_PATH="${path_prefix}/actuator/health/liveness"
   export METRICS_PATH="${path_prefix}/actuator/prometheus"
+  export NOVARI_KAFKA_TOPIC_ORGID="$namespace"
   extra_resources="$(extra_resources_for_overlay "$namespace" "$env_path")"
   EXTRA_RESOURCES=""
   if [[ -n "$extra_resources" ]]; then
@@ -266,7 +266,7 @@ while IFS= read -r file; do
   target_dir="$ROOT/kustomize/overlays/$dir"
 
   tmp="$(mktemp "$target_dir/.kustomization.yaml.XXXXXX")"
-  envsubst '$NAMESPACE $FINT_KAFKA_TOPIC_ORG_ID $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $URL_BASE_PATH $INGRESS_BASE_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_APP_PATCHES $EXTRA_PATCHES' \
+  envsubst '$NAMESPACE $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $INGRESS_BASE_PATH $SERVLET_CONTEXT_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_APP_PATCHES $EXTRA_PATCHES $NOVARI_KAFKA_TOPIC_ORGID' \
     < "$template" > "$tmp"
   mv "$tmp" "$target_dir/kustomization.yaml"
 done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)

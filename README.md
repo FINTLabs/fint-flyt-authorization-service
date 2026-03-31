@@ -4,7 +4,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 ## Highlights
 
-- **Internal OAuth2 APIs** — resource-server profile locks down `/api/intern/authorization` endpoints and enforces admin roles for management actions.
+- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` endpoints and enforces admin roles for management actions.
 - **Kafka request/reply** — listens for `client-id` authorization requests and replies with source application mappings using the FINT Kafka request/reply utilities.
 - **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced.
 - **Role-gated onboarding** — accepts users only when their token roles match a configured allow-list and auto-grants admins access to all source applications.
@@ -51,7 +51,7 @@ Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the c
 
 ## Configuration
 
-The application includes the shared Spring profiles `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-resource-server`.
+The application includes the shared Spring profiles `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-web-resource-server`.
 
 Key properties:
 
@@ -65,7 +65,7 @@ Key properties:
 | `novari.kafka.topic.domain-context` / `novari.kafka.topic.org-id` | Prefixes for Kafka topics and ACLs. |
 | `spring.datasource.*` | JDBC details for Postgres; Flyway migrations live under `classpath:db/migration`. |
 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | OAuth issuer for protecting internal endpoints. |
-| `novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json` | Defines which org/role pairs may call internal APIs (injected by overlays). |
+| `novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json` | Defines which org/role pairs may call internal APIs (injected by overlays). |
 | `spring.kafka.consumer.group-id` | Defaults to the application ID. |
 
 Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client credentials (e.g., `fint-flyt-vigo-oauth2-client`, `fint-flyt-altinn-oauth2-client`, `fint-flyt-egrunnerverv-oauth2-client`, `fint-flyt-hmsreg-oauth2-client`).
@@ -74,7 +74,7 @@ Secrets referenced by Kustomize overlays must provide database credentials, OAut
 
 Prerequisites:
 
-- Java 21+
+- Java 25+
 - Docker (for the bundled Postgres helper) and access to a Kafka broker
 - Gradle (wrapper included)
 
@@ -83,7 +83,8 @@ Useful commands:
 ```shell
 ./start-postgres                               # launch Postgres on localhost:5435
 SPRING_PROFILES_ACTIVE=local-staging ./gradlew bootRun   # start with local defaults
-./gradlew clean build                          # compile and run tests
+./gradlew ktlintFormat build                   # format, compile, and run tests
+./gradlew ktlintCheck                          # run ktlint only
 ./gradlew test                                 # run unit tests only
 ```
 
@@ -110,7 +111,7 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 
 ## Security
 
-- Uses the FINT OAuth2 resource-server setup for JWT validation (`spring.security.oauth2.resourceserver.jwt.issuer-uri`).
+- Uses the FINT OAuth2 web-resource-server setup for JWT validation (`spring.security.oauth2.resourceserver.jwt.issuer-uri`).
 - Internal APIs are restricted to callers whose org/role pairs are configured; management endpoints additionally require `ROLE_ADMIN`.
 - Client-authorization replies are limited to explicitly configured SSO client IDs per source application.
 
@@ -135,4 +136,3 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 4. Add or adjust tests for any new behaviour or edge cases.
 
 FINT Flyt Authorization Service is maintained by the FINT Flyt team. Reach out via the internal Slack channel or open an issue in this repository for questions or enhancements.
-

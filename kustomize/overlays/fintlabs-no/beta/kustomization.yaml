@@ -5,7 +5,6 @@ namespace: fintlabs-no
 resources:
   - ../../../base
   - digisak-oauth2-client.yaml
-  - fskyss-oauth2-client.yaml
   - side-oauth2-client.yaml
 
 labels:
@@ -22,15 +21,12 @@ patches:
         path: "/spec/orgId"
         value: "fintlabs.no"
       - op: replace
-        path: "/spec/url/basePath"
-        value: "/beta/fintlabs-no"
-      - op: replace
         path: "/spec/ingress/basePath"
         value: "/beta/fintlabs-no/api/intern/authorization"
       - op: add
         path: "/spec/env/-"
         value:
-          name: "novari.flyt.resource-server.security.api.internal.authorized-org-id-role-pairs-json"
+          name: "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json"
           value: |
             {
               "fintlabs.no":["USER"],
@@ -48,11 +44,6 @@ patches:
           name: "fint.flyt.side.available"
           value: "true"
       - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.fskyss.available"
-          value: "true"
-      - op: add
         path: "/spec/envFrom/0"
         value:
           secretRef:
@@ -62,17 +53,17 @@ patches:
         value:
           secretRef:
             name: fint-flyt-side-oauth2-client
-      - op: add
-        path: "/spec/envFrom/2"
-        value:
-          secretRef:
-            name: fint-flyt-fskyss-oauth2-client
 
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "fintlabs-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "server.servlet.context-path"
+         value: "/beta/fintlabs-no"
       - op: replace
         path: "/spec/probes/startup/path"
         value: "/beta/fintlabs-no/actuator/health"
