@@ -68,7 +68,7 @@ Key properties:
 | `novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json` | Defines which org/role pairs may call internal APIs (injected by overlays). |
 | `spring.kafka.consumer.group-id` | Defaults to the application ID. |
 
-Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client credentials (e.g., `fint-flyt-vigo-oauth2-client`, `fint-flyt-altinn-oauth2-client`, `fint-flyt-egrunnerverv-oauth2-client`, `fint-flyt-hmsreg-oauth2-client`).
+Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client IDs. The service now binds only `fint.flyt.<app>.sso.client-id` from these secrets; `client-secret` values are not injected into the application environment.
 
 ## Running Locally
 

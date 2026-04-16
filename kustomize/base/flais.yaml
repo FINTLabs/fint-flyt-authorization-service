@@ -34,15 +34,26 @@ spec:
   env:
     - name: JAVA_TOOL_OPTIONS
       value: '-XX:+ExitOnOutOfMemoryError -Xmx768M -Xms512M'
-  envFrom:
-    - secretRef:
-        name: fint-flyt-vigo-oauth2-client
-    - secretRef:
-        name: fint-flyt-altinn-oauth2-client
-    - secretRef:
-        name: fint-flyt-egrunnerverv-oauth2-client
-    - secretRef:
-        name: fint-flyt-hmsreg-oauth2-client
+    - name: fint.flyt.vigo.sso.client-id
+      valueFrom:
+        secretKeyRef:
+          name: fint-flyt-vigo-oauth2-client
+          key: fint.flyt.vigo.sso.client-id
+    - name: fint.flyt.altinn.sso.client-id
+      valueFrom:
+        secretKeyRef:
+          name: fint-flyt-altinn-oauth2-client
+          key: fint.flyt.altinn.sso.client-id
+    - name: fint.flyt.egrunnerverv.sso.client-id
+      valueFrom:
+        secretKeyRef:
+          name: fint-flyt-egrunnerverv-oauth2-client
+          key: fint.flyt.egrunnerverv.sso.client-id
+    - name: fint.flyt.hmsreg.sso.client-id
+      valueFrom:
+        secretKeyRef:
+          name: fint-flyt-hmsreg-oauth2-client
+          key: fint.flyt.hmsreg.sso.client-id
   resources:
     limits:
       memory: "1024Mi"
