@@ -76,32 +76,42 @@ extra_env_for_overlay() {
   esac
 }
 
-extra_env_from_for_overlay() {
+extra_client_id_apps_for_overlay() {
   local namespace="$1"
   local env_path="$2"
   case "${namespace}:${env_path}" in
     afk-no:*|ofk-no:*)
-      printf 'fint-flyt-acos-oauth2-client fint-flyt-isygraving-oauth2-client'
+      printf 'acos isygraving'
       ;;
     bfk-no:*)
-      printf 'fint-flyt-acos-oauth2-client fint-flyt-isygraving-oauth2-client fint-flyt-fskyss-oauth2-client'
+      printf 'acos isygraving fskyss'
       ;;
     mrfylke-no:api|telemarkfylke-no:*|vestfoldfylke-no:*)
-      printf 'fint-flyt-isygraving-oauth2-client'
+      printf 'isygraving'
       ;;
     nfk-no:api)
-      printf 'fint-flyt-side-oauth2-client'
+      printf 'side'
       ;;
     fintlabs-no:beta)
-      printf 'fint-flyt-digisak-oauth2-client fint-flyt-side-oauth2-client'
+      printf 'digisak side'
       ;;
     vlfk-no:beta)
-      printf 'fint-flyt-digisak-oauth2-client'
+      printf 'digisak'
       ;;
     *)
       printf ''
       ;;
   esac
+}
+
+client_id_property_for_app() {
+  local app="$1"
+  printf 'fint.flyt.%s.sso.client-id' "$app"
+}
+
+oauth2_secret_name_for_app() {
+  local app="$1"
+  printf 'fint-flyt-%s-oauth2-client' "$app"
 }
 
 onepassword_item_path_for_overlay() {
@@ -213,27 +223,31 @@ while IFS= read -r file; do
     EXTRA_ENV_PATCHES="${EXTRA_ENV_PATCHES%$'\n'}"
   fi
 
-  extra_env_from="$(extra_env_from_for_overlay "$namespace" "$env_path")"
-  EXTRA_ENV_FROM_PATCHES=""
-  if [[ -n "$extra_env_from" ]]; then
-    idx=0
-    for secret in $extra_env_from; do
-      EXTRA_ENV_FROM_PATCHES+=$'      - op: add\n'
-      EXTRA_ENV_FROM_PATCHES+=$'        path: "/spec/envFrom/'"${idx}"$'"\n'
-      EXTRA_ENV_FROM_PATCHES+=$'        value:\n'
-      EXTRA_ENV_FROM_PATCHES+=$'          secretRef:\n'
-      EXTRA_ENV_FROM_PATCHES+=$'            name: '"${secret}"$'\n'
-      idx=$((idx + 1))
+  extra_client_id_apps="$(extra_client_id_apps_for_overlay "$namespace" "$env_path")"
+  EXTRA_CLIENT_ID_ENV_PATCHES=""
+  if [[ -n "$extra_client_id_apps" ]]; then
+    for app in $extra_client_id_apps; do
+      client_id_property="$(client_id_property_for_app "$app")"
+      secret_name="$(oauth2_secret_name_for_app "$app")"
+
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'      - op: add\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'        path: "/spec/env/-"\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'        value:\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'          name: "'"${client_id_property}"$'"\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'          valueFrom:\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'            secretKeyRef:\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'              name: '"${secret_name}"$'\n'
+      EXTRA_CLIENT_ID_ENV_PATCHES+=$'              key: '"${client_id_property}"$'\n'
     done
-    EXTRA_ENV_FROM_PATCHES="${EXTRA_ENV_FROM_PATCHES%$'\n'}"
+    EXTRA_CLIENT_ID_ENV_PATCHES="${EXTRA_CLIENT_ID_ENV_PATCHES%$'\n'}"
   fi
 
   EXTRA_APP_PATCHES=""
   if [[ -n "$EXTRA_ENV_PATCHES" ]]; then
     EXTRA_APP_PATCHES+=$'\n'"$EXTRA_ENV_PATCHES"
   fi
-  if [[ -n "$EXTRA_ENV_FROM_PATCHES" ]]; then
-    EXTRA_APP_PATCHES+=$'\n'"$EXTRA_ENV_FROM_PATCHES"
+  if [[ -n "$EXTRA_CLIENT_ID_ENV_PATCHES" ]]; then
+    EXTRA_APP_PATCHES+=$'\n'"$EXTRA_CLIENT_ID_ENV_PATCHES"
   fi
   if [[ -n "$EXTRA_APP_PATCHES" ]]; then
     EXTRA_APP_PATCHES+=$'\n'
