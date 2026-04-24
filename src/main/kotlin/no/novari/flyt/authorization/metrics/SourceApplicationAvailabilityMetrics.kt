@@ -17,13 +17,27 @@ class SourceApplicationAvailabilityMetrics(
 
         sourceApplications
             .asSequence()
+            .sortedBy(SourceApplication::id)
+            .forEach { sourceApplication ->
+                Gauge
+                    .builder(INFO_METRIC_NAME) { 1.0 }
+                    .description("Source application metadata for the configured organization")
+                    .tag("org_id", orgId)
+                    .tag("sourceapplication_id", sourceApplication.id.toString())
+                    .tag("source_application", sourceApplication.displayName)
+                    .register(registry)
+            }
+
+        sourceApplications
+            .asSequence()
             .filter(SourceApplication::available)
             .sortedBy(SourceApplication::id)
             .forEach { sourceApplication ->
                 Gauge
-                    .builder(METRIC_NAME) { 1.0 }
+                    .builder(AVAILABILITY_METRIC_NAME) { 1.0 }
                     .description("Source applications enabled for the configured organization")
                     .tag("org_id", orgId)
+                    .tag("sourceapplication_id", sourceApplication.id.toString())
                     .tag("source_application", sourceApplication.displayName)
                     .register(registry)
             }
@@ -37,6 +51,7 @@ class SourceApplicationAvailabilityMetrics(
     }
 
     companion object {
-        const val METRIC_NAME: String = "flyt.authorization.source.application.available"
+        const val AVAILABILITY_METRIC_NAME: String = "flyt.authorization.source.application.available"
+        const val INFO_METRIC_NAME: String = "flyt.authorization.source.application.info"
     }
 }

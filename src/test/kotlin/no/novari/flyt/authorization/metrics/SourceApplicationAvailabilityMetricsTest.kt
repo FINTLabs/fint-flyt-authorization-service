@@ -12,7 +12,7 @@ import org.springframework.mock.env.MockEnvironment
 
 class SourceApplicationAvailabilityMetricsTest {
     @Test
-    fun `bindTo registers metrics for available source applications only`() {
+    fun `bindTo registers availability metrics for available source applications only`() {
         val registry = SimpleMeterRegistry()
         val metrics =
             SourceApplicationAvailabilityMetrics(
@@ -27,35 +27,41 @@ class SourceApplicationAvailabilityMetricsTest {
 
         metrics.bindTo(registry)
 
-        val allGauges = registry.find(SourceApplicationAvailabilityMetrics.METRIC_NAME).gauges()
+        val allGauges = registry.find(SourceApplicationAvailabilityMetrics.AVAILABILITY_METRIC_NAME).gauges()
         assertEquals(2, allGauges.size)
 
         val acosGauge =
             registry
-                .find(SourceApplicationAvailabilityMetrics.METRIC_NAME)
+                .find(SourceApplicationAvailabilityMetrics.AVAILABILITY_METRIC_NAME)
                 .tags(
                     "org_id",
                     "afk.no",
+                    "sourceapplication_id",
+                    "1",
                     "source_application",
                     "Acos Interact",
                 ).gauge()
 
         val vigoGauge =
             registry
-                .find(SourceApplicationAvailabilityMetrics.METRIC_NAME)
+                .find(SourceApplicationAvailabilityMetrics.AVAILABILITY_METRIC_NAME)
                 .tags(
                     "org_id",
                     "afk.no",
+                    "sourceapplication_id",
+                    "4",
                     "source_application",
                     "VIGO",
                 ).gauge()
 
         val digisakGauge =
             registry
-                .find(SourceApplicationAvailabilityMetrics.METRIC_NAME)
+                .find(SourceApplicationAvailabilityMetrics.AVAILABILITY_METRIC_NAME)
                 .tags(
                     "org_id",
                     "afk.no",
+                    "sourceapplication_id",
+                    "3",
                     "source_application",
                     "Digisak",
                 ).gauge()
@@ -65,5 +71,68 @@ class SourceApplicationAvailabilityMetricsTest {
         assertNotNull(vigoGauge)
         assertEquals(1.0, vigoGauge?.value())
         assertNull(digisakGauge)
+    }
+
+    @Test
+    fun `bindTo registers info metrics for all source applications`() {
+        val registry = SimpleMeterRegistry()
+        val metrics =
+            SourceApplicationAvailabilityMetrics(
+                sourceApplications =
+                    listOf(
+                        AcosSourceApplication("acos-client-id", true),
+                        DigisakSourceApplication("digisak-client-id", false),
+                        VigoSourceApplication("vigo-client-id", true),
+                    ),
+                environment = MockEnvironment().withProperty("fint.org-id", "afk.no"),
+            )
+
+        metrics.bindTo(registry)
+
+        val allGauges = registry.find(SourceApplicationAvailabilityMetrics.INFO_METRIC_NAME).gauges()
+        assertEquals(3, allGauges.size)
+
+        val acosGauge =
+            registry
+                .find(SourceApplicationAvailabilityMetrics.INFO_METRIC_NAME)
+                .tags(
+                    "org_id",
+                    "afk.no",
+                    "sourceapplication_id",
+                    "1",
+                    "source_application",
+                    "Acos Interact",
+                ).gauge()
+
+        val digisakGauge =
+            registry
+                .find(SourceApplicationAvailabilityMetrics.INFO_METRIC_NAME)
+                .tags(
+                    "org_id",
+                    "afk.no",
+                    "sourceapplication_id",
+                    "3",
+                    "source_application",
+                    "Digisak",
+                ).gauge()
+
+        val vigoGauge =
+            registry
+                .find(SourceApplicationAvailabilityMetrics.INFO_METRIC_NAME)
+                .tags(
+                    "org_id",
+                    "afk.no",
+                    "sourceapplication_id",
+                    "4",
+                    "source_application",
+                    "VIGO",
+                ).gauge()
+
+        assertNotNull(acosGauge)
+        assertEquals(1.0, acosGauge?.value())
+        assertNotNull(digisakGauge)
+        assertEquals(1.0, digisakGauge?.value())
+        assertNotNull(vigoGauge)
+        assertEquals(1.0, vigoGauge?.value())
     }
 }

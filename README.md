@@ -119,6 +119,10 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 
 - Readiness and liveness: `/actuator/health`.
 - Metrics: `/actuator/prometheus`.
+- `flyt_authorization_source_application_available` exposes enabled source applications per org
+  (tags: `org_id`, `sourceapplication_id`, `source_application`).
+- `flyt_authorization_source_application_info` exposes source-application metadata per org for label enrichment in Grafana
+  (tags: `org_id`, `sourceapplication_id`, `source_application`).
 - Structured logging via the shared logging profile; Kafka request/reply and user-permission publishing emit detailed log messages for traceability.
 
 ## Development Tips
