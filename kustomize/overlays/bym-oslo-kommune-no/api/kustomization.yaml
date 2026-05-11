@@ -31,45 +31,6 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.acos.available"
-          value: "true"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.isygraving.available"
-          value: "true"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.fskyss.available"
-          value: "true"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.acos.sso.client-id"
-          valueFrom:
-            secretKeyRef:
-              name: fint-flyt-acos-oauth2-client
-              key: fint.flyt.acos.sso.client-id
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.isygraving.sso.client-id"
-          valueFrom:
-            secretKeyRef:
-              name: fint-flyt-isygraving-oauth2-client
-              key: fint.flyt.isygraving.sso.client-id
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "fint.flyt.fskyss.sso.client-id"
-          valueFrom:
-            secretKeyRef:
-              name: fint-flyt-fskyss-oauth2-client
-              key: fint.flyt.fskyss.sso.client-id
 
       - op: add
         path: "/spec/env/-"
