@@ -11,15 +11,22 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.NaturalId
+import org.hibernate.envers.AuditJoinTable
+import org.hibernate.envers.AuditTable
+import org.hibernate.envers.Audited
 import java.util.UUID
 
 @Entity
+@Audited
+@AuditTable("user_entity_aud")
 class UserEntity(
     @NaturalId
     @Column(nullable = false, unique = true)
     var objectIdentifier: UUID? = null,
     var email: String? = null,
     var name: String? = null,
+    @Audited
+    @AuditJoinTable(name = "user_entity_source_application_ids_aud")
     @ElementCollection
     @CollectionTable(
         name = "user_entity_source_application_ids",
