@@ -23,53 +23,57 @@ import java.util.UUID
     ],
 )
 class UserEntityAuditingTest
-    @Autowired constructor(
+    @Autowired
+    constructor(
         private val userRepository: UserRepository,
         private val entityManager: EntityManager,
-) {
-    @AfterEach
-    fun tearDown() {
-        SecurityContextHolder.clearContext()
-    }
+    ) {
+        @AfterEach
+        fun tearDown() {
+            SecurityContextHolder.clearContext()
+        }
 
-    @Test
-    fun `persists user permission revisions with actor metadata`() {
-        SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("bootstrap@novari.no", null)
+        @Test
+        fun `persists user permission revisions with actor metadata`() {
+            SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("bootstrap@novari.no", null)
 
-        val createdUser =
-            userRepository.saveAndFlush(
-                UserEntity(
-                    objectIdentifier = UUID.randomUUID(),
-                    email = "user@example.no",
-                    name = "Test User",
-                    sourceApplicationIds = mutableListOf(1L),
-                ),
+            val createdUser =
+                userRepository.saveAndFlush(
+                    UserEntity(
+                        objectIdentifier = UUID.randomUUID(),
+                        email = "user@example.no",
+                        name = "Test User",
+                        sourceApplicationIds = mutableListOf(1L),
+                    ),
+                )
+
+            TestTransaction.flagForCommit()
+            TestTransaction.end()
+
+            TestTransaction.start()
+
+            SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("admin@novari.no", null)
+
+            val updatedUser = userRepository.findById(checkNotNull(createdUser.id)).orElseThrow()
+            updatedUser.sourceApplicationIds = mutableListOf(1L, 2L)
+            userRepository.saveAndFlush(updatedUser)
+
+            TestTransaction.flagForCommit()
+            TestTransaction.end()
+
+            TestTransaction.start()
+            entityManager.clear()
+
+            val auditReader = AuditReaderFactory.get(entityManager)
+            val revisions = auditReader.getRevisions(UserEntity::class.java, createdUser.id)
+
+            assertEquals(listOf(1, 2), revisions)
+            assertEquals(listOf(1L), auditReader.find(UserEntity::class.java, createdUser.id, 1).sourceApplicationIds)
+            assertEquals(
+                listOf(1L, 2L),
+                auditReader.find(UserEntity::class.java, createdUser.id, 2).sourceApplicationIds,
             )
-
-        TestTransaction.flagForCommit()
-        TestTransaction.end()
-
-        TestTransaction.start()
-
-        SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("admin@novari.no", null)
-
-        val updatedUser = userRepository.findById(checkNotNull(createdUser.id)).orElseThrow()
-        updatedUser.sourceApplicationIds = mutableListOf(1L, 2L)
-        userRepository.saveAndFlush(updatedUser)
-
-        TestTransaction.flagForCommit()
-        TestTransaction.end()
-
-        TestTransaction.start()
-        entityManager.clear()
-
-        val auditReader = AuditReaderFactory.get(entityManager)
-        val revisions = auditReader.getRevisions(UserEntity::class.java, createdUser.id)
-
-        assertEquals(listOf(1, 2), revisions)
-        assertEquals(listOf(1L), auditReader.find(UserEntity::class.java, createdUser.id, 1).sourceApplicationIds)
-        assertEquals(listOf(1L, 2L), auditReader.find(UserEntity::class.java, createdUser.id, 2).sourceApplicationIds)
-        assertEquals("bootstrap@novari.no", auditReader.findRevision(RevisionInfo::class.java, 1).actor)
-        assertEquals("admin@novari.no", auditReader.findRevision(RevisionInfo::class.java, 2).actor)
+            assertEquals("bootstrap@novari.no", auditReader.findRevision(RevisionInfo::class.java, 1).actor)
+            assertEquals("admin@novari.no", auditReader.findRevision(RevisionInfo::class.java, 2).actor)
+        }
     }
-}
