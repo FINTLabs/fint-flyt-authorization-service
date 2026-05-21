@@ -114,6 +114,19 @@ oauth2_secret_name_for_app() {
   printf 'fint-flyt-%s-oauth2-client' "$app"
 }
 
+excluded_base_client_id_apps_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+  case "${namespace}:${env_path}" in
+    bym-oslo-kommune-no:api)
+      printf 'vigo'
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
+}
+
 base_onepassword_item_names() {
   while IFS= read -r file; do
     sed -n 's/^  name: //p' "$file"
@@ -260,6 +273,7 @@ while IFS= read -r file; do
   fi
   export EXTRA_APP_PATCHES
 
+  excluded_base_client_id_apps="$(excluded_base_client_id_apps_for_overlay "$namespace" "$env_path")"
   declare -a onepassword_item_names=()
   while IFS= read -r item_name; do
     if [[ -n "$item_name" ]]; then
@@ -277,6 +291,26 @@ while IFS= read -r file; do
       EXTRA_PATCHES+=$'    target:\n'
       EXTRA_PATCHES+=$'      kind: OnePasswordItem\n'
       EXTRA_PATCHES+=$'      name: '"${item_name}"$'\n'
+    done
+    EXTRA_PATCHES="${EXTRA_PATCHES%$'\n'}"
+  fi
+
+  if [[ -n "$excluded_base_client_id_apps" ]]; then
+    for app in $excluded_base_client_id_apps; do
+      EXTRA_PATCHES+=$'\n'
+      EXTRA_PATCHES+=$'  - patch: |-\n'
+      EXTRA_PATCHES+=$'      - op: remove\n'
+      EXTRA_PATCHES+=$'        path: "/spec/env/1"\n'
+      EXTRA_PATCHES+=$'    target:\n'
+      EXTRA_PATCHES+=$'      kind: Application\n'
+      EXTRA_PATCHES+=$'      name: fint-flyt-authorization-service\n'
+      EXTRA_PATCHES+=$'\n'
+      EXTRA_PATCHES+=$'  - patch: |-\n'
+      EXTRA_PATCHES+=$'      $patch: delete\n'
+      EXTRA_PATCHES+=$'      apiVersion: fintlabs.no/v1alpha1\n'
+      EXTRA_PATCHES+=$'      kind: NamOAuthClientApplicationResource\n'
+      EXTRA_PATCHES+=$'      metadata:\n'
+      EXTRA_PATCHES+=$'        name: '"$(oauth2_secret_name_for_app "$app")"$'\n'
     done
     EXTRA_PATCHES="${EXTRA_PATCHES%$'\n'}"
   fi

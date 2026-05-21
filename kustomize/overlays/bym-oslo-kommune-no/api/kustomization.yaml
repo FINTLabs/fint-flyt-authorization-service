@@ -56,3 +56,16 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
+  - patch: |-
+      - op: remove
+        path: "/spec/env/1"
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
+
+  - patch: |-
+      $patch: delete
+      apiVersion: fintlabs.no/v1alpha1
+      kind: NamOAuthClientApplicationResource
+      metadata:
+        name: fint-flyt-vigo-oauth2-client
