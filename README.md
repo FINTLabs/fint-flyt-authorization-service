@@ -7,6 +7,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 - **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` endpoints and enforces admin roles for management actions.
 - **Kafka request/reply** — listens for `client-id` authorization requests and replies with source application mappings using the FINT Kafka request/reply utilities.
 - **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced.
+- **Permission auditing** — keeps an Envers history of `user_entity` and `sourceApplicationIds` changes in dedicated audit tables with actor metadata.
 - **Role-gated onboarding** — accepts users only when their token roles match a configured allow-list and auto-grants admins access to all source applications.
 - **Scheduled publishing** — optional scheduler republishes all user permissions on a fixed delay to keep downstream caches in sync.
 
@@ -130,6 +131,7 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 - When adding a new source application, supply its `fint.flyt.<app>.sso.client-id`, assign a unique `SOURCE_APPLICATION_ID`, and update the builder test.
 - If access-control role mappings change, adjust `novari.flyt.authorization.access-control.permitted-approles` and ensure admins still get full `sourceApplicationIds` in `MeController`.
 - Bulk updates trigger Kafka publishes; keep database schema and `UserPermission` consumers aligned when altering user fields.
+- User-permission changes are now audited in `user_entity_aud`, `user_entity_source_application_ids_aud`, and `revinfo`; inspect those tables when validating access changes.
 - Update `script/render-overlay.sh` if additional organizations need custom role mappings or path prefixes.
 
 ## Contributing

@@ -17,6 +17,9 @@ kotlin {
 
 configurations {
     compileOnly
+    create("mockitoAgent") {
+        isTransitive = false
+    }
 }
 
 tasks.jar {
@@ -38,6 +41,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.hibernate.orm:hibernate-envers")
     compileOnly("org.springframework.security:spring-security-config")
     compileOnly("org.springframework.security:spring-security-web")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -58,10 +62,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-core")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
+    testRuntimeOnly("com.h2database:h2")
+    add("mockitoAgent", "org.mockito:mockito-core")
 }
 
 tasks.test {
     useJUnitPlatform()
+    doFirst {
+        jvmArgs("-javaagent:${configurations["mockitoAgent"].singleFile}")
+    }
 }
 
 ktlint {
