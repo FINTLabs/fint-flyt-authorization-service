@@ -11,7 +11,10 @@ class SecurityRevisionListener : RevisionListener {
     }
 
     private fun currentActor(): String {
-        val authentication = SecurityContextHolder.getContext().authentication ?: return RevisionInfo.SYSTEM_ACTOR
+        val authentication =
+            requireNotNull(SecurityContextHolder.getContext().authentication) {
+                "Missing authentication while creating Envers revision for user permission change"
+            }
 
         val jwtAuthenticationToken = authentication as? JwtAuthenticationToken
 
@@ -32,6 +35,8 @@ class SecurityRevisionListener : RevisionListener {
                 ?.toString()
                 ?.takeIf(String::isNotBlank)
             ?: authentication.name.takeIf(String::isNotBlank)
-            ?: RevisionInfo.SYSTEM_ACTOR
+            ?: throw IllegalStateException(
+                "Missing actor identity while creating Envers revision for user permission change",
+            )
     }
 }
