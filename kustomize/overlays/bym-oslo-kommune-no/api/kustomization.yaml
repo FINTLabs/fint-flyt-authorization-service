@@ -7,13 +7,11 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/instance: fint-flyt-authorization-service_bym-oslo-kommune-no
+      app.kubernetes.io/instance: fint-flyt-authorization-service_bym_oslo_kommune_no
       fintlabs.no/org-id: bym.oslo.kommune.no
 
 patches:
   - patch: |-
-      - op: remove
-        path: "/spec/env/1"
       - op: replace
         path: "/spec/kafka/acls/0/topic"
         value: "bym-oslo-kommune-no.flyt.*"
@@ -33,7 +31,6 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
-
       - op: add
         path: "/spec/env/-"
         value:
@@ -59,12 +56,3 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
-  - patch: |-
-      $patch: delete
-      apiVersion: fintlabs.no/v1alpha1
-      kind: NamOAuthClientApplicationResource
-      metadata:
-        name: fint-flyt-vigo-oauth2-client
-    target:
-      kind: NamOAuthClientApplicationResource
-      name: fint-flyt-vigo-oauth2-client

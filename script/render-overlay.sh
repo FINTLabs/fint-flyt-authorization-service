@@ -114,12 +114,18 @@ oauth2_secret_name_for_app() {
   printf 'fint-flyt-%s-oauth2-client' "$app"
 }
 
-onepassword_item_path_for_overlay() {
+base_onepassword_item_names() {
+  while IFS= read -r file; do
+    sed -n 's/^  name: //p' "$file"
+  done < <(find "$ROOT/kustomize/base" -maxdepth 1 -name '*-onepassword.yaml' -print | sort)
+}
+
+onepassword_item_names_for_overlay() {
   local namespace="$1"
   local env_path="$2"
   case "${namespace}:${env_path}" in
     *:beta)
-      printf 'vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client'
+      base_onepassword_item_names
       ;;
     *)
       printf ''
@@ -254,17 +260,24 @@ while IFS= read -r file; do
   fi
   export EXTRA_APP_PATCHES
 
-  onepassword_item_path="$(onepassword_item_path_for_overlay "$namespace" "$env_path")"
+  declare -a onepassword_item_names=()
+  while IFS= read -r item_name; do
+    if [[ -n "$item_name" ]]; then
+      onepassword_item_names+=("$item_name")
+    fi
+  done < <(onepassword_item_names_for_overlay "$namespace" "$env_path")
   EXTRA_PATCHES=""
-  if [[ -n "$onepassword_item_path" ]]; then
-    EXTRA_PATCHES+=$'\n'
-    EXTRA_PATCHES+=$'  - patch: |-\n'
-    EXTRA_PATCHES+=$'      - op: replace\n'
-    EXTRA_PATCHES+=$'        path: "/spec/itemPath"\n'
-    EXTRA_PATCHES+=$'        value: "'"${onepassword_item_path}"$'"\n'
-    EXTRA_PATCHES+=$'    target:\n'
-    EXTRA_PATCHES+=$'      kind: OnePasswordItem\n'
-    EXTRA_PATCHES+=$'      name: fint-flyt-egrunnerverv-oauth2-client\n'
+  if ((${#onepassword_item_names[@]})); then
+    for item_name in "${onepassword_item_names[@]}"; do
+      EXTRA_PATCHES+=$'\n'
+      EXTRA_PATCHES+=$'  - patch: |-\n'
+      EXTRA_PATCHES+=$'      - op: replace\n'
+      EXTRA_PATCHES+=$'        path: "/spec/itemPath"\n'
+      EXTRA_PATCHES+=$'        value: "vaults/aks-beta-vault/items/'"${item_name}"$'"\n'
+      EXTRA_PATCHES+=$'    target:\n'
+      EXTRA_PATCHES+=$'      kind: OnePasswordItem\n'
+      EXTRA_PATCHES+=$'      name: '"${item_name}"$'\n'
+    done
     EXTRA_PATCHES="${EXTRA_PATCHES%$'\n'}"
   fi
   export EXTRA_PATCHES
