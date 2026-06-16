@@ -3,6 +3,7 @@ package no.novari.flyt.authorization.client
 import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication
 import no.novari.kafka.requestreply.ReplyProducerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -11,10 +12,35 @@ class ClientAuthorizationProducerRecordBuilder(
 ) {
     fun apply(consumerRecord: ConsumerRecord<String, String>): ReplyProducerRecord<ClientAuthorization> {
         val clientId = consumerRecord.value()
+        logger.debug(
+            "Received client authorization request topic={} partition={} offset={} key={} clientId={}",
+            consumerRecord.topic(),
+            consumerRecord.partition(),
+            consumerRecord.offset(),
+            consumerRecord.key(),
+            clientId,
+        )
 
-        return resolveSourceApplicationId(clientId)?.let { sourceApplicationId ->
-            buildReplyProducerRecord(clientId, sourceApplicationId)
-        } ?: buildUnauthorizedReplyProducerRecord(clientId)
+        val sourceApplication = resolveSourceApplication(clientId)
+        return if (sourceApplication != null) {
+            logger.debug(
+                "Authorized client authorization request clientId={} sourceApplicationId={} sourceApplication={} available={}",
+                clientId,
+                sourceApplication.id,
+                sourceApplication.displayName,
+                sourceApplication.available,
+            )
+            buildReplyProducerRecord(clientId, sourceApplication.id)
+        } else {
+            logger.debug(
+                "Rejected client authorization request clientId={}. Configured source applications: {}",
+                clientId,
+                sourceApplications.map {
+                    "${it.displayName}(id=${it.id}, clientIdConfigured=${it.clientId != null}, available=${it.available})"
+                },
+            )
+            buildUnauthorizedReplyProducerRecord(clientId)
+        }
     }
 
     private fun buildReplyProducerRecord(
@@ -43,9 +69,12 @@ class ClientAuthorizationProducerRecordBuilder(
             ).build()
     }
 
-    private fun resolveSourceApplicationId(clientId: String): Long? {
+    private fun resolveSourceApplication(clientId: String): SourceApplication? {
         return sourceApplications
             .firstOrNull { sourceApplication -> sourceApplication.clientId == clientId }
-            ?.id
+    }
+
+    private companion object {
+        val logger = LoggerFactory.getLogger(ClientAuthorizationProducerRecordBuilder::class.java)
     }
 }
