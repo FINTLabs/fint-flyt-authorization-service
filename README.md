@@ -4,7 +4,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 ## Highlights
 
-- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/brukere` for authorized OAuth2 clients.
+- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/users` for authorized OAuth2 clients.
 - **Kafka request/reply** — listens for `client-id` authorization requests and replies with source application mappings using the FINT Kafka request/reply utilities.
 - **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced.
 - **Permission auditing** — keeps an Envers history of `user_entity` and `sourceApplicationIds` changes in dedicated audit tables with actor metadata.
@@ -41,7 +41,7 @@ Base path: `/api/intern/authorization`
 
 Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the caller lacks admin authority).
 
-Base path: `/api/intern-klient/authorization/brukere`
+Base path: `/api/intern-klient/authorization/users`
 
 | Method | Path | Description | Request body | Response |
 | --- | --- | --- | --- | --- |
@@ -67,7 +67,7 @@ Key properties:
 | Property | Description |
 | --- | --- |
 | `fint.application-id` | Defaults to `fint-flyt-authorization-service`. |
-| `fint.flyt.authorization.sso.client-id` | Client ID allowed to call `/api/intern-klient/authorization/brukere`. |
+| `fint.flyt.authorization.sso.client-id` | Client ID allowed to call `/api/intern-klient/authorization/users`. |
 | `novari.flyt.authorization.access-control.permitted-approles.*` | Map of allowed app roles (e.g., `flyt-user`, `flyt-developer`) to role URIs used when onboarding users. |
 | `novari.flyt.authorization.access-control.enabled` | Enables the scheduled user-permission publisher. |
 | `novari.flyt.authorization.access-control.sync-schedule.initial-delay-ms` / `fixed-delay-ms` | Interval settings for the publisher task. |

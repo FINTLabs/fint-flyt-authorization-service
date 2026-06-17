@@ -62,7 +62,7 @@ class InternalClientUserControllerTest
 
             mockMvc
                 .perform(
-                    get("/api/intern-klient/authorization/brukere/$objectIdentifier")
+                    get("/api/intern-klient/authorization/users/$objectIdentifier")
                         .with(internalClientJwt()),
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.objectIdentifier").value(objectIdentifier.toString()))
@@ -77,7 +77,7 @@ class InternalClientUserControllerTest
 
             mockMvc
                 .perform(
-                    get("/api/intern-klient/authorization/brukere/$objectIdentifier")
+                    get("/api/intern-klient/authorization/users/$objectIdentifier")
                         .with(internalClientJwt()),
                 ).andExpect(status().isNotFound)
         }
@@ -96,7 +96,7 @@ class InternalClientUserControllerTest
 
             mockMvc
                 .perform(
-                    post("/api/intern-klient/authorization/brukere/actions/lookup")
+                    post("/api/intern-klient/authorization/users/actions/lookup")
                         .with(internalClientJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(listOf(first, second, third))),
@@ -114,7 +114,7 @@ class InternalClientUserControllerTest
 
             mockMvc
                 .perform(
-                    post("/api/intern-klient/authorization/brukere/actions/lookup")
+                    post("/api/intern-klient/authorization/users/actions/lookup")
                         .with(internalClientJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(emptyList<UUID>())),
@@ -126,7 +126,7 @@ class InternalClientUserControllerTest
         fun `lookup returns bad request for invalid json`() {
             mockMvc
                 .perform(
-                    post("/api/intern-klient/authorization/brukere/actions/lookup")
+                    post("/api/intern-klient/authorization/users/actions/lookup")
                         .with(internalClientJwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{invalid"),
@@ -136,7 +136,7 @@ class InternalClientUserControllerTest
         @Test
         fun `internal client endpoint returns unauthorized without authorization header`() {
             mockMvc
-                .perform(get("/api/intern-klient/authorization/brukere/${UUID.randomUUID()}"))
+                .perform(get("/api/intern-klient/authorization/users/${UUID.randomUUID()}"))
                 .andExpect(status().isUnauthorized)
         }
 
@@ -144,7 +144,7 @@ class InternalClientUserControllerTest
         fun `internal client endpoint rejects ordinary user token`() {
             mockMvc
                 .perform(
-                    get("/api/intern-klient/authorization/brukere/${UUID.randomUUID()}")
+                    get("/api/intern-klient/authorization/users/${UUID.randomUUID()}")
                         .with(userJwt()),
                 ).andExpect(status().isForbidden)
         }

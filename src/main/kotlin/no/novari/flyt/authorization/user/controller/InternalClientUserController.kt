@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
-@RequestMapping("$INTERNAL_CLIENT_API/authorization/brukere")
+@RequestMapping("$INTERNAL_CLIENT_API/authorization/users")
 class InternalClientUserController(
     private val userService: UserService,
 ) {
