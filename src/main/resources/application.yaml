@@ -10,6 +10,11 @@ novari:
         sync-schedule:
           initial-delay: 1s
           fixed-delay: 12h
+    web-resource-server:
+      security:
+        api:
+          internal-client:
+            authorized-client-ids: ${fint.flyt.authorization.sso.client-id}
 
 spring:
   profiles:

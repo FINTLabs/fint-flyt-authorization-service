@@ -40,6 +40,10 @@ class UserService(
         return userRepository.findByObjectIdentifier(objectIdentifier)?.let(::mapFromEntity)
     }
 
+    fun findAllByObjectIdentifiers(objectIdentifiers: Collection<UUID>): List<User> {
+        return userRepository.findAllByObjectIdentifierIn(objectIdentifiers).map(::mapFromEntity)
+    }
+
     fun getAll(pageable: Pageable): Page<User> {
         return userRepository.findAll(pageable).map(::mapFromEntity)
     }
