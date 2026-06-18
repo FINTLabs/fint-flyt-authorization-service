@@ -11,7 +11,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.core.annotation.Order
@@ -22,6 +21,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -37,16 +37,16 @@ class InternalClientUserControllerTest
         private val mockMvc: MockMvc,
         private val objectMapper: ObjectMapper,
     ) {
-        @MockBean
+        @MockitoBean
         private lateinit var userService: UserService
 
-        @MockBean
+        @MockitoBean
         private lateinit var tokenParsingUtils: TokenParsingUtils
 
-        @MockBean
+        @MockitoBean
         private lateinit var jwtDecoder: JwtDecoder
 
-        @MockBean
+        @MockitoBean
         private lateinit var sourceApplicationJwtConverter: SourceApplicationJwtConverter
 
         @Test
