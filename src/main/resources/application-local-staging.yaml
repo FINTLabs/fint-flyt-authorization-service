@@ -1,5 +1,9 @@
 fint:
   org-id: novari.no
+  flyt:
+    authorization:
+      sso:
+        client-id: local-authorization-client
 
 novari:
   flyt:

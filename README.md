@@ -4,7 +4,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 ## Highlights
 
-- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` endpoints and enforces admin roles for management actions.
+- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/users` for authorized OAuth2 clients.
 - **Kafka request/reply** — listens for `client-id` authorization requests and replies with source application mappings using the FINT Kafka request/reply utilities.
 - **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced.
 - **Permission auditing** — keeps an Envers history of `user_entity` and `sourceApplicationIds` changes in dedicated audit tables with actor metadata.
@@ -23,6 +23,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 | `UserPermissionEntityProducerService` | Produces last-value `userpermission` events to Kafka with a 4-day retention window. |
 | `UserPublishingComponent` | Conditional scheduler that republishes all users at configured intervals. |
 | `UserController` | Admin-only internal API for paginating users and bulk updating `sourceApplicationIds`. |
+| `InternalClientUserController` | Client-credentials protected internal client API for single and batch user lookups by `objectIdentifier`. |
 | `MeController` | Self-service internal API that provisions users from JWT claims, reports restricted-page access, and returns the current user. |
 | `TokenParsingUtils` / `AccessControlProperties` | Parse JWT claims, check permitted app roles, and detect `ROLE_ADMIN` authority. |
 
@@ -39,6 +40,13 @@ Base path: `/api/intern/authorization`
 | `POST` | `/users/actions/userPermissionBatchPut` | Admin-only bulk upsert of user permissions, then republishes all users. | JSON array of `User` objects (`objectIdentifier`, `email`, `name`, `sourceApplicationIds`). | `200 OK` or `403` on insufficient role. |
 
 Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the caller lacks admin authority).
+
+Base path: `/api/intern-klient/authorization/users`
+
+| Method | Path | Description | Request body | Response |
+| --- | --- | --- | --- | --- |
+| `GET` | `/{objectIdentifier}` | Returns a single `User` by object identifier. | – | `200 OK` with `User` JSON or `404 Not Found`. |
+| `POST` | `/actions/lookup` | Returns all matching users for a batch of object identifiers. | JSON array of UUIDs. | `200 OK` with `List<User>`. |
 
 ## Kafka Integration
 
@@ -59,6 +67,7 @@ Key properties:
 | Property | Description |
 | --- | --- |
 | `fint.application-id` | Defaults to `fint-flyt-authorization-service`. |
+| `fint.flyt.authorization.sso.client-id` | Client ID allowed to call `/api/intern-klient/authorization/users`. |
 | `novari.flyt.authorization.access-control.permitted-approles.*` | Map of allowed app roles (e.g., `flyt-user`, `flyt-developer`) to role URIs used when onboarding users. |
 | `novari.flyt.authorization.access-control.enabled` | Enables the scheduled user-permission publisher. |
 | `novari.flyt.authorization.access-control.sync-schedule.initial-delay-ms` / `fixed-delay-ms` | Interval settings for the publisher task. |
@@ -67,6 +76,7 @@ Key properties:
 | `spring.datasource.*` | JDBC details for Postgres; Flyway migrations live under `classpath:db/migration`. |
 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | OAuth issuer for protecting internal endpoints. |
 | `novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json` | Defines which org/role pairs may call internal APIs (injected by overlays). |
+| `novari.flyt.web-resource-server.security.api.internal-client.authorized-client-ids` | Defines which OAuth2 client IDs may call the internal client API. |
 | `spring.kafka.consumer.group-id` | Defaults to the application ID. |
 
 Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client IDs. The service now binds only `fint.flyt.<app>.sso.client-id` from these secrets; `client-secret` values are not injected into the application environment.
@@ -114,6 +124,7 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 
 - Uses the FINT OAuth2 web-resource-server setup for JWT validation (`spring.security.oauth2.resourceserver.jwt.issuer-uri`).
 - Internal APIs are restricted to callers whose org/role pairs are configured; management endpoints additionally require `ROLE_ADMIN`.
+- Internal client APIs are restricted to configured OAuth2 client IDs and are intended for `client_credentials` callers.
 - Client-authorization replies are limited to explicitly configured SSO client IDs per source application.
 
 ## Observability & Operations
@@ -142,4 +153,3 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 4. Add or adjust tests for any new behaviour or edge cases.
 
 FINT Flyt Authorization Service is maintained by the FINT Flyt team. Reach out via the internal Slack channel or open an issue in this repository for questions or enhancements.
-

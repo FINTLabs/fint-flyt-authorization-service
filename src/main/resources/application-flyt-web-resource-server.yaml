@@ -5,3 +5,5 @@ novari:
         api:
           internal:
             enabled: true
+          internal-client:
+            enabled: true
