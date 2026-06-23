@@ -81,6 +81,10 @@ class UserService(
             name = userEntity.name,
             email = userEntity.email,
             sourceApplicationIds = userEntity.sourceApplicationIds.toList(),
+            createdAt = userEntity.createdAt,
+            createdBy = userEntity.createdBy,
+            lastModifiedAt = userEntity.lastModifiedAt,
+            lastModifiedBy = userEntity.lastModifiedBy,
         )
     }
 

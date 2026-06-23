@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.UniqueConstraint
+import no.novari.flyt.audit.entity.AuditedEntity
 import org.hibernate.annotations.NaturalId
 import org.hibernate.envers.AuditJoinTable
 import org.hibernate.envers.AuditTable
@@ -35,7 +36,7 @@ class UserEntity(
     )
     @Column(name = "source_application_ids")
     var sourceApplicationIds: MutableList<Long> = mutableListOf(),
-) {
+) : AuditedEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
