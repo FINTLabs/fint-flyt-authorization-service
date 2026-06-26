@@ -52,7 +52,6 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
-    implementation("no.novari:kafka:5.0.0")
     implementation("no.novari:flyt-web-resource-server:3.1.0")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
