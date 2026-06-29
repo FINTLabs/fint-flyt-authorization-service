@@ -14,7 +14,7 @@ novari:
       security:
         api:
           internal-client:
-            authorized-client-ids: ${fint.flyt.authorization.sso.client-id:}
+            authorized-client-ids: ${fint.flyt.authorization.sso.client-id}
 
 spring:
   profiles:
