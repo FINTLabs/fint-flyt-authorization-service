@@ -59,7 +59,6 @@ spec:
         secretKeyRef:
           name: fint-flyt-authorization-oauth2-client
           key: fint.sso.client-id
-          optional: true
   resources:
     limits:
       memory: "1024Mi"
