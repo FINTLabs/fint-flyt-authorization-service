@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
-import java.util.UUID
 
 @RestController
 @RequestMapping("$INTERNAL_API/authorization/me")
@@ -25,10 +24,8 @@ class MeController(
     @GetMapping("is-authorized")
     fun checkAuthorization(authentication: Authentication?): String {
         val jwtAuthToken = requireJwtAuthenticationToken(authentication)
-        if (getUserFromUserAuthorizationComponent(jwtAuthToken) == null &&
-            tokenParsingUtils.hasPermittedRole(jwtAuthToken)
-        ) {
-            createUserFromToken(authentication)
+        if (tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
+            userService.findOrCreate(buildUserFromToken(jwtAuthToken, authentication))
         }
 
         return "User authorized"
@@ -44,26 +41,19 @@ class MeController(
     @GetMapping
     fun get(authentication: Authentication?): User {
         val jwtAuthToken = requireJwtAuthenticationToken(authentication)
-
-        return getUserFromUserAuthorizationComponent(jwtAuthToken) ?: createUserFromToken(authentication)
+        return userService.findOrCreate(buildUserFromToken(jwtAuthToken, authentication))
     }
 
-    private fun getUserFromUserAuthorizationComponent(token: JwtAuthenticationToken): User? {
-        return userService.find(UUID.fromString(tokenParsingUtils.getObjectIdentifierFromToken(token)))
-    }
-
-    private fun createUserFromToken(authentication: Authentication?): User {
-        val jwtAuthToken = requireJwtAuthenticationToken(authentication)
+    private fun buildUserFromToken(
+        jwtAuthToken: JwtAuthenticationToken,
+        authentication: Authentication?,
+    ): User {
         val user = tokenParsingUtils.getUserFromToken(jwtAuthToken)
-        val newUser =
-            if (tokenParsingUtils.isAdmin(authentication)) {
-                user.copy(sourceApplicationIds = allSourceApplicationIds())
-            } else {
-                user
-            }
-
-        userService.save(newUser)
-        return newUser
+        return if (tokenParsingUtils.isAdmin(authentication)) {
+            user.copy(sourceApplicationIds = allSourceApplicationIds())
+        } else {
+            user
+        }
     }
 
     private fun allSourceApplicationIds(): List<Long> {
