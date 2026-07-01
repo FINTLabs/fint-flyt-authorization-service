@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class UserService(
@@ -49,6 +50,10 @@ class UserService(
             )
             mapFromEntity(existing)
         }
+    }
+
+    fun find(objectIdentifier: UUID): User? {
+        return userRepository.findByObjectIdentifier(objectIdentifier)?.let(::mapFromEntity)
     }
 
     fun findAllByObjectIdentifiers(objectIdentifiers: Collection<UUID>): List<User> {
