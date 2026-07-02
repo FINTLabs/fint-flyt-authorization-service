@@ -53,7 +53,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     implementation("no.novari:flyt-web-resource-server:3.1.0")
-    implementation("no.novari:flyt-audit-starter:1.0.0-rc-9")
+    implementation("no.novari:flyt-audit-starter:1.0.0-rc-10")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
