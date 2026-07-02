@@ -5,7 +5,9 @@ import no.novari.flyt.authorization.user.kafka.UserPermission
 import no.novari.flyt.authorization.user.kafka.UserPermissionEntityProducerService
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.authorization.user.model.UserEntity
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -34,9 +36,23 @@ class UserService(
         }
     }
 
-    fun save(user: User) {
-        val userEntity = userRepository.save(mapFromUser(user))
-        userPermissionEntityProducerService.send(mapFromEntityToUserPermission(userEntity))
+    fun findOrCreate(user: User): User {
+        userRepository.findByObjectIdentifier(user.objectIdentifier)?.let {
+            return mapFromEntity(it)
+        }
+
+        return try {
+            val savedEntity = userRepository.saveAndFlush(mapFromUser(user))
+            userPermissionEntityProducerService.send(mapFromEntityToUserPermission(savedEntity))
+            mapFromEntity(savedEntity)
+        } catch (exception: DataIntegrityViolationException) {
+            val existing = userRepository.findByObjectIdentifier(user.objectIdentifier) ?: throw exception
+            logger.info(
+                "Lost race when creating user with objectIdentifier={}; returning existing user",
+                user.objectIdentifier,
+            )
+            mapFromEntity(existing)
+        }
     }
 
     fun find(objectIdentifier: UUID): User? {
@@ -124,6 +140,6 @@ class UserService(
     }
 
     private companion object {
-        val logger = LoggerFactory.getLogger(UserService::class.java)
+        val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
     }
 }
