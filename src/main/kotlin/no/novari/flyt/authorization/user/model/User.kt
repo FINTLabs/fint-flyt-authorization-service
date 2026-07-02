@@ -13,9 +13,13 @@ data class User(
     @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
     val createdAt: Instant? = null,
     @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    val createdBy: Actor? = null,
+    val createdBy: String? = null,
+    @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    val createdByActor: Actor? = null,
     @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
     val lastModifiedAt: Instant? = null,
     @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    val lastModifiedBy: Actor? = null,
+    val lastModifiedBy: String? = null,
+    @field:JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    val lastModifiedByActor: Actor? = null,
 )

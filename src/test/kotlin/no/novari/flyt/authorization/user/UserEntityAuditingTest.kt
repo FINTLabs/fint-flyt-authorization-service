@@ -108,7 +108,7 @@ class UserEntityAuditingTest
                 Jwt
                     .withTokenValue("token")
                     .header("alg", "none")
-                    .claim("oid", oid.toString())
+                    .claim("objectidentifier", oid.toString())
                     .build()
             SecurityContextHolder.getContext().authentication = JwtAuthenticationToken(jwt)
         }

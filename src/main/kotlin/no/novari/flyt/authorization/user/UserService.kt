@@ -1,11 +1,13 @@
 package no.novari.flyt.authorization.user
 
+import no.novari.flyt.audit.actor.ActorDisplayResolver
 import no.novari.flyt.authorization.user.kafka.UserPermission
 import no.novari.flyt.authorization.user.kafka.UserPermissionEntityProducerService
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.authorization.user.model.UserEntity
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -14,6 +16,7 @@ import java.util.UUID
 class UserService(
     private val userRepository: UserRepository,
     private val userPermissionEntityProducerService: UserPermissionEntityProducerService,
+    private val actorDisplayResolver: ActorDisplayResolver,
 ) {
     fun publishUsers() {
         logger.info("Starting publishing users")
@@ -41,11 +44,12 @@ class UserService(
     }
 
     fun findAllByObjectIdentifiers(objectIdentifiers: Collection<UUID>): List<User> {
-        return userRepository.findAllByObjectIdentifierIn(objectIdentifiers).map(::mapFromEntity)
+        return mapAllFromEntities(userRepository.findAllByObjectIdentifierIn(objectIdentifiers))
     }
 
     fun getAll(pageable: Pageable): Page<User> {
-        return userRepository.findAll(pageable).map(::mapFromEntity)
+        val page = userRepository.findAll(pageable)
+        return PageImpl(mapAllFromEntities(page.content), pageable, page.totalElements)
     }
 
     fun putAll(users: List<User>) {
@@ -75,18 +79,42 @@ class UserService(
         )
     }
 
-    private fun mapFromEntity(userEntity: UserEntity): User {
-        return User(
+    private fun mapFromEntity(userEntity: UserEntity): User =
+        toUser(
+            userEntity = userEntity,
+            createdByDisplay = actorDisplayResolver.resolve(userEntity.createdBy),
+            lastModifiedByDisplay = actorDisplayResolver.resolve(userEntity.lastModifiedBy),
+        )
+
+    private fun mapAllFromEntities(userEntities: List<UserEntity>): List<User> {
+        val createdByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.createdBy })
+        val lastModifiedByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.lastModifiedBy })
+        return userEntities.map { userEntity ->
+            toUser(
+                userEntity = userEntity,
+                createdByDisplay = createdByDisplay[userEntity.createdBy],
+                lastModifiedByDisplay = lastModifiedByDisplay[userEntity.lastModifiedBy],
+            )
+        }
+    }
+
+    private fun toUser(
+        userEntity: UserEntity,
+        createdByDisplay: String?,
+        lastModifiedByDisplay: String?,
+    ): User =
+        User(
             objectIdentifier = checkNotNull(userEntity.objectIdentifier),
             name = userEntity.name,
             email = userEntity.email,
             sourceApplicationIds = userEntity.sourceApplicationIds.toList(),
             createdAt = userEntity.createdAt,
-            createdBy = userEntity.createdBy,
+            createdBy = createdByDisplay,
+            createdByActor = userEntity.createdBy,
             lastModifiedAt = userEntity.lastModifiedAt,
-            lastModifiedBy = userEntity.lastModifiedBy,
+            lastModifiedBy = lastModifiedByDisplay,
+            lastModifiedByActor = userEntity.lastModifiedBy,
         )
-    }
 
     private fun mapFromEntityToUserPermission(userEntity: UserEntity): UserPermission {
         return UserPermission(

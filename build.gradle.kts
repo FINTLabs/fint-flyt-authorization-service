@@ -1,5 +1,5 @@
 plugins {
-    id("org.springframework.boot") version "3.5.15"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.ben-manes.versions") version "0.54.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
@@ -53,7 +53,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     implementation("no.novari:flyt-web-resource-server:3.1.0")
-    implementation("no.novari:flyt-audit-starter:1.0.0-rc-3")
+    implementation("no.novari:flyt-audit-starter:1.0.0-rc-8")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
