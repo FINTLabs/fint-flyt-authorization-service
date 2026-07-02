@@ -1,5 +1,6 @@
 package no.novari.flyt.authorization.user
 
+import no.novari.flyt.audit.actor.Actor
 import no.novari.flyt.audit.actor.ActorDisplayResolver
 import no.novari.flyt.authorization.user.kafka.UserPermission
 import no.novari.flyt.authorization.user.kafka.UserPermissionEntityProducerService
@@ -98,18 +99,18 @@ class UserService(
     private fun mapFromEntity(userEntity: UserEntity): User =
         toUser(
             userEntity = userEntity,
-            createdByDisplay = actorDisplayResolver.resolve(userEntity.createdBy),
-            lastModifiedByDisplay = actorDisplayResolver.resolve(userEntity.lastModifiedBy),
+            createdByDisplay = actorDisplayResolver.resolve(userEntity.createdByOrNull()),
+            lastModifiedByDisplay = actorDisplayResolver.resolve(userEntity.lastModifiedByOrNull()),
         )
 
     private fun mapAllFromEntities(userEntities: List<UserEntity>): List<User> {
-        val createdByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.createdBy })
-        val lastModifiedByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.lastModifiedBy })
+        val createdByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.createdByOrNull() })
+        val lastModifiedByDisplay = actorDisplayResolver.resolveAll(userEntities.map { it.lastModifiedByOrNull() })
         return userEntities.map { userEntity ->
             toUser(
                 userEntity = userEntity,
-                createdByDisplay = createdByDisplay[userEntity.createdBy],
-                lastModifiedByDisplay = lastModifiedByDisplay[userEntity.lastModifiedBy],
+                createdByDisplay = userEntity.createdByOrNull()?.let(createdByDisplay::get),
+                lastModifiedByDisplay = userEntity.lastModifiedByOrNull()?.let(lastModifiedByDisplay::get),
             )
         }
     }
@@ -126,11 +127,30 @@ class UserService(
             sourceApplicationIds = userEntity.sourceApplicationIds.toList(),
             createdAt = userEntity.createdAt,
             createdBy = createdByDisplay,
-            createdByActor = userEntity.createdBy,
+            createdByActor = userEntity.createdByOrNull(),
             lastModifiedAt = userEntity.lastModifiedAt,
             lastModifiedBy = lastModifiedByDisplay,
-            lastModifiedByActor = userEntity.lastModifiedBy,
+            lastModifiedByActor = userEntity.lastModifiedByOrNull(),
         )
+
+    /**
+     * `createdBy`/`lastModifiedBy` er lateinit på entiteten og først satt av JPA Auditing ved
+     * flush. Testkode som konstruerer [UserEntity] direkte uten å gå via persistens (f.eks. med
+     * mocket [UserRepository]) vil ikke ha disse satt.
+     */
+    private fun UserEntity.createdByOrNull(): Actor? =
+        try {
+            createdBy
+        } catch (_: UninitializedPropertyAccessException) {
+            null
+        }
+
+    private fun UserEntity.lastModifiedByOrNull(): Actor? =
+        try {
+            lastModifiedBy
+        } catch (_: UninitializedPropertyAccessException) {
+            null
+        }
 
     private fun mapFromEntityToUserPermission(userEntity: UserEntity): UserPermission {
         return UserPermission(

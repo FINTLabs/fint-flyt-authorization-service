@@ -1,5 +1,8 @@
 package no.novari.flyt.authorization.user
 
+import no.novari.flyt.audit.actor.ActorDisplayProperties
+import no.novari.flyt.audit.actor.ActorDisplayResolver
+import no.novari.flyt.audit.actor.ActorNameLookup
 import no.novari.flyt.authorization.user.kafka.UserPermission
 import no.novari.flyt.authorization.user.kafka.UserPermissionEntityProducerService
 import no.novari.flyt.authorization.user.model.User
@@ -19,6 +22,8 @@ import org.springframework.dao.DataIntegrityViolationException
 import java.util.UUID
 
 class UserServiceTest {
+    private val actorDisplayResolver = ActorDisplayResolver(ActorNameLookup { emptyMap() }, ActorDisplayProperties())
+
     @Test
     fun `findOrCreate returns existing user without inserting or publishing`() {
         val objectIdentifier = UUID.randomUUID()
@@ -35,7 +40,7 @@ class UserServiceTest {
                 on { findByObjectIdentifier(objectIdentifier) } doReturn existing
             }
         val producer = mock<UserPermissionEntityProducerService>()
-        val service = UserService(repository, producer)
+        val service = UserService(repository, producer, actorDisplayResolver)
 
         val result =
             service.findOrCreate(
@@ -64,7 +69,7 @@ class UserServiceTest {
                 }
             }
         val producer = mock<UserPermissionEntityProducerService>()
-        val service = UserService(repository, producer)
+        val service = UserService(repository, producer, actorDisplayResolver)
 
         val result =
             service.findOrCreate(
@@ -102,7 +107,7 @@ class UserServiceTest {
                 } doThrow DataIntegrityViolationException("uk_td2dvdf4t2le4cydfk7a1x17i")
             }
         val producer = mock<UserPermissionEntityProducerService>()
-        val service = UserService(repository, producer)
+        val service = UserService(repository, producer, actorDisplayResolver)
 
         val result =
             service.findOrCreate(
@@ -132,7 +137,7 @@ class UserServiceTest {
                 } doThrow DataIntegrityViolationException("some other constraint")
             }
         val producer = mock<UserPermissionEntityProducerService>()
-        val service = UserService(repository, producer)
+        val service = UserService(repository, producer, actorDisplayResolver)
 
         assertThrows(DataIntegrityViolationException::class.java) {
             service.findOrCreate(
