@@ -37,7 +37,7 @@ update revinfo
 set actor_jsonb = jsonb_build_object('type', 'USER', 'oid', actor)
 where actor ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
 
--- Resolv kjente e-poster til ekte OID via user_entity, kun ved nøyaktig én match
+-- Slå opp kjente e-poster til ekte OID via user_entity, kun ved nøyaktig én match
 -- (email er verken unik eller garantert satt).
 update revinfo r
 set actor_jsonb = jsonb_build_object('type', 'USER', 'oid', u.object_identifier)
