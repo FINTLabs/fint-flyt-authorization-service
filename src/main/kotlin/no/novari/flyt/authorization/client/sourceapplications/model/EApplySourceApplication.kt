@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class EApplySourceApplication(
     @Value("\${fint.flyt.eapply.sso.client-id:#{null}}")
     clientId: String?,
-    @Value("\${fint.flyt.eapply.available:false}")
+    @Value("\${fint.flyt.eapply.available:true}")
     available: Boolean,
 ) : BaseSourceApplication(
         id = 10L,
