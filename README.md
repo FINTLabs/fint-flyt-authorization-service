@@ -13,19 +13,19 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 ## Architecture Overview
 
-| Component | Responsibility |
-| --- | --- |
-| `ClientAuthorizationRequestConfiguration` | Provisions the Kafka request topic (`authorization` / `client-id`) and hosts the listener that responds to client ID lookups. |
-| `ClientAuthorizationProducerRecordBuilder` | Resolves incoming client IDs to `ClientAuthorization` replies with the correct `sourceApplicationId`, or marks them unauthorized. |
-| `AcosSourceApplication`, `DigisakSourceApplication`, `EgrunnervervSourceApplication`, `VigoSourceApplication`, `AltinnSourceApplication`, `HMSRegSourceApplication` | Bind SSO client IDs from properties and expose static source-application IDs used in authorization replies. |
-| `UserService` | Core business logic for persisting users, mapping DTOs/entities, and emitting `UserPermission` Kafka events. |
-| `UserRepository` | Spring Data JPA repository for `UserEntity` storage and lookups by `objectIdentifier`. |
-| `UserPermissionEntityProducerService` | Produces last-value `userpermission` events to Kafka with a 4-day retention window. |
-| `UserPublishingComponent` | Conditional scheduler that republishes all users at configured intervals. |
-| `UserController` | Admin-only internal API for paginating users and bulk updating `sourceApplicationIds`. |
-| `InternalClientUserController` | Client-credentials protected internal client API for single and batch user lookups by `objectIdentifier`. |
-| `MeController` | Self-service internal API that provisions users from JWT claims, reports restricted-page access, and returns the current user. |
-| `TokenParsingUtils` / `AccessControlProperties` | Parse JWT claims, check permitted app roles, and detect `ROLE_ADMIN` authority. |
+| Component                                                                                                                                                                                      | Responsibility |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| --- |
+| `ClientAuthorizationRequestConfiguration`                                                                                                                                                      | Provisions the Kafka request topic (`authorization` / `client-id`) and hosts the listener that responds to client ID lookups. |
+| `ClientAuthorizationProducerRecordBuilder`                                                                                                                                                     | Resolves incoming client IDs to `ClientAuthorization` replies with the correct `sourceApplicationId`, or marks them unauthorized. |
+| `AcosSourceApplication`, `AltinnSourceApplication`, `DigisakSourceApplication`, `EApplySourceApplication`, `EgrunnervervSourceApplication`, `FSkyssSourceApplication`, `HMSRegSourceApplication`, `IsyGravingSourceApplication`, `SiDESourceApplication`, `VigoSourceApplication` | Bind SSO client IDs from properties and expose static source-application IDs used in authorization replies. |
+| `UserService`                                                                                                                                                                                  | Core business logic for persisting users, mapping DTOs/entities, and emitting `UserPermission` Kafka events. |
+| `UserRepository`                                                                                                                                                                               | Spring Data JPA repository for `UserEntity` storage and lookups by `objectIdentifier`. |
+| `UserPermissionEntityProducerService`                                                                                                                                                          | Produces last-value `userpermission` events to Kafka with a 4-day retention window. |
+| `UserPublishingComponent`                                                                                                                                                                      | Conditional scheduler that republishes all users at configured intervals. |
+| `UserController`                                                                                                                                                                               | Admin-only internal API for paginating users and bulk updating `sourceApplicationIds`. |
+| `InternalClientUserController`                                                                                                                                                                 | Client-credentials protected internal client API for single and batch user lookups by `objectIdentifier`. |
+| `MeController`                                                                                                                                                                                 | Self-service internal API that provisions users from JWT claims, reports restricted-page access, and returns the current user. |
+| `TokenParsingUtils` / `AccessControlProperties`                                                                                                                                                | Parse JWT claims, check permitted app roles, and detect `ROLE_ADMIN` authority. |
 
 ## HTTP API
 
@@ -153,3 +153,4 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 4. Add or adjust tests for any new behaviour or edge cases.
 
 FINT Flyt Authorization Service is maintained by the FINT Flyt team. Reach out via the internal Slack channel or open an issue in this repository for questions or enhancements.
+
