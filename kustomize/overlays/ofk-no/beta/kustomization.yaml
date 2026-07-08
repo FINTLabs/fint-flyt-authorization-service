@@ -101,14 +101,6 @@ patches:
   - patch: |-
       - op: replace
         path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-eapply-oauth2-client-ofk-no"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-eapply-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-egrunnerverv-oauth2-client"
     target:
       kind: OnePasswordItem

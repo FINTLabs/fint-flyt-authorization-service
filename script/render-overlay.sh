@@ -37,10 +37,10 @@ extra_resources_for_overlay() {
       printf 'side-oauth2-client.yaml'
       ;;
     fintlabs-no:beta)
-      printf 'digisak-oauth2-client.yaml side-oauth2-client.yaml'
+      printf 'digisak-oauth2-client.yaml side-oauth2-client.yaml eapply-onepassword.yaml'
       ;;
     vlfk-no:beta)
-      printf 'digisak-oauth2-client.yaml'
+      printf 'digisak-oauth2-client.yaml eapply-onepassword.yaml'
       ;;
     *)
       printf ''
@@ -65,10 +65,10 @@ extra_env_for_overlay() {
       printf 'fint.flyt.side.available'
       ;;
     fintlabs-no:beta)
-      printf 'fint.flyt.digisak.available fint.flyt.side.available'
+      printf 'fint.flyt.digisak.available fint.flyt.side.available fint.flyt.eapply.available'
       ;;
     vlfk-no:beta)
-      printf 'fint.flyt.digisak.available'
+      printf 'fint.flyt.digisak.available fint.flyt.eapply.available'
       ;;
     *)
       printf ''
@@ -93,10 +93,10 @@ extra_client_id_apps_for_overlay() {
       printf 'side'
       ;;
     fintlabs-no:beta)
-      printf 'digisak side'
+      printf 'digisak side eapply'
       ;;
     vlfk-no:beta)
-      printf 'digisak'
+      printf 'digisak eapply'
       ;;
     *)
       printf ''
@@ -112,6 +112,15 @@ client_id_property_for_app() {
 oauth2_secret_name_for_app() {
   local app="$1"
   printf 'fint-flyt-%s-oauth2-client' "$app"
+}
+
+base_client_resource_kind_for_app() {
+  local app="$1"
+  case "$app" in
+    vigo) printf 'NamOAuthClientApplicationResource' ;;
+    eapply|altinn|egrunnerverv) printf 'OnePasswordItem' ;;
+    *) return 1 ;;
+  esac
 }
 
 excluded_base_client_id_apps_for_overlay() {
@@ -138,10 +147,10 @@ onepassword_item_names_for_overlay() {
   local env_path="$2"
   case "${namespace}:${env_path}" in
     *:api)
-      printf '%s\n' 'fint-flyt-eapply-oauth2-client'
+      printf ''
       ;;
     *:beta)
-      base_onepassword_item_names
+      base_onepassword_item_names | sed '/^fint-flyt-eapply-oauth2-client$/d'
       ;;
     *)
       printf ''
@@ -299,9 +308,6 @@ while IFS= read -r file; do
   if ((${#onepassword_item_names[@]})); then
     for item_name in "${onepassword_item_names[@]}"; do
       item_path="$item_name"
-      if [[ "$item_name" == "fint-flyt-eapply-oauth2-client" ]]; then
-        item_path="${item_name}-${namespace}"
-      fi
       EXTRA_PATCHES+=$'\n'
       EXTRA_PATCHES+=$'  - patch: |-\n'
       EXTRA_PATCHES+=$'      - op: replace\n'
@@ -316,18 +322,19 @@ while IFS= read -r file; do
 
   if [[ -n "$excluded_base_client_id_apps" ]]; then
     for app in $excluded_base_client_id_apps; do
+      env_index='1'
       EXTRA_PATCHES+=$'\n'
       EXTRA_PATCHES+=$'  - patch: |-\n'
       EXTRA_PATCHES+=$'      - op: remove\n'
-      EXTRA_PATCHES+=$'        path: "/spec/env/1"\n'
+      EXTRA_PATCHES+=$'        path: "/spec/env/'"${env_index}"$'"\n'
       EXTRA_PATCHES+=$'    target:\n'
       EXTRA_PATCHES+=$'      kind: Application\n'
       EXTRA_PATCHES+=$'      name: fint-flyt-authorization-service\n'
       EXTRA_PATCHES+=$'\n'
       EXTRA_PATCHES+=$'  - patch: |-\n'
       EXTRA_PATCHES+=$'      $patch: delete\n'
-      EXTRA_PATCHES+=$'      apiVersion: fintlabs.no/v1alpha1\n'
-      EXTRA_PATCHES+=$'      kind: NamOAuthClientApplicationResource\n'
+      EXTRA_PATCHES+=$'      apiVersion: '"$(if [[ "$app" == "vigo" ]]; then printf 'fintlabs.no/v1alpha1'; else printf 'onepassword.com/v1'; fi)"$'\n'
+      EXTRA_PATCHES+=$'      kind: '"$(base_client_resource_kind_for_app "$app")"$'\n'
       EXTRA_PATCHES+=$'      metadata:\n'
       EXTRA_PATCHES+=$'        name: '"$(oauth2_secret_name_for_app "$app")"$'\n'
     done
