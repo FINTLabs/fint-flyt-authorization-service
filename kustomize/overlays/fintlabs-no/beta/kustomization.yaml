@@ -6,6 +6,7 @@ resources:
   - ../../../base
   - digisak-oauth2-client.yaml
   - side-oauth2-client.yaml
+  - eapply-onepassword.yaml
 
 labels:
   - pairs:
@@ -49,6 +50,11 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
+          name: "fint.flyt.eapply.available"
+          value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
           name: "fint.flyt.digisak.sso.client-id"
           valueFrom:
             secretKeyRef:
@@ -62,6 +68,14 @@ patches:
             secretKeyRef:
               name: fint-flyt-side-oauth2-client
               key: fint.flyt.side.sso.client-id
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.eapply.sso.client-id"
+          valueFrom:
+            secretKeyRef:
+              name: fint-flyt-eapply-oauth2-client
+              key: fint.flyt.eapply.sso.client-id
 
       - op: add
         path: "/spec/env/-"
@@ -95,14 +109,6 @@ patches:
     target:
       kind: OnePasswordItem
       name: fint-flyt-altinn-oauth2-client
-
-  - patch: |-
-      - op: replace
-        path: "/spec/itemPath"
-        value: "vaults/aks-beta-vault/items/fint-flyt-eapply-oauth2-client-fintlabs-no"
-    target:
-      kind: OnePasswordItem
-      name: fint-flyt-eapply-oauth2-client
 
   - patch: |-
       - op: replace
