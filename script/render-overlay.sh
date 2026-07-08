@@ -137,6 +137,9 @@ onepassword_item_names_for_overlay() {
   local namespace="$1"
   local env_path="$2"
   case "${namespace}:${env_path}" in
+    *:api)
+      printf '%s\n' 'fint-flyt-eapply-oauth2-client'
+      ;;
     *:beta)
       base_onepassword_item_names
       ;;
@@ -200,6 +203,18 @@ while IFS= read -r file; do
   if [[ -n "$env_path" && "$env_path" != "api" ]]; then
     path_prefix="/${env_path}/$namespace"
   fi
+
+  case "$env_path" in
+    api)
+      vault_name="aks-api-vault"
+      ;;
+    beta)
+      vault_name="aks-beta-vault"
+      ;;
+    *)
+      vault_name="aks-api-vault"
+      ;;
+  esac
 
   declare -a additional_user_orgs=()
   extra_orgs="$(extra_user_orgs_for_namespace "$namespace")"
@@ -283,11 +298,15 @@ while IFS= read -r file; do
   EXTRA_PATCHES=""
   if ((${#onepassword_item_names[@]})); then
     for item_name in "${onepassword_item_names[@]}"; do
+      item_path="$item_name"
+      if [[ "$item_name" == "fint-flyt-eapply-oauth2-client" ]]; then
+        item_path="${item_name}-${namespace}"
+      fi
       EXTRA_PATCHES+=$'\n'
       EXTRA_PATCHES+=$'  - patch: |-\n'
       EXTRA_PATCHES+=$'      - op: replace\n'
       EXTRA_PATCHES+=$'        path: "/spec/itemPath"\n'
-      EXTRA_PATCHES+=$'        value: "vaults/aks-beta-vault/items/'"${item_name}"$'"\n'
+      EXTRA_PATCHES+=$'        value: "vaults/'"${vault_name}"$'/items/'"${item_path}"$'"\n'
       EXTRA_PATCHES+=$'    target:\n'
       EXTRA_PATCHES+=$'      kind: OnePasswordItem\n'
       EXTRA_PATCHES+=$'      name: '"${item_name}"$'\n'

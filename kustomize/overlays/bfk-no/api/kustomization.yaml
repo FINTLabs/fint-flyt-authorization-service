@@ -104,3 +104,10 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
+  - patch: |-
+      - op: replace
+        path: "/spec/itemPath"
+        value: "vaults/aks-api-vault/items/fint-flyt-eapply-oauth2-client-bfk-no"
+    target:
+      kind: OnePasswordItem
+      name: fint-flyt-eapply-oauth2-client
