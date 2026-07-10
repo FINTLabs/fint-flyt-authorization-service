@@ -38,7 +38,7 @@ class UserService(
 
     fun findOrCreate(user: User): User {
         userRepository.findByObjectIdentifier(user.objectIdentifier)?.let {
-            return mapFromEntity(it)
+            return mapFromEntity(syncNameAndEmail(it, user))
         }
 
         return try {
@@ -84,6 +84,22 @@ class UserService(
         }
 
         userRepository.saveAll(entities)
+    }
+
+    private fun syncNameAndEmail(
+        entity: UserEntity,
+        user: User,
+    ): UserEntity {
+        var changed = false
+        if (!user.name.isNullOrBlank() && user.name != entity.name) {
+            entity.name = user.name
+            changed = true
+        }
+        if (!user.email.isNullOrBlank() && user.email != entity.email) {
+            entity.email = user.email
+            changed = true
+        }
+        return if (changed) userRepository.save(entity) else entity
     }
 
     private fun mapFromUser(user: User): UserEntity {
