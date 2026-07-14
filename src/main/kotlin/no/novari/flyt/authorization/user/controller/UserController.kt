@@ -3,8 +3,8 @@ package no.novari.flyt.authorization.user.controller
 import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.User
+import no.novari.flyt.authorization.user.model.UserPageResponse
 import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_API
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
@@ -25,15 +25,20 @@ class UserController(
     private val userService: UserService,
 ) {
     @GetMapping
-    fun get(
+    fun getUsers(
         authentication: Authentication?,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "name") sort: String,
-    ): Page<User> {
+    ): UserPageResponse {
         requireAdmin(authentication)
 
-        return userService.getAll(PageRequest.of(page, size, Sort.by(sort)))
+        val users = userService.getAll(PageRequest.of(page, size, Sort.by(sort)))
+
+        return UserPageResponse(
+            content = users.content,
+            totalPages = users.totalPages,
+        )
     }
 
     @PostMapping("actions/userPermissionBatchPut")
