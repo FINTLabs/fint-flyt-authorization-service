@@ -80,20 +80,24 @@ class UserEntityAuditingTest
             val auditReader = AuditReaderFactory.get(entityManager)
             val revisions = auditReader.getRevisions(UserEntity::class.java, createdUser.id)
 
-            assertEquals(listOf(1L, 2L), revisions)
-            assertEquals(listOf(1L), auditReader.find(UserEntity::class.java, createdUser.id, 1).sourceApplicationIds)
+            assertEquals(2, revisions.size)
+            val (firstRevision, secondRevision) = revisions
+            assertEquals(
+                listOf(1L),
+                auditReader.find(UserEntity::class.java, createdUser.id, firstRevision).sourceApplicationIds,
+            )
             assertEquals(
                 listOf(1L, 2L),
-                auditReader.find(UserEntity::class.java, createdUser.id, 2).sourceApplicationIds,
+                auditReader.find(UserEntity::class.java, createdUser.id, secondRevision).sourceApplicationIds,
             )
 
             assertEquals(
                 Actor.User(creatorOid),
-                auditReader.findRevision(ActorRevisionEntity::class.java, 1).actor,
+                auditReader.findRevision(ActorRevisionEntity::class.java, firstRevision).actor,
             )
             assertEquals(
                 Actor.User(editorOid),
-                auditReader.findRevision(ActorRevisionEntity::class.java, 2).actor,
+                auditReader.findRevision(ActorRevisionEntity::class.java, secondRevision).actor,
             )
 
             val persistedUser = userRepository.findById(createdUser.id!!).orElseThrow()
@@ -101,6 +105,69 @@ class UserEntityAuditingTest
             assertEquals(Actor.User(editorOid), persistedUser.lastModifiedBy)
             assertNotNull(persistedUser.createdAt)
             assertNotNull(persistedUser.lastModifiedAt)
+        }
+
+        @Test
+        fun `persists name and email revisions with actor metadata`() {
+            val creatorOid = UUID.randomUUID()
+            val editorOid = UUID.randomUUID()
+
+            authenticateAs(creatorOid)
+
+            val createdUser =
+                userRepository.saveAndFlush(
+                    UserEntity(
+                        objectIdentifier = UUID.randomUUID(),
+                        email = "original@example.no",
+                        name = "Original Name",
+                        sourceApplicationIds = mutableListOf(1L),
+                    ),
+                )
+
+            TestTransaction.flagForCommit()
+            TestTransaction.end()
+
+            TestTransaction.start()
+
+            authenticateAs(editorOid)
+
+            val updatedUser = userRepository.findById(checkNotNull(createdUser.id)).orElseThrow()
+            updatedUser.name = "Updated Name"
+            updatedUser.email = "updated@example.no"
+            userRepository.saveAndFlush(updatedUser)
+
+            TestTransaction.flagForCommit()
+            TestTransaction.end()
+
+            TestTransaction.start()
+            entityManager.clear()
+
+            val auditReader = AuditReaderFactory.get(entityManager)
+            val revisions = auditReader.getRevisions(UserEntity::class.java, createdUser.id)
+
+            assertEquals(2, revisions.size)
+            val (firstRevisionNumber, secondRevisionNumber) = revisions
+
+            val firstRevision = auditReader.find(UserEntity::class.java, createdUser.id, firstRevisionNumber)
+            assertEquals("Original Name", firstRevision.name)
+            assertEquals("original@example.no", firstRevision.email)
+
+            val secondRevision = auditReader.find(UserEntity::class.java, createdUser.id, secondRevisionNumber)
+            assertEquals("Updated Name", secondRevision.name)
+            assertEquals("updated@example.no", secondRevision.email)
+
+            assertEquals(
+                Actor.User(creatorOid),
+                auditReader.findRevision(ActorRevisionEntity::class.java, firstRevisionNumber).actor,
+            )
+            assertEquals(
+                Actor.User(editorOid),
+                auditReader.findRevision(ActorRevisionEntity::class.java, secondRevisionNumber).actor,
+            )
+
+            val persistedUser = userRepository.findById(createdUser.id!!).orElseThrow()
+            assertEquals(Actor.User(creatorOid), persistedUser.createdBy)
+            assertEquals(Actor.User(editorOid), persistedUser.lastModifiedBy)
         }
 
         private fun authenticateAs(oid: UUID) {

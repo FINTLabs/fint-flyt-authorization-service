@@ -25,7 +25,7 @@ class UserServiceTest {
     private val actorDisplayResolver = ActorDisplayResolver(ActorNameLookup { emptyMap() }, ActorDisplayProperties())
 
     @Test
-    fun `findOrCreate returns existing user without inserting or publishing`() {
+    fun `findOrCreate does not save when token name and email match stored values`() {
         val objectIdentifier = UUID.randomUUID()
         val existing =
             UserEntity(
@@ -46,15 +46,119 @@ class UserServiceTest {
             service.findOrCreate(
                 User(
                     objectIdentifier = objectIdentifier,
-                    name = "From token",
-                    email = "token@novari.no",
+                    name = "Existing",
+                    email = "existing@novari.no",
                     sourceApplicationIds = listOf(1L),
                 ),
             )
 
         assertEquals(objectIdentifier, result.objectIdentifier)
         assertEquals("Existing", result.name)
+        verify(repository, never()).save(any<UserEntity>())
         verify(repository, never()).saveAndFlush(any<UserEntity>())
+        verify(producer, never()).send(any())
+    }
+
+    @Test
+    fun `findOrCreate updates name and email when they differ from stored values`() {
+        val objectIdentifier = UUID.randomUUID()
+        val existing =
+            UserEntity(
+                objectIdentifier = objectIdentifier,
+                name = "Existing",
+                email = "existing@novari.no",
+                sourceApplicationIds = mutableListOf(1L),
+            ).apply { id = 1L }
+
+        val repository =
+            mock<UserRepository> {
+                on { findByObjectIdentifier(objectIdentifier) } doReturn existing
+                on { save(any<UserEntity>()) } doAnswer { it.arguments[0] as UserEntity }
+            }
+        val producer = mock<UserPermissionEntityProducerService>()
+        val service = UserService(repository, producer, actorDisplayResolver)
+
+        val result =
+            service.findOrCreate(
+                User(
+                    objectIdentifier = objectIdentifier,
+                    name = "From token",
+                    email = "token@novari.no",
+                    sourceApplicationIds = listOf(1L),
+                ),
+            )
+
+        assertEquals("From token", result.name)
+        assertEquals("token@novari.no", result.email)
+        verify(repository).save(existing)
+        verify(producer, never()).send(any())
+    }
+
+    @Test
+    fun `findOrCreate preserves stored name when token name is blank`() {
+        val objectIdentifier = UUID.randomUUID()
+        val existing =
+            UserEntity(
+                objectIdentifier = objectIdentifier,
+                name = "Manually corrected name",
+                email = "existing@novari.no",
+                sourceApplicationIds = mutableListOf(1L),
+            ).apply { id = 1L }
+
+        val repository =
+            mock<UserRepository> {
+                on { findByObjectIdentifier(objectIdentifier) } doReturn existing
+            }
+        val producer = mock<UserPermissionEntityProducerService>()
+        val service = UserService(repository, producer, actorDisplayResolver)
+
+        val result =
+            service.findOrCreate(
+                User(
+                    objectIdentifier = objectIdentifier,
+                    name = "",
+                    email = "existing@novari.no",
+                    sourceApplicationIds = listOf(1L),
+                ),
+            )
+
+        assertEquals("Manually corrected name", result.name)
+        verify(repository, never()).save(any<UserEntity>())
+        verify(producer, never()).send(any())
+    }
+
+    @Test
+    fun `findOrCreate updates email while preserving blank token name`() {
+        val objectIdentifier = UUID.randomUUID()
+        val existing =
+            UserEntity(
+                objectIdentifier = objectIdentifier,
+                name = "Manually corrected name",
+                email = "old@novari.no",
+                sourceApplicationIds = mutableListOf(1L),
+            ).apply { id = 1L }
+
+        val repository =
+            mock<UserRepository> {
+                on { findByObjectIdentifier(objectIdentifier) } doReturn existing
+                on { save(any<UserEntity>()) } doAnswer { it.arguments[0] as UserEntity }
+            }
+        val producer = mock<UserPermissionEntityProducerService>()
+        val service = UserService(repository, producer, actorDisplayResolver)
+
+        val result =
+            service.findOrCreate(
+                User(
+                    objectIdentifier = objectIdentifier,
+                    name = null,
+                    email = "new@novari.no",
+                    sourceApplicationIds = listOf(1L),
+                ),
+            )
+
+        assertEquals("Manually corrected name", result.name)
+        assertEquals("new@novari.no", result.email)
+        verify(repository).save(existing)
         verify(producer, never()).send(any())
     }
 
