@@ -6,7 +6,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 - **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/users` for authorized OAuth2 clients.
 - **Kafka request/reply** — listens for `client-id` authorization requests and replies with source application mappings using the FINT Kafka request/reply utilities.
-- **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced.
+- **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced. The topic is retained for services that have not yet migrated to HTTP authorization.
 - **Permission auditing** — keeps an Envers history of `user_entity` and `sourceApplicationIds` changes in dedicated audit tables with actor metadata.
 - **Role-gated onboarding** — accepts users only when their token roles match a configured allow-list and auto-grants admins access to all source applications.
 - **Scheduled publishing** — optional scheduler republishes all user permissions on a fixed delay to keep downstream caches in sync.
@@ -47,11 +47,15 @@ Base path: `/api/intern-klient/authorization/users`
 | --- | --- | --- | --- | --- |
 | `GET` | `/{objectIdentifier}` | Returns a single `User` by object identifier. | – | `200 OK` with `User` JSON or `404 Not Found`. |
 | `POST` | `/actions/lookup` | Returns all matching users for a batch of object identifiers. | JSON array of UUIDs. | `200 OK` with `List<User>`. |
+| `POST` | `/actions/authorize-source-applications` | Returns the requested source-application IDs the identified user is allowed to access. Unknown users and no matches return an empty set. | `{ "objectIdentifier": "<uuid>", "sourceApplicationIds": [1, 2, 3] }` | `200 OK` with `{ "authorizedSourceApplicationIds": [1, 3] }`. |
+
+`sourceApplicationIds` is represented as a set in the API model: duplicate JSON array values are ignored, and the
+response contains only requested, permitted IDs.
 
 ## Kafka Integration
 
 - **Request/reply consumer** — provisions the `authorization` request topic (resource `authorization`, parameter `client-id`) with 10-minute retention and responds with `ClientAuthorization` payloads for known SSO client IDs.
-- **Entity producer** — publishes `userpermission` entity events (partition count: 1, last/null-value retention: 4 days) whenever users are saved or bulk-updated; replay is also triggered by the scheduled publisher.
+- **Entity producer** — publishes `userpermission` entity events (partition count: 1, last/null-value retention: 4 days) whenever users are saved or bulk-updated; replay is also triggered by the scheduled publisher. This remains for backward compatibility while consumers migrate to the HTTP endpoint.
 - Topic names are built with `orgId`/`domainContext` prefixes from `novari.kafka.topic.*` and the FINT Kafka templating services.
 
 ## Scheduled Tasks
@@ -153,4 +157,3 @@ The script injects namespace-specific values (base paths, Kafka topics, authoriz
 4. Add or adjust tests for any new behaviour or edge cases.
 
 FINT Flyt Authorization Service is maintained by the FINT Flyt team. Reach out via the internal Slack channel or open an issue in this repository for questions or enhancements.
-

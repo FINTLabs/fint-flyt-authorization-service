@@ -1,6 +1,8 @@
 package no.novari.flyt.authorization.user.controller
 
 import no.novari.flyt.authorization.user.UserService
+import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationRequest
+import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationResponse
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_CLIENT_API
 import org.springframework.http.HttpStatus
@@ -31,5 +33,26 @@ class InternalClientUserController(
         @RequestBody objectIdentifiers: List<UUID>,
     ): List<User> {
         return userService.findAllByObjectIdentifiers(objectIdentifiers)
+    }
+
+    @PostMapping("/actions/authorize-source-applications")
+    fun authorizeSourceApplications(
+        @RequestBody request: SourceApplicationAuthorizationRequest,
+    ): SourceApplicationAuthorizationResponse {
+        if (request.sourceApplicationIds.isEmpty()) {
+            return SourceApplicationAuthorizationResponse(emptySet())
+        }
+
+        val authorizedSourceApplicationIds =
+            userService
+                .find(request.objectIdentifier)
+                ?.sourceApplicationIds
+                ?.toSet()
+                .orEmpty()
+
+        return SourceApplicationAuthorizationResponse(
+            request.sourceApplicationIds
+                .filterTo(mutableSetOf(), authorizedSourceApplicationIds::contains),
+        )
     }
 }

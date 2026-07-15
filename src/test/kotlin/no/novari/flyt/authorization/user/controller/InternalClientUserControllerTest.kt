@@ -123,6 +123,103 @@ class InternalClientUserControllerTest
         }
 
         @Test
+        fun `authorize source applications returns the requested permitted IDs once`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.find(objectIdentifier)).thenReturn(
+                User(
+                    objectIdentifier = objectIdentifier,
+                    sourceApplicationIds = listOf(2L, 3L, 4L),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .with(internalClientJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                              "objectIdentifier": "$objectIdentifier",
+                              "sourceApplicationIds": [1, 2, 2, 3]
+                            }
+                            """.trimIndent(),
+                        ),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds.length()").value(2))
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds[0]").value(2))
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds[1]").value(3))
+        }
+
+        @Test
+        fun `authorize source applications returns empty list for an unknown user`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.find(objectIdentifier)).thenReturn(null)
+
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .with(internalClientJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                              "objectIdentifier": "$objectIdentifier",
+                              "sourceApplicationIds": [1, 2]
+                            }
+                            """.trimIndent(),
+                        ),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds.length()").value(0))
+        }
+
+        @Test
+        fun `authorize source applications returns empty list when no requested ID is permitted`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.find(objectIdentifier)).thenReturn(
+                User(
+                    objectIdentifier = objectIdentifier,
+                    sourceApplicationIds = listOf(4L),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .with(internalClientJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                              "objectIdentifier": "$objectIdentifier",
+                              "sourceApplicationIds": [1, 2]
+                            }
+                            """.trimIndent(),
+                        ),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds.length()").value(0))
+        }
+
+        @Test
+        fun `authorize source applications returns empty list for empty input`() {
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .with(internalClientJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                              "objectIdentifier": "${UUID.randomUUID()}",
+                              "sourceApplicationIds": []
+                            }
+                            """.trimIndent(),
+                        ),
+                ).andExpect(status().isOk)
+                .andExpect(jsonPath("$.authorizedSourceApplicationIds.length()").value(0))
+        }
+
+        @Test
         fun `lookup returns bad request for invalid json`() {
             mockMvc
                 .perform(
