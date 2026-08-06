@@ -170,6 +170,27 @@ class UserEntityAuditingTest
             assertEquals(Actor.User(editorOid), persistedUser.lastModifiedBy)
         }
 
+        @Test
+        fun `finds only requested authorized source application IDs`() {
+            val objectIdentifier = UUID.randomUUID()
+            authenticateAs(UUID.randomUUID())
+            userRepository.saveAndFlush(
+                UserEntity(
+                    objectIdentifier = objectIdentifier,
+                    sourceApplicationIds = mutableListOf(1L, 2L, 3L),
+                ),
+            )
+            entityManager.clear()
+
+            val result =
+                userRepository.findAuthorizedSourceApplicationIds(
+                    objectIdentifier,
+                    setOf(2L, 3L, 4L),
+                )
+
+            assertEquals(setOf(2L, 3L), result)
+        }
+
         private fun authenticateAs(oid: UUID) {
             val jwt =
                 Jwt

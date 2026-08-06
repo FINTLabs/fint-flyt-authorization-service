@@ -44,15 +44,13 @@ class InternalClientUserController(
         }
 
         val authorizedSourceApplicationIds =
-            userService
-                .find(request.objectIdentifier)
-                ?.sourceApplicationIds
-                ?.toSet()
-                .orEmpty()
+            userService.findAuthorizedSourceApplicationIds(
+                request.objectIdentifier,
+                request.sourceApplicationIds,
+            )
 
         return SourceApplicationAuthorizationResponse(
-            request.sourceApplicationIds
-                .filterTo(mutableSetOf(), authorizedSourceApplicationIds::contains),
+            authorizedSourceApplicationIds,
         )
     }
 }

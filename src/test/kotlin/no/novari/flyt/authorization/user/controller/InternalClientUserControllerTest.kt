@@ -125,12 +125,12 @@ class InternalClientUserControllerTest
         @Test
         fun `authorize source applications returns the requested permitted IDs once`() {
             val objectIdentifier = UUID.randomUUID()
-            whenever(userService.find(objectIdentifier)).thenReturn(
-                User(
-                    objectIdentifier = objectIdentifier,
-                    sourceApplicationIds = listOf(2L, 3L, 4L),
+            whenever(
+                userService.findAuthorizedSourceApplicationIds(
+                    objectIdentifier,
+                    setOf(1L, 2L, 3L),
                 ),
-            )
+            ).thenReturn(setOf(2L, 3L))
 
             mockMvc
                 .perform(
@@ -154,7 +154,9 @@ class InternalClientUserControllerTest
         @Test
         fun `authorize source applications returns empty list for an unknown user`() {
             val objectIdentifier = UUID.randomUUID()
-            whenever(userService.find(objectIdentifier)).thenReturn(null)
+            whenever(
+                userService.findAuthorizedSourceApplicationIds(objectIdentifier, setOf(1L, 2L)),
+            ).thenReturn(emptySet())
 
             mockMvc
                 .perform(
@@ -176,12 +178,9 @@ class InternalClientUserControllerTest
         @Test
         fun `authorize source applications returns empty list when no requested ID is permitted`() {
             val objectIdentifier = UUID.randomUUID()
-            whenever(userService.find(objectIdentifier)).thenReturn(
-                User(
-                    objectIdentifier = objectIdentifier,
-                    sourceApplicationIds = listOf(4L),
-                ),
-            )
+            whenever(
+                userService.findAuthorizedSourceApplicationIds(objectIdentifier, setOf(1L, 2L)),
+            ).thenReturn(emptySet())
 
             mockMvc
                 .perform(
@@ -217,6 +216,27 @@ class InternalClientUserControllerTest
                         ),
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.authorizedSourceApplicationIds.length()").value(0))
+        }
+
+        @Test
+        fun `authorize source applications returns unauthorized without authorization header`() {
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""{"objectIdentifier":"${UUID.randomUUID()}","sourceApplicationIds":[1]}"""),
+                ).andExpect(status().isUnauthorized)
+        }
+
+        @Test
+        fun `authorize source applications rejects ordinary user token`() {
+            mockMvc
+                .perform(
+                    post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
+                        .with(userJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""{"objectIdentifier":"${UUID.randomUUID()}","sourceApplicationIds":[1]}"""),
+                ).andExpect(status().isForbidden)
         }
 
         @Test
