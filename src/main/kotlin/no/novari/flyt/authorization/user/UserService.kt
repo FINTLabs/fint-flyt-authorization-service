@@ -59,6 +59,17 @@ class UserService(
         return userRepository.findByObjectIdentifier(objectIdentifier)?.let(::mapFromEntity)
     }
 
+    fun findAuthorizedSourceApplicationIds(
+        objectIdentifier: UUID,
+        sourceApplicationIds: Set<Long>,
+    ): Set<Long> {
+        if (sourceApplicationIds.isEmpty()) {
+            return emptySet()
+        }
+
+        return userRepository.findAuthorizedSourceApplicationIds(objectIdentifier, sourceApplicationIds)
+    }
+
     fun findAllByObjectIdentifiers(objectIdentifiers: Collection<UUID>): List<User> {
         return mapAllFromEntities(userRepository.findAllByObjectIdentifierIn(objectIdentifiers))
     }

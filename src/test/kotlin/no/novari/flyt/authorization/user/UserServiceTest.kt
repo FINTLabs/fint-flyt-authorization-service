@@ -25,6 +25,31 @@ class UserServiceTest {
     private val actorDisplayResolver = ActorDisplayResolver(ActorNameLookup { emptyMap() }, ActorDisplayProperties())
 
     @Test
+    fun `find authorized source application IDs queries only requested IDs`() {
+        val objectIdentifier = UUID.randomUUID()
+        val repository =
+            mock<UserRepository> {
+                on { findAuthorizedSourceApplicationIds(objectIdentifier, setOf(1L, 2L, 3L)) } doReturn setOf(2L, 3L)
+            }
+        val service = UserService(repository, mock(), actorDisplayResolver)
+
+        val result = service.findAuthorizedSourceApplicationIds(objectIdentifier, setOf(1L, 2L, 3L))
+
+        assertEquals(setOf(2L, 3L), result)
+        verify(repository).findAuthorizedSourceApplicationIds(objectIdentifier, setOf(1L, 2L, 3L))
+        verify(repository, never()).findByObjectIdentifier(any())
+    }
+
+    @Test
+    fun `find authorized source application IDs skips repository for empty input`() {
+        val repository = mock<UserRepository>()
+        val service = UserService(repository, mock(), actorDisplayResolver)
+
+        assertEquals(emptySet<Long>(), service.findAuthorizedSourceApplicationIds(UUID.randomUUID(), emptySet()))
+        verify(repository, never()).findAuthorizedSourceApplicationIds(any(), any())
+    }
+
+    @Test
     fun `findOrCreate does not save when token name and email match stored values`() {
         val objectIdentifier = UUID.randomUUID()
         val existing =
