@@ -4,7 +4,6 @@ namespace: nfk-no
 
 resources:
   - ../../../base
-  - isygraving-onepassword.yaml
   - side-oauth2-client.yaml
 
 labels:
