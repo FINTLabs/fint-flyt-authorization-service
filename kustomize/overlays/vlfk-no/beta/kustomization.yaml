@@ -62,6 +62,11 @@ patches:
             secretKeyRef:
               name: fint-flyt-eapply-oauth2-client
               key: fint.flyt.eapply.sso.client-id
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+          value: "http://alloy.flais-system.svc.cluster.local:4318"
 
       - op: add
         path: "/spec/env/-"
