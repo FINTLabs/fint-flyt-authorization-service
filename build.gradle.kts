@@ -46,6 +46,7 @@ dependencies {
     compileOnly("org.springframework.security:spring-security-web")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
     implementation("org.springframework.kafka:spring-kafka")
 
