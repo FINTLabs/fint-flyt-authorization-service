@@ -52,11 +52,13 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
-    implementation("no.novari:flyt-web-resource-server:4.0.0")
+    implementation("no.novari:flyt-web-resource-server:4.1.0-rc-2")
     implementation("no.novari:flyt-audit-starter:1.0.0")
+    implementation("no.novari:telemetry-starter:0.0.3")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:9.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
