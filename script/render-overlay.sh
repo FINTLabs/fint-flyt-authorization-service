@@ -62,7 +62,7 @@ extra_env_for_overlay() {
       printf 'fint.flyt.isygraving.available'
       ;;
     nfk-no:api)
-      printf 'fint.flyt.side.available'
+      printf 'fint.flyt.isygraving.available fint.flyt.side.available'
       ;;
     fintlabs-no:beta)
       printf 'fint.flyt.digisak.available fint.flyt.side.available fint.flyt.eapply.available'
@@ -90,7 +90,7 @@ extra_client_id_apps_for_overlay() {
       printf 'isygraving'
       ;;
     nfk-no:api)
-      printf 'side'
+      printf 'isygraving side'
       ;;
     fintlabs-no:beta)
       printf 'digisak side eapply'
