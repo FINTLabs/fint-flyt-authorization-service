@@ -55,7 +55,7 @@ dependencies {
 
     implementation("no.novari:flyt-web-resource-server:4.1.0-rc-2")
     implementation("no.novari:flyt-audit-starter:1.0.0")
-    implementation("no.novari:telemetry-starter:0.0.4")
+    implementation("no.novari:telemetry-starter:0.0.5")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
