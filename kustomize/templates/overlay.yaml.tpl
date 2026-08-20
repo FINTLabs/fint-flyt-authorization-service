@@ -38,6 +38,11 @@ $AUTHORIZED_ORG_ROLE_PAIRS$EXTRA_APP_PATCHES
       - op: add
         path: "/spec/env/-"
         value:
+         name: "novari.telemetry.org-id"
+         value: "$ORG_ID"
+      - op: add
+        path: "/spec/env/-"
+        value:
          name: "server.servlet.context-path"
          value: "$SERVLET_CONTEXT_PATH"
       - op: replace

@@ -78,12 +78,22 @@ patches:
             secretKeyRef:
               name: fint-flyt-fskyss-oauth2-client
               key: fint.flyt.fskyss.sso.client-id
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+          value: "http://alloy.flais-system.svc.cluster.local:4318"
 
       - op: add
         path: "/spec/env/-"
         value:
          name: "novari.kafka.topic.orgId"
          value: "bfk-no"
+      - op: add
+        path: "/spec/env/-"
+        value:
+         name: "novari.telemetry.org-id"
+         value: "bfk.no"
       - op: add
         path: "/spec/env/-"
         value:

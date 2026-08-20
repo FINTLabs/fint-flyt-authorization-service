@@ -17,6 +17,8 @@ novari:
             authorized-client-ids: ${fint.flyt.authorization.sso.client-id}
 
 spring:
+  application:
+    name: ${fint.application-id}
   profiles:
     include:
       - flyt-kafka
