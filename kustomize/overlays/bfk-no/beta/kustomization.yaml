@@ -24,9 +24,6 @@ patches:
       - op: replace
         path: "/spec/ingress/routes/0/path"
         value: "/beta/bfk-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/ingress/routes/1/path"
-        value: "/beta/bfk-no/api/intern/authorization"
       - op: add
         path: "/spec/env/-"
         value:

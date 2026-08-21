@@ -22,9 +22,6 @@ patches:
       - op: replace
         path: "/spec/ingress/routes/0/path"
         value: "/mrfylke-no/api/intern/authorization"
-      - op: replace
-        path: "/spec/ingress/routes/1/path"
-        value: "/mrfylke-no/api/intern/authorization"
       - op: add
         path: "/spec/env/-"
         value:
