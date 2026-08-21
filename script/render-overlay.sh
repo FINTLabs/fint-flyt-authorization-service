@@ -20,6 +20,27 @@ extra_user_orgs_for_namespace() {
   esac
 }
 
+app_instance_suffix() {
+  local namespace="$1"
+  case "$namespace" in
+    bym-oslo-kommune-no)
+      printf '%s' "$namespace"
+      ;;
+    *)
+      printf '%s' "${namespace//-/_}"
+      ;;
+  esac
+}
+
+authorized_org_id() {
+  local namespace="$1"
+  case "$namespace" in
+    *)
+      printf '%s' "${namespace//-/.}"
+      ;;
+  esac
+}
+
 extra_resources_for_overlay() {
   local namespace="$1"
   local env_path="$2"
@@ -62,7 +83,7 @@ extra_env_for_overlay() {
       printf 'fint.flyt.isygraving.available'
       ;;
     nfk-no:api)
-      printf 'fint.flyt.side.available'
+      printf 'fint.flyt.isygraving.available fint.flyt.side.available'
       ;;
     fintlabs-no:beta)
       printf 'fint.flyt.digisak.available fint.flyt.side.available fint.flyt.eapply.available'
@@ -90,7 +111,7 @@ extra_client_id_apps_for_overlay() {
       printf 'isygraving'
       ;;
     nfk-no:api)
-      printf 'side'
+      printf 'isygraving side'
       ;;
     fintlabs-no:beta)
       printf 'digisak side eapply'
@@ -235,7 +256,7 @@ while IFS= read -r file; do
 
   export NAMESPACE="$namespace"
   export ORG_ID="${namespace//-/.}"
-  export APP_INSTANCE_LABEL="fint-flyt-authorization-service_${namespace//-/_}"
+  export APP_INSTANCE_LABEL="fint-flyt-authorization-service_$(app_instance_suffix "$namespace")"
   export KAFKA_TOPIC="${namespace}.flyt.*"
   export INGRESS_BASE_PATH="${path_prefix}/api/intern/authorization"
   export SERVLET_CONTEXT_PATH="$path_prefix"
@@ -343,9 +364,9 @@ while IFS= read -r file; do
   export EXTRA_PATCHES
 
   if ((${#additional_user_orgs[@]})); then
-    AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$ORG_ID" "${additional_user_orgs[@]}")"
+    AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$(authorized_org_id "$namespace")" "${additional_user_orgs[@]}")"
   else
-    AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$ORG_ID")"
+    AUTHORIZED_ORG_ROLE_PAIRS="$(render_authorized_role_pairs "$(authorized_org_id "$namespace")")"
   fi
   export AUTHORIZED_ORG_ROLE_PAIRS
 
