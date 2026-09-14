@@ -1,5 +1,10 @@
 package no.novari.flyt.authorization.user.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationRequest
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationResponse
@@ -17,11 +22,20 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("$INTERNAL_CLIENT_API/authorization/users")
+@Tag(name = "Client users", description = "User authorization for trusted service clients.")
 class InternalClientUserController(
     private val userService: UserService,
 ) {
     @GetMapping("/{objectIdentifier}")
+    @Operation(summary = "Get a user by object identifier")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "User found"),
+            ApiResponse(responseCode = "404", description = "User not found"),
+        ],
+    )
     fun get(
+        @Parameter(description = "The user's object identifier")
         @PathVariable objectIdentifier: UUID,
     ): User {
         return userService.find(objectIdentifier)
@@ -29,6 +43,7 @@ class InternalClientUserController(
     }
 
     @PostMapping("/actions/lookup")
+    @Operation(summary = "Look up users by object identifiers")
     fun lookup(
         @RequestBody objectIdentifiers: List<UUID>,
     ): List<User> {
@@ -36,6 +51,7 @@ class InternalClientUserController(
     }
 
     @PostMapping("/actions/authorize-source-applications")
+    @Operation(summary = "Get the source applications authorized for a user")
     fun authorizeSourceApplications(
         @RequestBody request: SourceApplicationAuthorizationRequest,
     ): SourceApplicationAuthorizationResponse {

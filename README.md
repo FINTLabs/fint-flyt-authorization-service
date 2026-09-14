@@ -41,6 +41,17 @@ Base path: `/api/intern/authorization`
 
 Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the caller lacks admin authority).
 
+### OpenAPI Documentation
+
+The OpenAPI endpoints are protected by the same OAuth2 rules as the internal API:
+
+- Swagger UI: `/api/intern/authorization/swagger-ui.html`
+- OpenAPI JSON: `/api/intern/authorization/v3/api-docs`
+- OpenAPI YAML: `/api/intern/authorization/v3/api-docs.yaml`
+
+The generated specification includes both `/api/intern/authorization/**` and
+`/api/intern-klient/authorization/**` endpoints.
+
 Base path: `/api/intern-klient/authorization/users`
 
 | Method | Path | Description | Request body | Response |
