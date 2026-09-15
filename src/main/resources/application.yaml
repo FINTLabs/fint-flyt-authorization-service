@@ -2,9 +2,9 @@ fint:
   application-id: fint-flyt-authorization-service
 springdoc:
   api-docs:
-    path: /api/intern/authorization/v3/api-docs
+    path: /v3/api-docs
   swagger-ui:
-    path: /api/intern/authorization/swagger-ui.html
+    path: /swagger-ui.html
 novari:
   flyt:
     authorization:
