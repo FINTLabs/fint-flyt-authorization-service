@@ -52,14 +52,6 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
-          name: "fint.flyt.digisak.sso.client-id"
-          valueFrom:
-            secretKeyRef:
-              name: fint-flyt-digisak-oauth2-client
-              key: fint.flyt.digisak.sso.client-id
-      - op: add
-        path: "/spec/env/-"
-        value:
           name: "fint.flyt.side.sso.client-id"
           valueFrom:
             secretKeyRef:
