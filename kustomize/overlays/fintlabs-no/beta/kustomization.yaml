@@ -4,7 +4,6 @@ namespace: fintlabs-no
 
 resources:
   - ../../../base
-  - digisak-oauth2-client.yaml
   - side-oauth2-client.yaml
   - eapply-onepassword.yaml
 
