@@ -1,5 +1,7 @@
 package no.novari.flyt.authorization.user.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication
 import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
@@ -16,12 +18,14 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("$INTERNAL_API/authorization/me")
+@Tag(name = "Current user", description = "Authorization and permissions for the authenticated user.")
 class MeController(
     private val tokenParsingUtils: TokenParsingUtils,
     private val userService: UserService,
     private val sourceApplications: List<SourceApplication>,
 ) {
     @GetMapping("is-authorized")
+    @Operation(summary = "Verify that the current user is authorized")
     fun checkAuthorization(authentication: Authentication?): String {
         val jwtAuthToken = requireJwtAuthenticationToken(authentication)
         if (tokenParsingUtils.hasPermittedRole(jwtAuthToken)) {
@@ -32,6 +36,7 @@ class MeController(
     }
 
     @GetMapping("restricted-page-authorization")
+    @Operation(summary = "Get restricted-page authorization for the current user")
     fun getRestrictedPageAuthorization(authentication: Authentication?): RestrictedPageAuthorization {
         return RestrictedPageAuthorization(
             userPermissionPage = tokenParsingUtils.isAdmin(authentication),
@@ -39,6 +44,7 @@ class MeController(
     }
 
     @GetMapping
+    @Operation(summary = "Get or provision the current user")
     fun get(authentication: Authentication?): User {
         val jwtAuthToken = requireJwtAuthenticationToken(authentication)
         return userService.findOrCreate(buildUserFromToken(jwtAuthToken, authentication))

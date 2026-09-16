@@ -41,6 +41,27 @@ Base path: `/api/intern/authorization`
 
 Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the caller lacks admin authority).
 
+### OpenAPI Documentation
+
+Swagger UI and the generated OpenAPI specification are available only through direct service access, such as a
+Kubernetes port-forward. Their paths sit outside the external ingress route for `/api/intern/authorization`:
+
+- Swagger UI: `/swagger-ui.html`
+- OpenAPI JSON: `/v3/api-docs`
+- OpenAPI YAML: `/v3/api-docs.yaml`
+
+For the FINTLabs beta deployment:
+
+```shell
+kubectl -n fintlabs-no port-forward service/fint-flyt-authorization-service 8080:8080
+```
+
+Swagger UI is then available at `http://localhost:8080/beta/fintlabs-no/swagger-ui.html`, and OpenAPI JSON at
+`http://localhost:8080/beta/fintlabs-no/v3/api-docs`.
+
+The generated specification includes both `/api/intern/authorization/**` and
+`/api/intern-klient/authorization/**` endpoints.
+
 Base path: `/api/intern-klient/authorization/users`
 
 | Method | Path | Description | Request body | Response |
