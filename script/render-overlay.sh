@@ -58,10 +58,10 @@ extra_resources_for_overlay() {
       printf 'side-oauth2-client.yaml'
       ;;
     fintlabs-no:beta)
-      printf 'digisak-oauth2-client.yaml side-oauth2-client.yaml eapply-onepassword.yaml'
+      printf 'side-oauth2-client.yaml eapply-onepassword.yaml'
       ;;
     vlfk-no:beta)
-      printf 'digisak-oauth2-client.yaml eapply-onepassword.yaml'
+      printf 'eapply-onepassword.yaml'
       ;;
     *)
       printf ''
@@ -114,10 +114,10 @@ extra_client_id_apps_for_overlay() {
       printf 'isygraving side'
       ;;
     fintlabs-no:beta)
-      printf 'digisak side eapply'
+      printf 'side eapply'
       ;;
     vlfk-no:beta)
-      printf 'digisak eapply'
+      printf 'eapply'
       ;;
     *)
       printf ''
@@ -372,9 +372,17 @@ while IFS= read -r file; do
 
   template="$(choose_template "$env_path")"
   target_dir="$ROOT/kustomize/overlays/$dir"
+  mkdir -p "$target_dir"
 
   tmp="$(mktemp "$target_dir/.kustomization.yaml.XXXXXX")"
   envsubst '$NAMESPACE $APP_INSTANCE_LABEL $ORG_ID $KAFKA_TOPIC $INGRESS_BASE_PATH $SERVLET_CONTEXT_PATH $STARTUP_PATH $READINESS_PATH $LIVENESS_PATH $METRICS_PATH $AUTHORIZED_ORG_ROLE_PAIRS $EXTRA_RESOURCES $EXTRA_APP_PATCHES $EXTRA_PATCHES $NOVARI_KAFKA_TOPIC_ORGID' \
     < "$template" > "$tmp"
   mv "$tmp" "$target_dir/kustomization.yaml"
-done < <(find "$ROOT/kustomize/overlays" -name kustomization.yaml -print | sort)
+done < <(
+  {
+    find "$ROOT/kustomize/overlays" -name kustomization.yaml -print
+    printf '%s\n' \
+      "$ROOT/kustomize/overlays/ra-no/beta/kustomization.yaml" \
+      "$ROOT/kustomize/overlays/ra-no/api/kustomization.yaml"
+  } | sort -u
+)
