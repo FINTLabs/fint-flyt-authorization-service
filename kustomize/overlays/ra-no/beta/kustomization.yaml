@@ -58,6 +58,19 @@ patches:
       kind: Application
       name: fint-flyt-authorization-service
   - patch: |-
+      - op: remove
+        path: "/spec/env/4"
+      - op: remove
+        path: "/spec/env/3"
+      - op: remove
+        path: "/spec/env/2"
+      - op: remove
+        path: "/spec/env/1"
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
+
+  - patch: |-
       - op: replace
         path: "/spec/itemPath"
         value: "vaults/aks-beta-vault/items/fint-flyt-altinn-oauth2-client"

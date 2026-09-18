@@ -57,3 +57,15 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
+  - patch: |-
+      - op: remove
+        path: "/spec/env/4"
+      - op: remove
+        path: "/spec/env/3"
+      - op: remove
+        path: "/spec/env/2"
+      - op: remove
+        path: "/spec/env/1"
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
