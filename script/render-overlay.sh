@@ -10,6 +10,7 @@ DEVELOPER_ROLE_URL="DEVELOPER"
 
 extra_user_orgs_for_namespace() {
   local namespace="$1"
+
   case "$namespace" in
     afk-no|bfk-no|ofk-no)
       printf 'viken.no frid-iks.no'
@@ -22,6 +23,7 @@ extra_user_orgs_for_namespace() {
 
 app_instance_suffix() {
   local namespace="$1"
+
   case "$namespace" in
     bym-oslo-kommune-no)
       printf '%s' "$namespace"
@@ -34,11 +36,8 @@ app_instance_suffix() {
 
 authorized_org_id() {
   local namespace="$1"
-  case "$namespace" in
-    *)
-      printf '%s' "${namespace//-/.}"
-      ;;
-  esac
+
+  printf '%s' "${namespace//-/.}"
 }
 
 extra_resources_for_overlay() {
@@ -133,28 +132,14 @@ extra_client_id_apps_for_overlay() {
 
 client_id_property_for_app() {
   local app="$1"
+
   printf 'fint.flyt.%s.sso.client-id' "$app"
 }
 
 oauth2_secret_name_for_app() {
   local app="$1"
+
   printf 'fint-flyt-%s-oauth2-client' "$app"
-}
-
-base_client_resource_kind_for_app() {
-  local app="$1"
-
-  case "$app" in
-    vigo)
-      printf 'NamOAuthClientApplicationResource'
-      ;;
-    eapply|altinn|egrunnerverv)
-      printf 'OnePasswordItem'
-      ;;
-    *)
-      return 1
-      ;;
-  esac
 }
 
 base_client_env_index_for_app() {
@@ -182,31 +167,65 @@ base_client_env_index_for_app() {
   esac
 }
 
+base_client_resource_kind_for_app() {
+  local app="$1"
+
+  case "$app" in
+    vigo|hmsreg|authorization)
+      printf 'NamOAuthClientApplicationResource'
+      ;;
+    altinn|egrunnerverv|eapply)
+      printf 'OnePasswordItem'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+base_client_resource_api_version_for_app() {
+  local app="$1"
+
+  case "$app" in
+    vigo|hmsreg|authorization)
+      printf 'fintlabs.no/v1alpha1'
+      ;;
+    altinn|egrunnerverv|eapply)
+      printf 'onepassword.com/v1'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 excluded_base_client_id_apps_for_overlay() {
   local namespace="$1"
   local env_path="$2"
 
   case "${namespace}:${env_path}" in
-    bym-oslo-kommune-no:api)
-      printf 'vigo'
-      ;;
-    *)
-      printf ''
-      ;;
-  esac
-}
-
-excluded_base_client_id_env_apps_for_overlay() {
-  local namespace="$1"
-  local env_path="$2"
-
-  case "${namespace}:${env_path}" in
     ra-no:*)
-      # Must be in descending env index order:
-      # hmsreg=4, egrunnerverv=3, altinn=2, vigo=1.
-      # JSON Patch array indexes shift after each remove.
+      # ra-no keeps only authorization.
+      #
+      # Descending env indexes:
+      # hmsreg=4
+      # egrunnerverv=3
+      # altinn=2
+      # vigo=1
       printf 'hmsreg egrunnerverv altinn vigo'
       ;;
+
+    bym-oslo-kommune-no:*)
+      # bym-oslo-kommune-no keeps only altinn.
+      #
+      # Descending env indexes:
+      # authorization=5
+      # hmsreg=4
+      # egrunnerverv=3
+      # vigo=1
+      printf 'authorization hmsreg egrunnerverv vigo'
+      ;;
+
     *)
       printf ''
       ;;
@@ -243,11 +262,32 @@ onepassword_item_names_for_overlay() {
   esac
 }
 
+is_excluded_base_client_resource() {
+  local item_name="$1"
+  local excluded_apps="$2"
+
+  if [[ -z "$excluded_apps" ]]; then
+    return 1
+  fi
+
+  local app
+
+  for app in $excluded_apps; do
+    if [[ "$item_name" == "$(oauth2_secret_name_for_app "$app")" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 render_authorized_role_pairs() {
   local org_id="$1"
   shift
 
   local entries=("\"${org_id}\":[\"${USER_ROLE_URL}\"]")
+
+  local extra_org
 
   for extra_org in "$@"; do
     entries+=("\"${extra_org}\":[\"${USER_ROLE_URL}\"]")
@@ -259,6 +299,8 @@ render_authorized_role_pairs() {
   local total="${#entries[@]}"
 
   printf '            {\n'
+
+  local idx
 
   for idx in "${!entries[@]}"; do
     local comma=","
@@ -342,6 +384,10 @@ while IFS= read -r file; do
   export METRICS_PATH="${path_prefix}/actuator/prometheus"
   export NOVARI_KAFKA_TOPIC_ORGID="$namespace"
 
+  #
+  # Extra resources
+  #
+
   extra_resources="$(
     extra_resources_for_overlay "$namespace" "$env_path"
   )"
@@ -355,6 +401,10 @@ while IFS= read -r file; do
   fi
 
   export EXTRA_RESOURCES
+
+  #
+  # Extra boolean environment variables
+  #
 
   extra_env="$(
     extra_env_for_overlay "$namespace" "$env_path"
@@ -373,6 +423,10 @@ while IFS= read -r file; do
 
     EXTRA_ENV_PATCHES="${EXTRA_ENV_PATCHES%$'\n'}"
   fi
+
+  #
+  # Extra client-id environment variables
+  #
 
   extra_client_id_apps="$(
     extra_client_id_apps_for_overlay "$namespace" "$env_path"
@@ -414,6 +468,19 @@ while IFS= read -r file; do
 
   export EXTRA_APP_PATCHES
 
+  #
+  # Determine base clients excluded for this overlay
+  #
+
+  excluded_base_client_id_apps="$(
+    excluded_base_client_id_apps_for_overlay "$namespace" "$env_path"
+  )"
+
+  #
+  # Find base OnePassword resources whose vault path would normally
+  # be rewritten.
+  #
+
   declare -a onepassword_item_names=()
 
   while IFS= read -r item_name; do
@@ -424,29 +491,25 @@ while IFS= read -r file; do
     onepassword_item_names_for_overlay "$namespace" "$env_path"
   )
 
+  #
+  # Build extra patches
+  #
+
   EXTRA_PATCHES=""
 
   #
-  # Remove selected env entries from the base Application.
+  # Remove env entries belonging to excluded base clients.
   #
-  # ra-no removes:
-  #   fint.flyt.vigo.sso.client-id
-  #   fint.flyt.altinn.sso.client-id
-  #   fint.flyt.egrunnerverv.sso.client-id
-  #   fint.flyt.hmsreg.sso.client-id
+  # excluded_base_client_id_apps_for_overlay MUST return apps in
+  # descending env-index order because JSON Patch array indexes shift
+  # after every remove.
   #
-  # Entries are removed in descending index order because JSON Patch
-  # array indexes shift after every remove.
-  #
-  excluded_base_client_id_env_apps="$(
-    excluded_base_client_id_env_apps_for_overlay "$namespace" "$env_path"
-  )"
 
-  if [[ -n "$excluded_base_client_id_env_apps" ]]; then
+  if [[ -n "$excluded_base_client_id_apps" ]]; then
     EXTRA_PATCHES+=$'\n'
     EXTRA_PATCHES+=$'  - patch: |-\n'
 
-    for app in $excluded_base_client_id_env_apps; do
+    for app in $excluded_base_client_id_apps; do
       env_index="$(base_client_env_index_for_app "$app")"
 
       EXTRA_PATCHES+=$'      - op: remove\n'
@@ -459,11 +522,49 @@ while IFS= read -r file; do
   fi
 
   #
-  # Update OnePassword item paths for overlays where the base
-  # OnePassword resources are reused with a different vault.
+  # Delete excluded base client resources.
   #
+  # Explicit target is used for reliable matching of custom resources.
+  #
+
+  if [[ -n "$excluded_base_client_id_apps" ]]; then
+    for app in $excluded_base_client_id_apps; do
+      resource_kind="$(base_client_resource_kind_for_app "$app")"
+      resource_api_version="$(base_client_resource_api_version_for_app "$app")"
+      resource_name="$(oauth2_secret_name_for_app "$app")"
+
+      resource_group="${resource_api_version%/*}"
+      resource_version="${resource_api_version#*/}"
+
+      EXTRA_PATCHES+=$'\n'
+      EXTRA_PATCHES+=$'  - target:\n'
+      EXTRA_PATCHES+=$'      group: '"${resource_group}"$'\n'
+      EXTRA_PATCHES+=$'      version: '"${resource_version}"$'\n'
+      EXTRA_PATCHES+=$'      kind: '"${resource_kind}"$'\n'
+      EXTRA_PATCHES+=$'      name: '"${resource_name}"$'\n'
+      EXTRA_PATCHES+=$'    patch: |-\n'
+      EXTRA_PATCHES+=$'      apiVersion: '"${resource_api_version}"$'\n'
+      EXTRA_PATCHES+=$'      kind: '"${resource_kind}"$'\n'
+      EXTRA_PATCHES+=$'      metadata:\n'
+      EXTRA_PATCHES+=$'        name: '"${resource_name}"$'\n'
+      EXTRA_PATCHES+=$'      $patch: delete\n'
+    done
+  fi
+
+  #
+  # Rewrite OnePassword item paths for remaining base resources.
+  #
+  # Resources deleted above must not get an itemPath patch.
+  #
+
   if ((${#onepassword_item_names[@]})); then
     for item_name in "${onepassword_item_names[@]}"; do
+      if is_excluded_base_client_resource \
+        "$item_name" \
+        "$excluded_base_client_id_apps"; then
+        continue
+      fi
+
       item_path="$item_name"
 
       EXTRA_PATCHES+=$'\n'
@@ -477,44 +578,12 @@ while IFS= read -r file; do
     done
   fi
 
-  #
-  # Remove base client-id env entries and their corresponding
-  # Kubernetes resources where needed.
-  #
-  excluded_base_client_id_apps="$(
-    excluded_base_client_id_apps_for_overlay "$namespace" "$env_path"
-  )"
-
-  if [[ -n "$excluded_base_client_id_apps" ]]; then
-    for app in $excluded_base_client_id_apps; do
-      env_index="$(base_client_env_index_for_app "$app")"
-
-      EXTRA_PATCHES+=$'\n'
-      EXTRA_PATCHES+=$'  - patch: |-\n'
-      EXTRA_PATCHES+=$'      - op: remove\n'
-      EXTRA_PATCHES+=$'        path: "/spec/env/'"${env_index}"$'"\n'
-      EXTRA_PATCHES+=$'    target:\n'
-      EXTRA_PATCHES+=$'      kind: Application\n'
-      EXTRA_PATCHES+=$'      name: fint-flyt-authorization-service\n'
-
-      EXTRA_PATCHES+=$'\n'
-      EXTRA_PATCHES+=$'  - patch: |-\n'
-      EXTRA_PATCHES+=$'      $patch: delete\n'
-
-      if [[ "$app" == "vigo" ]]; then
-        EXTRA_PATCHES+=$'      apiVersion: fintlabs.no/v1alpha1\n'
-      else
-        EXTRA_PATCHES+=$'      apiVersion: onepassword.com/v1\n'
-      fi
-
-      EXTRA_PATCHES+=$'      kind: '"$(base_client_resource_kind_for_app "$app")"$'\n'
-      EXTRA_PATCHES+=$'      metadata:\n'
-      EXTRA_PATCHES+=$'        name: '"$(oauth2_secret_name_for_app "$app")"$'\n'
-    done
-  fi
-
   EXTRA_PATCHES="${EXTRA_PATCHES%$'\n'}"
   export EXTRA_PATCHES
+
+  #
+  # Authorized org/role pairs
+  #
 
   if ((${#additional_user_orgs[@]})); then
     AUTHORIZED_ORG_ROLE_PAIRS="$(
@@ -530,6 +599,10 @@ while IFS= read -r file; do
   fi
 
   export AUTHORIZED_ORG_ROLE_PAIRS
+
+  #
+  # Render kustomization.yaml
+  #
 
   template="$(choose_template "$env_path")"
   target_dir="$ROOT/kustomize/overlays/$dir"

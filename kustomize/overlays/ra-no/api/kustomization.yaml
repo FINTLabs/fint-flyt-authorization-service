@@ -69,3 +69,51 @@ patches:
     target:
       kind: Application
       name: fint-flyt-authorization-service
+
+  - target:
+      group: fintlabs.no
+      version: v1alpha1
+      kind: NamOAuthClientApplicationResource
+      name: fint-flyt-hmsreg-oauth2-client
+    patch: |-
+      apiVersion: fintlabs.no/v1alpha1
+      kind: NamOAuthClientApplicationResource
+      metadata:
+        name: fint-flyt-hmsreg-oauth2-client
+      $patch: delete
+
+  - target:
+      group: onepassword.com
+      version: v1
+      kind: OnePasswordItem
+      name: fint-flyt-egrunnerverv-oauth2-client
+    patch: |-
+      apiVersion: onepassword.com/v1
+      kind: OnePasswordItem
+      metadata:
+        name: fint-flyt-egrunnerverv-oauth2-client
+      $patch: delete
+
+  - target:
+      group: onepassword.com
+      version: v1
+      kind: OnePasswordItem
+      name: fint-flyt-altinn-oauth2-client
+    patch: |-
+      apiVersion: onepassword.com/v1
+      kind: OnePasswordItem
+      metadata:
+        name: fint-flyt-altinn-oauth2-client
+      $patch: delete
+
+  - target:
+      group: fintlabs.no
+      version: v1alpha1
+      kind: NamOAuthClientApplicationResource
+      name: fint-flyt-vigo-oauth2-client
+    patch: |-
+      apiVersion: fintlabs.no/v1alpha1
+      kind: NamOAuthClientApplicationResource
+      metadata:
+        name: fint-flyt-vigo-oauth2-client
+      $patch: delete
