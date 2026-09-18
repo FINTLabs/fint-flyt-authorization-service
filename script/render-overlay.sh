@@ -36,7 +36,6 @@ app_instance_suffix() {
 
 authorized_org_id() {
   local namespace="$1"
-
   printf '%s' "${namespace//-/.}"
 }
 
@@ -132,13 +131,11 @@ extra_client_id_apps_for_overlay() {
 
 client_id_property_for_app() {
   local app="$1"
-
   printf 'fint.flyt.%s.sso.client-id' "$app"
 }
 
 oauth2_secret_name_for_app() {
   local app="$1"
-
   printf 'fint-flyt-%s-oauth2-client' "$app"
 }
 
@@ -206,28 +203,34 @@ excluded_base_client_id_apps_for_overlay() {
   case "${namespace}:${env_path}" in
     ra-no:*)
       # ra-no keeps only authorization.
-      #
-      # Descending env indexes:
-      # hmsreg=4
-      # egrunnerverv=3
-      # altinn=2
-      # vigo=1
+      # Descending env index order is required:
+      # hmsreg=4, egrunnerverv=3, altinn=2, vigo=1
       printf 'hmsreg egrunnerverv altinn vigo'
       ;;
 
     bym-oslo-kommune-no:*)
       # bym-oslo-kommune-no keeps only altinn.
-      #
-      # Descending env indexes:
-      # authorization=5
-      # hmsreg=4
-      # egrunnerverv=3
-      # vigo=1
+      # Descending env index order:
+      # authorization=5, hmsreg=4, egrunnerverv=3, vigo=1
       printf 'authorization hmsreg egrunnerverv vigo'
       ;;
 
     *)
       printf ''
+      ;;
+  esac
+}
+
+authorization_credentials_from_onepassword_for_overlay() {
+  local namespace="$1"
+  local env_path="$2"
+
+  case "${namespace}:${env_path}" in
+    ra-no:*)
+      return 0
+      ;;
+    *)
+      return 1
       ;;
   esac
 }
@@ -403,7 +406,7 @@ while IFS= read -r file; do
   export EXTRA_RESOURCES
 
   #
-  # Extra boolean environment variables
+  # Extra boolean env vars
   #
 
   extra_env="$(
@@ -425,7 +428,7 @@ while IFS= read -r file; do
   fi
 
   #
-  # Extra client-id environment variables
+  # Extra client-id env vars
   #
 
   extra_client_id_apps="$(
@@ -469,7 +472,7 @@ while IFS= read -r file; do
   export EXTRA_APP_PATCHES
 
   #
-  # Determine base clients excluded for this overlay
+  # Determine excluded base clients
   #
 
   excluded_base_client_id_apps="$(
@@ -477,8 +480,7 @@ while IFS= read -r file; do
   )"
 
   #
-  # Find base OnePassword resources whose vault path would normally
-  # be rewritten.
+  # Find base OnePassword items
   #
 
   declare -a onepassword_item_names=()
@@ -498,11 +500,56 @@ while IFS= read -r file; do
   EXTRA_PATCHES=""
 
   #
-  # Remove env entries belonging to excluded base clients.
+  # ra-no:
   #
-  # excluded_base_client_id_apps_for_overlay MUST return apps in
-  # descending env-index order because JSON Patch array indexes shift
-  # after every remove.
+  # The base already contains:
+  #
+  #   name: fint.flyt.authorization.sso.client-id
+  #   secretKeyRef:
+  #     name: fint-flyt-authorization-oauth2-client
+  #     key: fint.sso.client-id
+  #
+  # Replace the Secret key with the actual OnePassword field name:
+  #
+  #   fint.flyt.authorization.sso.client-id
+  #
+  # Then add the client-secret from the same Secret:
+  #
+  #   fint.flyt.authorization.sso.client-secret
+  #
+  # This patch must run before removing env indexes because
+  # authorization is index 5 in the base.
+  #
+
+  if authorization_credentials_from_onepassword_for_overlay \
+    "$namespace" \
+    "$env_path"; then
+
+    EXTRA_PATCHES+=$'\n'
+    EXTRA_PATCHES+=$'  - patch: |-\n'
+
+    EXTRA_PATCHES+=$'      - op: replace\n'
+    EXTRA_PATCHES+=$'        path: "/spec/env/5/valueFrom/secretKeyRef/key"\n'
+    EXTRA_PATCHES+=$'        value: "fint.flyt.authorization.sso.client-id"\n'
+
+    EXTRA_PATCHES+=$'      - op: add\n'
+    EXTRA_PATCHES+=$'        path: "/spec/env/-"\n'
+    EXTRA_PATCHES+=$'        value:\n'
+    EXTRA_PATCHES+=$'          name: "fint.flyt.authorization.sso.client-secret"\n'
+    EXTRA_PATCHES+=$'          valueFrom:\n'
+    EXTRA_PATCHES+=$'            secretKeyRef:\n'
+    EXTRA_PATCHES+=$'              name: fint-flyt-authorization-oauth2-client\n'
+    EXTRA_PATCHES+=$'              key: fint.flyt.authorization.sso.client-secret\n'
+
+    EXTRA_PATCHES+=$'    target:\n'
+    EXTRA_PATCHES+=$'      kind: Application\n'
+    EXTRA_PATCHES+=$'      name: fint-flyt-authorization-service\n'
+  fi
+
+  #
+  # Remove env entries belonging to excluded clients.
+  #
+  # Apps must be returned in descending index order.
   #
 
   if [[ -n "$excluded_base_client_id_apps" ]]; then
@@ -522,9 +569,7 @@ while IFS= read -r file; do
   fi
 
   #
-  # Delete excluded base client resources.
-  #
-  # Explicit target is used for reliable matching of custom resources.
+  # Delete excluded base resources
   #
 
   if [[ -n "$excluded_base_client_id_apps" ]]; then
@@ -552,9 +597,7 @@ while IFS= read -r file; do
   fi
 
   #
-  # Rewrite OnePassword item paths for remaining base resources.
-  #
-  # Resources deleted above must not get an itemPath patch.
+  # Rewrite OnePassword item paths for remaining base resources
   #
 
   if ((${#onepassword_item_names[@]})); then
@@ -601,7 +644,7 @@ while IFS= read -r file; do
   export AUTHORIZED_ORG_ROLE_PAIRS
 
   #
-  # Render kustomization.yaml
+  # Render
   #
 
   template="$(choose_template "$env_path")"

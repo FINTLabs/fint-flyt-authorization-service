@@ -58,6 +58,22 @@ patches:
       kind: Application
       name: fint-flyt-authorization-service
   - patch: |-
+      - op: replace
+        path: "/spec/env/5/valueFrom/secretKeyRef/key"
+        value: "fint.flyt.authorization.sso.client-id"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.authorization.sso.client-secret"
+          valueFrom:
+            secretKeyRef:
+              name: fint-flyt-authorization-oauth2-client
+              key: fint.flyt.authorization.sso.client-secret
+    target:
+      kind: Application
+      name: fint-flyt-authorization-service
+
+  - patch: |-
       - op: remove
         path: "/spec/env/4"
       - op: remove
