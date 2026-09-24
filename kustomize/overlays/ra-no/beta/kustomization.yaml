@@ -35,6 +35,31 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
+          name: "fint.flyt.digisak.available"
+          value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.altinn.available"
+          value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.egrunnerverv.available"
+          value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.hmsreg.available"
+          value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+          name: "fint.flyt.vigo.available"
+          value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
          name: "novari.kafka.topic.orgId"
          value: "ra-no"
       - op: add

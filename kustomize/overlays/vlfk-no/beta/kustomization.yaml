@@ -4,6 +4,7 @@ namespace: vlfk-no
 
 resources:
   - ../../../base
+  - digisak-onepassword.yaml
   - eapply-onepassword.yaml
 
 labels:
@@ -45,11 +46,19 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
-          name: "fint.flyt.eapply.sso.client-id"
-          valueFrom:
-            secretKeyRef:
-              name: fint-flyt-eapply-oauth2-client
-              key: fint.flyt.eapply.sso.client-id
+            name: "fint.flyt.digisak.sso.client-id"
+            valueFrom:
+                secretKeyRef:
+                    name: fint-flyt-digisak-oauth2-client
+                    key: fint.flyt.digisak.sso.client-id
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.eapply.sso.client-id"
+            valueFrom:
+                secretKeyRef:
+                    name: fint-flyt-eapply-oauth2-client
+                    key: fint.flyt.eapply.sso.client-id
 
       - op: add
         path: "/spec/env/-"
