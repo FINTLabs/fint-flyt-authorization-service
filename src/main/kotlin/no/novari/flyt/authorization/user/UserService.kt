@@ -1,12 +1,11 @@
 package no.novari.flyt.authorization.user
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import no.novari.flyt.audit.actor.ActorDisplayResolver
 import no.novari.flyt.authorization.user.kafka.UserPermission
 import no.novari.flyt.authorization.user.kafka.UserPermissionEntityProducerService
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.authorization.user.model.UserEntity
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -20,19 +19,27 @@ class UserService(
     private val userPermissionEntityProducerService: UserPermissionEntityProducerService,
     private val actorDisplayResolver: ActorDisplayResolver,
 ) {
+    private val log = KotlinLogging.logger {}
+
     fun publishUsers() {
-        logger.info("Starting publishing users")
+        log.atInfo { message = "Starting publishing users" }
         try {
             val userPermissions =
                 userRepository
                     .findAll()
                     .map(::mapFromEntityToUserPermission)
 
-            logger.info("Retrieved and mapped {} user entities", userPermissions.size)
+            log.atInfo {
+                message = "Retrieved and mapped {} user entities"
+                arguments = arrayOf(userPermissions.size)
+            }
             userPermissions.forEach(userPermissionEntityProducerService::send)
-            logger.info("Successfully published users")
+            log.atInfo { message = "Successfully published users" }
         } catch (exception: Exception) {
-            logger.error("Error while publishing users", exception)
+            log.atError {
+                message = "Error while publishing users"
+                cause = exception
+            }
         }
     }
 
@@ -47,10 +54,10 @@ class UserService(
             mapFromEntity(savedEntity)
         } catch (exception: DataIntegrityViolationException) {
             val existing = userRepository.findByObjectIdentifier(user.objectIdentifier) ?: throw exception
-            logger.info(
-                "Lost race when creating user with objectIdentifier={}; returning existing user",
-                user.objectIdentifier,
-            )
+            log.atInfo {
+                message = "Lost race when creating user with objectIdentifier={}; returning existing user"
+                arguments = arrayOf(user.objectIdentifier)
+            }
             mapFromEntity(existing)
         }
     }
@@ -164,9 +171,5 @@ class UserService(
             objectIdentifier = checkNotNull(userEntity.objectIdentifier),
             sourceApplicationIds = userEntity.sourceApplicationIds.toList(),
         )
-    }
-
-    private companion object {
-        val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
     }
 }

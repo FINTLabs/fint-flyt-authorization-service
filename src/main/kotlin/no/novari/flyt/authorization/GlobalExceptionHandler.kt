@@ -1,6 +1,6 @@
 package no.novari.flyt.authorization
 
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -11,11 +11,15 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+    private val log = KotlinLogging.logger {}
 
     @ExceptionHandler(ResponseStatusException::class)
     fun handleResponseStatusException(exception: ResponseStatusException): ProblemDetail {
-        logger.warn("Response status exception with status={}", exception.statusCode, exception)
+        log.atWarn {
+            message = "Response status exception with status={}"
+            arguments = arrayOf(exception.statusCode)
+            cause = exception
+        }
         return exception.reason
             ?.let { ProblemDetail.forStatusAndDetail(exception.statusCode, it) }
             ?: ProblemDetail.forStatus(exception.statusCode)
@@ -23,7 +27,10 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ProblemDetail {
-        logger.warn("Malformed request body", exception)
+        log.atWarn {
+            message = "Malformed request body"
+            cause = exception
+        }
         return createProblemDetail(
             status = HttpStatus.BAD_REQUEST,
             title = "Bad Request",
@@ -33,7 +40,10 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleMethodArgumentTypeMismatch(exception: MethodArgumentTypeMismatchException): ProblemDetail {
-        logger.warn("Request parameter type mismatch", exception)
+        log.atWarn {
+            message = "Request parameter type mismatch"
+            cause = exception
+        }
         return createProblemDetail(
             status = HttpStatus.BAD_REQUEST,
             title = "Bad Request",
@@ -43,7 +53,10 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(exception: IllegalArgumentException): ProblemDetail {
-        logger.warn("Invalid or incomplete authentication token", exception)
+        log.atWarn {
+            message = "Invalid or incomplete authentication token"
+            cause = exception
+        }
         return createProblemDetail(
             status = HttpStatus.BAD_REQUEST,
             title = "Bad Request",
@@ -53,7 +66,10 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleUnhandledException(exception: Exception): ProblemDetail {
-        logger.error("Unhandled exception", exception)
+        log.atError {
+            message = "Unhandled exception"
+            cause = exception
+        }
         return createProblemDetail(
             status = HttpStatus.INTERNAL_SERVER_ERROR,
             title = "Internal Server Error",
