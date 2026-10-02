@@ -1,9 +1,9 @@
 package no.novari.flyt.authorization.user.controller.utils
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import no.novari.flyt.authorization.user.AccessControlProperties
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.webresourceserver.security.user.UserClaim
-import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
@@ -13,6 +13,8 @@ import java.util.UUID
 class TokenParsingUtils(
     private val accessControlProperties: AccessControlProperties,
 ) {
+    private val log = KotlinLogging.logger {}
+
     fun getObjectIdentifierFromToken(jwtAuthenticationToken: JwtAuthenticationToken): String {
         return requiredTokenAttribute(jwtAuthenticationToken, UserClaim.OBJECT_IDENTIFIER)
     }
@@ -37,13 +39,13 @@ class TokenParsingUtils(
     fun hasPermittedRole(jwtAuthenticationToken: JwtAuthenticationToken): Boolean {
         val roles = getRolesFromToken(jwtAuthenticationToken)
         if (roles.isEmpty()) {
-            logger.warn("Roles are null or empty in token")
+            log.atWarn { message = "Roles are null or empty in token" }
             return false
         }
 
         val permittedRoles = accessControlProperties.permittedAppRoles.values
         if (permittedRoles.isEmpty()) {
-            logger.warn("Permitted app roles are not configured or empty")
+            log.atWarn { message = "Permitted app roles are not configured or empty" }
             return false
         }
 
@@ -62,9 +64,5 @@ class TokenParsingUtils(
     ): String {
         return jwtAuthenticationToken.tokenAttributes[claim.tokenClaimName]?.toString()
             ?: throw IllegalArgumentException("Missing token claim: ${claim.tokenClaimName}")
-    }
-
-    private companion object {
-        val logger = LoggerFactory.getLogger(TokenParsingUtils::class.java)
     }
 }
