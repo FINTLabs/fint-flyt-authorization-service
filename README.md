@@ -126,7 +126,7 @@ SPRING_PROFILES_ACTIVE=local-staging ./gradlew bootRun   # start with local defa
 
 The `local-staging` profile points to `localhost:9092` for Kafka and configures database credentials/schema for local use. Override `fint.flyt.<app>.sso.client-id` and access-control properties as needed for experiments.
 
-Add `--profile tools` to also start Kafdrop on http://localhost:19000. `docker compose down -v` stops everything and wipes the data.
+Add `--profile tools` to also start Kafdrop on http://localhost:19000. Kafka topics and the database are empty on every start.
 
 ## Deployment
 
