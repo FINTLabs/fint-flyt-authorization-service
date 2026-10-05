@@ -33,7 +33,6 @@ kotlin {
 }
 
 configurations {
-    compileOnly
     create("mockitoAgent") {
         isTransitive = false
     }
@@ -74,8 +73,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.hibernate.orm:hibernate-envers")
-    compileOnly("org.springframework.security:spring-security-config")
-    compileOnly("org.springframework.security:spring-security-web")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -93,7 +90,6 @@ dependencies {
     // Pinned to 8.x: 9.x pulls in Jackson 3 (tools.jackson), while Spring Boot 3.5 uses Jackson 2
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:8.1")
     runtimeOnly("org.postgresql:postgresql")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -102,7 +98,6 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-core")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
-    testRuntimeOnly("com.h2database:h2")
     add("mockitoAgent", "org.mockito:mockito-core")
 }
 
