@@ -111,13 +111,13 @@ Secrets referenced by Kustomize overlays must provide database credentials, OAut
 Prerequisites:
 
 - Java 25+
-- Docker (for the bundled Postgres helper) and access to a Kafka broker
+- Docker (Docker Compose starts Postgres and Kafka)
 - Gradle (wrapper included)
 
 Useful commands:
 
 ```shell
-./start-postgres                               # launch Postgres on localhost:5435
+docker compose up -d                           # start Postgres on localhost:5435 and Kafka on localhost:9092
 SPRING_PROFILES_ACTIVE=local-staging ./gradlew bootRun   # start with local defaults
 ./gradlew ktlintFormat build                   # format, compile, and run tests
 ./gradlew ktlintCheck                          # run ktlint only
@@ -125,6 +125,8 @@ SPRING_PROFILES_ACTIVE=local-staging ./gradlew bootRun   # start with local defa
 ```
 
 The `local-staging` profile points to `localhost:9092` for Kafka and configures database credentials/schema for local use. Override `fint.flyt.<app>.sso.client-id` and access-control properties as needed for experiments.
+
+Add `--profile tools` to also start Kafdrop on http://localhost:19000. Kafka topics and the database are empty on every start.
 
 ## Deployment
 
