@@ -53,6 +53,21 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/bym-oslo-kommune-no/actuator/prometheus"
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.egrunnerverv.available"
+            value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.hmsreg.available"
+            value: "false"
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.vigo.available"
+            value: "false"
     target:
       kind: Application
       name: fint-flyt-authorization-service
