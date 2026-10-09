@@ -73,8 +73,6 @@ patches:
       name: fint-flyt-authorization-service
   - patch: |-
       - op: remove
-        path: "/spec/env/5"
-      - op: remove
         path: "/spec/env/4"
       - op: remove
         path: "/spec/env/3"
