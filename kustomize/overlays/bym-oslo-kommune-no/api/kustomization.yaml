@@ -57,17 +57,17 @@ patches:
         path: "/spec/env/-"
         value:
             name: "fint.flyt.egrunnerverv.available"
-            value: "true"
+            value: "false"
       - op: add
         path: "/spec/env/-"
         value:
             name: "fint.flyt.hmsreg.available"
-            value: "true"
+            value: "false"
       - op: add
         path: "/spec/env/-"
         value:
             name: "fint.flyt.vigo.available"
-            value: "true"
+            value: "false"
     target:
       kind: Application
       name: fint-flyt-authorization-service
