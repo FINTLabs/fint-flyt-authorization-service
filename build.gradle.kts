@@ -26,7 +26,7 @@ plugins {
 group = "no.novari"
 version = "0.0.1-SNAPSHOT"
 
-var springdocOpenApiVersion = "2.9.1"
+var springdocOpenApiVersion = "2.10.0"
 
 kotlin {
     jvmToolchain(25)
@@ -106,7 +106,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.security:spring-security-core")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
     add("mockitoAgent", "org.mockito:mockito-core")
 }
 
