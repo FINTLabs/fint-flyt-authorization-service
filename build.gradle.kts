@@ -101,7 +101,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.security:spring-security-core")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
     add("mockitoAgent", "org.mockito:mockito-core")
 }
 
