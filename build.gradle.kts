@@ -56,6 +56,10 @@ extra["log4j2.version"] = "2.26.1"
 extra["postgresql.version"] = "42.7.12"
 extra["tomcat.version"] = "10.1.59"
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 dependencies {
     constraints {
         implementation("at.yawk.lz4:lz4-java:1.12.1") {
