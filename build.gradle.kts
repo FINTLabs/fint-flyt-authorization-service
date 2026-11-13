@@ -91,11 +91,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocOpenApiVersion")
 
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("no.novari:kafka:6.3.1")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
-    implementation("no.novari:flyt-web-resource-server:4.1.1")
+    implementation("no.novari:flyt-web-resource-server:5.0.0-rc-3")
     implementation("no.novari:flyt-audit-starter:1.2.1")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
