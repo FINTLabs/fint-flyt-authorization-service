@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.springframework.boot.autoconfigure.AutoConfigurations
+import org.springframework.boot.autoconfigure.http.client.HttpClientAutoConfiguration
 import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
@@ -19,6 +20,7 @@ class WebResourceServerCompatibilityTest {
         ApplicationContextRunner()
             .withConfiguration(
                 AutoConfigurations.of(
+                    HttpClientAutoConfiguration::class.java,
                     OAuth2ClientAutoConfiguration::class.java,
                     AuthorizationServiceConfiguration::class.java,
                 ),
