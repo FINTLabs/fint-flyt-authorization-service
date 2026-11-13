@@ -4,6 +4,7 @@ namespace: agderfk-no
 
 resources:
   - ../../../base
+  - eapply-onepassword.yaml
 
 labels:
   - pairs:
@@ -31,6 +32,19 @@ patches:
               "vigo.no":["DEVELOPER","USER"],
               "novari.no":["DEVELOPER","USER"]
             }
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.eapply.available"
+            value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.eapply.sso.client-id"
+            valueFrom:
+                secretKeyRef:
+                    name: fint-flyt-eapply-oauth2-client
+                    key: fint.flyt.eapply.sso.client-id
       - op: add
         path: "/spec/env/-"
         value:
