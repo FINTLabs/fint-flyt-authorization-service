@@ -2,6 +2,7 @@ package no.novari
 
 import no.novari.flyt.authorization.client.ClientAuthorization
 import no.novari.flyt.authorization.client.ClientAuthorizationProducerRecordBuilder
+import no.novari.flyt.authorization.client.ClientAuthorizationService
 import no.novari.flyt.authorization.client.sourceapplications.model.AcosSourceApplication
 import no.novari.flyt.authorization.client.sourceapplications.model.AltinnSourceApplication
 import no.novari.flyt.authorization.client.sourceapplications.model.DigisakSourceApplication
@@ -111,7 +112,7 @@ class ClientAuthorizationProducerRecordBuilderTest {
     }
 
     private fun builderFor(vararg sourceApplications: SourceApplication): ClientAuthorizationProducerRecordBuilder {
-        return ClientAuthorizationProducerRecordBuilder(sourceApplications.toList())
+        return ClientAuthorizationProducerRecordBuilder(ClientAuthorizationService(sourceApplications.toList()))
     }
 
     private fun consumerRecord(clientId: String): ConsumerRecord<String, String> {
