@@ -96,7 +96,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
-    implementation("no.novari:flyt-web-resource-server:5.0.0-rc-3")
+    implementation("no.novari:flyt-web-resource-server:5.0.0")
     implementation("no.novari:flyt-audit-starter:1.2.1")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
