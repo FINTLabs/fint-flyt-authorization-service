@@ -32,7 +32,7 @@ spec:
         path: path
   env:
     - name: JAVA_TOOL_OPTIONS
-      value: '-XX:+ExitOnOutOfMemoryError -Xmx768M -Xms512M'
+      value: '-XX:+ExitOnOutOfMemoryError -Xmx768M -Xms512M -XX:-UseBASE64Intrinsics'
     - name: fint.flyt.vigo.sso.client-id
       valueFrom:
         secretKeyRef:
