@@ -50,6 +50,24 @@ class UserServiceTest {
     }
 
     @Test
+    fun `find source application IDs gives the stored IDs, and none for an unknown user`() {
+        val known = UUID.randomUUID()
+        val repository =
+            mock<UserRepository> {
+                on { findByObjectIdentifier(known) } doReturn
+                    UserEntity(
+                        objectIdentifier = known,
+                        name = "Known",
+                        sourceApplicationIds = mutableListOf(3L, 1L, 3L),
+                    ).apply { id = 1L }
+            }
+        val service = UserService(repository, mock(), actorDisplayResolver)
+
+        assertEquals(setOf(1L, 3L), service.findSourceApplicationIds(known))
+        assertEquals(emptySet<Long>(), service.findSourceApplicationIds(UUID.randomUUID()))
+    }
+
+    @Test
     fun `findOrCreate does not save when token name and email match stored values`() {
         val objectIdentifier = UUID.randomUUID()
         val existing =

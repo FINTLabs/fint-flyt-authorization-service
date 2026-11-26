@@ -42,6 +42,24 @@ class InternalClientUserController(
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
 
+    @GetMapping("/{objectIdentifier}/source-application-ids")
+    @Operation(summary = "Get the user's source applications")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The user's source application IDs, empty for an unknown user",
+            ),
+        ],
+    )
+    fun getSourceApplicationIds(
+        @Parameter(description = "The user's object identifier")
+        @PathVariable objectIdentifier: UUID,
+    ): Set<Long> {
+        // [] and not 404 for an unknown user, so a missing route during a rollout is not read as "no access".
+        return userService.findSourceApplicationIds(objectIdentifier)
+    }
+
     @PostMapping("/actions/lookup")
     @Operation(summary = "Look up users by object identifiers")
     fun lookup(

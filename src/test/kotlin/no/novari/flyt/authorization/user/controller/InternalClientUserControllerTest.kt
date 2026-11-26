@@ -1,12 +1,15 @@
 package no.novari.flyt.authorization.user.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.novari.flyt.authorization.config.MethodSecurityConfiguration
 import no.novari.flyt.authorization.user.UserService
-import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.User
 import no.novari.flyt.webresourceserver.security.client.sourceapplication.SourceApplicationJwtConverter
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -25,12 +28,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
 @WebMvcTest(controllers = [InternalClientUserController::class, UserController::class])
-@Import(InternalClientUserControllerTest.TestSecurityConfiguration::class)
+@Import(InternalClientUserControllerTest.TestSecurityConfiguration::class, MethodSecurityConfiguration::class)
 class InternalClientUserControllerTest
     @Autowired
     constructor(
@@ -39,9 +43,6 @@ class InternalClientUserControllerTest
     ) {
         @MockitoBean
         private lateinit var userService: UserService
-
-        @MockitoBean
-        private lateinit var tokenParsingUtils: TokenParsingUtils
 
         @MockitoBean
         private lateinit var jwtDecoder: JwtDecoder
@@ -267,27 +268,74 @@ class InternalClientUserControllerTest
         }
 
         @Test
-        fun `admin users endpoint still works for admins`() {
-            whenever(tokenParsingUtils.isAdmin(any())).thenReturn(true)
-            whenever(userService.getAll(any())).thenReturn(PageImpl(emptyList()))
+        fun `source application ids returns the user's ids`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.findSourceApplicationIds(objectIdentifier)).thenReturn(setOf(1L, 3L))
 
             mockMvc
                 .perform(
-                    get("/api/intern/authorization/users")
-                        .with(adminJwt()),
+                    get("/api/intern-klient/authorization/users/$objectIdentifier/source-application-ids")
+                        .with(internalClientJwt()),
                 ).andExpect(status().isOk)
-                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(content().json("[1, 3]"))
         }
 
         @Test
-        fun `admin users endpoint still requires admin`() {
-            whenever(tokenParsingUtils.isAdmin(any())).thenReturn(false)
+        fun `source application ids returns an empty list for an unknown user`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.findSourceApplicationIds(objectIdentifier)).thenReturn(emptySet())
 
             mockMvc
                 .perform(
-                    get("/api/intern/authorization/users")
-                        .with(userJwt()),
+                    get("/api/intern-klient/authorization/users/$objectIdentifier/source-application-ids")
+                        .with(internalClientJwt()),
+                ).andExpect(status().isOk)
+                .andExpect(content().json("[]"))
+        }
+
+        @Test
+        fun `source application ids rejects another client and user tokens`() {
+            val path = "/api/intern-klient/authorization/users/${UUID.randomUUID()}/source-application-ids"
+            mockMvc
+                .perform(get(path).with(jwt().authorities(SimpleGrantedAuthority("CLIENT_ID_another-client"))))
+                .andExpect(status().isForbidden)
+            mockMvc.perform(get(path).with(userJwt())).andExpect(status().isForbidden)
+            mockMvc.perform(get(path)).andExpect(status().isUnauthorized)
+        }
+
+        @Test
+        fun `admin operations give 403 for USER`() {
+            mockMvc
+                .perform(get("/api/intern/authorization/users").with(userJwt()))
+                .andExpect(status().isForbidden)
+            mockMvc
+                .perform(
+                    post("/api/intern/authorization/users/actions/userPermissionBatchPut")
+                        .with(userJwt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"),
                 ).andExpect(status().isForbidden)
+            verifyNoInteractions(userService)
+        }
+
+        @Test
+        fun `admin operations pass for ADMIN and DEVELOPER`() {
+            whenever(userService.getAll(any())).thenReturn(PageImpl(emptyList()))
+
+            for (token in listOf(adminJwt(), developerJwt())) {
+                mockMvc
+                    .perform(get("/api/intern/authorization/users").with(token))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.content.length()").value(0))
+                mockMvc
+                    .perform(
+                        post("/api/intern/authorization/users/actions/userPermissionBatchPut")
+                            .with(token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("[]"),
+                    ).andExpect(status().isOk)
+            }
+            verify(userService, times(2)).putAll(emptyList())
         }
 
         private fun internalClientJwt() =
@@ -299,6 +347,14 @@ class InternalClientUserControllerTest
             jwt().authorities(
                 SimpleGrantedAuthority("ROLE_USER"),
                 SimpleGrantedAuthority("ROLE_ADMIN"),
+            )
+
+        // fint-flyt-web-resource-server adds the implied roles, so a DEVELOPER also has ROLE_ADMIN and ROLE_USER.
+        private fun developerJwt() =
+            jwt().authorities(
+                SimpleGrantedAuthority("ROLE_USER"),
+                SimpleGrantedAuthority("ROLE_ADMIN"),
+                SimpleGrantedAuthority("ROLE_DEVELOPER"),
             )
 
         @TestConfiguration
