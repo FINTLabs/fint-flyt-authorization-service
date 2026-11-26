@@ -66,6 +66,10 @@ class UserService(
         return userRepository.findByObjectIdentifier(objectIdentifier)?.let(::mapFromEntity)
     }
 
+    /** The user's source applications, or none for an unknown user. */
+    fun findSourceApplicationIds(objectIdentifier: UUID): Set<Long> =
+        find(objectIdentifier)?.sourceApplicationIds?.toSet().orEmpty()
+
     fun findAuthorizedSourceApplicationIds(
         objectIdentifier: UUID,
         sourceApplicationIds: Set<Long>,
