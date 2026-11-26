@@ -1,9 +1,8 @@
 package no.novari.flyt.authorization.metrics
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.novari.flyt.authorization.client.sourceapplications.model.AcosSourceApplication
-import no.novari.flyt.authorization.client.sourceapplications.model.DigisakSourceApplication
-import no.novari.flyt.authorization.client.sourceapplications.model.VigoSourceApplication
+import no.novari.flyt.authorization.client.sourceapplications.SourceApplications
+import no.novari.flyt.security.SourceApplication
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -16,12 +15,7 @@ class SourceApplicationAvailabilityMetricsTest {
         val registry = SimpleMeterRegistry()
         val metrics =
             SourceApplicationAvailabilityMetrics(
-                sourceApplications =
-                    listOf(
-                        AcosSourceApplication("acos-client-id", true),
-                        DigisakSourceApplication("digisak-client-id", false),
-                        VigoSourceApplication("vigo-client-id", true),
-                    ),
+                sourceApplications = sourceApplications(),
                 environment = MockEnvironment().withProperty("fint.org-id", "afk.no"),
             )
 
@@ -78,19 +72,14 @@ class SourceApplicationAvailabilityMetricsTest {
         val registry = SimpleMeterRegistry()
         val metrics =
             SourceApplicationAvailabilityMetrics(
-                sourceApplications =
-                    listOf(
-                        AcosSourceApplication("acos-client-id", true),
-                        DigisakSourceApplication("digisak-client-id", false),
-                        VigoSourceApplication("vigo-client-id", true),
-                    ),
+                sourceApplications = sourceApplications(),
                 environment = MockEnvironment().withProperty("fint.org-id", "afk.no"),
             )
 
         metrics.bindTo(registry)
 
         val allGauges = registry.find(SourceApplicationAvailabilityMetrics.INFO_METRIC_NAME).gauges()
-        assertEquals(3, allGauges.size)
+        assertEquals(SourceApplication.entries.size, allGauges.size)
 
         val acosGauge =
             registry
@@ -135,4 +124,12 @@ class SourceApplicationAvailabilityMetricsTest {
         assertNotNull(vigoGauge)
         assertEquals(1.0, vigoGauge?.value())
     }
+
+    private fun sourceApplications() =
+        SourceApplications(
+            MockEnvironment()
+                .withProperty("fint.flyt.acos.available", "true")
+                .withProperty("fint.flyt.digisak.available", "false")
+                .withProperty("fint.flyt.vigo.available", "true"),
+        )
 }

@@ -1,5 +1,15 @@
 fint:
   application-id: fint-flyt-authorization-service
+  flyt:
+    # Source applications available by default. The overlays turn on the rest per namespace.
+    altinn:
+      available: true
+    egrunnerverv:
+      available: true
+    hmsreg:
+      available: true
+    vigo:
+      available: true
 springdoc:
   api-docs:
     path: /v3/api-docs

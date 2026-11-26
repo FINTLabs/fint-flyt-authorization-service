@@ -14,19 +14,19 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 C4 diagrams are in [docs/architecture.md](docs/architecture.md).
 
-| Component                                                                                                                                                                                                                                                                         | Responsibility                                                                                                                 |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `ClientAuthorizationService`                                                                                                                                                                                                                                                      | Maps an SSO client ID to its source application.                                                                               |
-| `InternalClientAuthorizationController`                                                                                                                                                                                                                                           | Internal client API that returns the `ClientAuthorization` for a client ID, or `404` for unknown clients.                      |
-| `AcosSourceApplication`, `AltinnSourceApplication`, `DigisakSourceApplication`, `EApplySourceApplication`, `EgrunnervervSourceApplication`, `FSkyssSourceApplication`, `HMSRegSourceApplication`, `IsyGravingSourceApplication`, `SiDESourceApplication`, `VigoSourceApplication` | Bind SSO client IDs from properties and expose static source-application IDs used in authorization replies.                    |
-| `UserService`                                                                                                                                                                                                                                                                     | Core business logic for persisting users, mapping DTOs/entities, and emitting `UserPermission` Kafka events.                   |
-| `UserRepository`                                                                                                                                                                                                                                                                  | Spring Data JPA repository for `UserEntity` storage and lookups by `objectIdentifier`.                                         |
-| `UserPermissionEntityProducerService`                                                                                                                                                                                                                                             | Produces last-value `userpermission` events to Kafka with a 4-day retention window.                                            |
-| `UserPublishingComponent`                                                                                                                                                                                                                                                         | Conditional scheduler that republishes all users at configured intervals.                                                      |
-| `UserController`                                                                                                                                                                                                                                                                  | Admin-only internal API for paginating users and bulk updating `sourceApplicationIds`.                                         |
-| `InternalClientUserController`                                                                                                                                                                                                                                                    | Client-credentials protected internal client API for single and batch user lookups by `objectIdentifier`.                      |
-| `MeController`                                                                                                                                                                                                                                                                    | Self-service internal API that provisions users from JWT claims, reports restricted-page access, and returns the current user. |
-| `TokenParsingUtils` / `AccessControlProperties`                                                                                                                                                                                                                                   | Parse JWT claims, check permitted app roles, and detect `ROLE_ADMIN` authority.                                                |
+| Component                                       | Responsibility                                                                                                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ClientAuthorizationService`                    | Maps an SSO client ID to its source application.                                                                                                                 |
+| `InternalClientAuthorizationController`         | Internal client API that returns the `ClientAuthorization` for a client ID, or `404` for unknown clients.                                                        |
+| `SourceApplications`                            | `SourceApplication` from flyt-security-starter, with the namespace's client ID (`fint.flyt.<app>.sso.client-id`) and availability (`fint.flyt.<app>.available`). |
+| `UserService`                                   | Core business logic for persisting users, mapping DTOs/entities, and emitting `UserPermission` Kafka events.                                                     |
+| `UserRepository`                                | Spring Data JPA repository for `UserEntity` storage and lookups by `objectIdentifier`.                                                                           |
+| `UserPermissionEntityProducerService`           | Produces last-value `userpermission` events to Kafka with a 4-day retention window.                                                                              |
+| `UserPublishingComponent`                       | Conditional scheduler that republishes all users at configured intervals.                                                                                        |
+| `UserController`                                | Admin-only internal API for paginating users and bulk updating `sourceApplicationIds`.                                                                           |
+| `InternalClientUserController`                  | Client-credentials protected internal client API for single and batch user lookups by `objectIdentifier`.                                                        |
+| `MeController`                                  | Self-service internal API that provisions users from JWT claims, reports restricted-page access, and returns the current user.                                   |
+| `TokenParsingUtils` / `AccessControlProperties` | Parse JWT claims, check permitted app roles, and detect `ROLE_ADMIN` authority.                                                                                  |
 
 ## HTTP API
 
@@ -90,21 +90,21 @@ The application includes the shared Spring profiles `flyt-kafka`, `flyt-logging`
 
 Key properties:
 
-| Property | Description |
-| --- | --- |
-| `fint.application-id` | Defaults to `fint-flyt-authorization-service`. |
-| `fint.flyt.authorization.sso.client-id` | Client ID allowed to call `/api/intern-klient/authorization/users`. |
-| `novari.flyt.authorization.access-control.permitted-approles.*` | Map of allowed app roles (e.g., `flyt-user`, `flyt-developer`) to role URIs used when onboarding users. |
-| `novari.flyt.authorization.access-control.enabled` | Enables the scheduled user-permission publisher. |
-| `novari.flyt.authorization.access-control.sync-schedule.initial-delay-ms` / `fixed-delay-ms` | Interval settings for the publisher task. |
-| `fint.flyt.<app>.sso.client-id` | Client IDs for Acos, Digisak, Egrunnerverv, Vigo, Altinn, and HMSReg; mapped to source application IDs 1–6. |
-| `novari.kafka.topic.domain-context` / `novari.kafka.topic.org-id` | Prefixes for Kafka topics and ACLs. |
-| `spring.datasource.*` | JDBC details for Postgres; Flyway migrations live under `classpath:db/migration`. |
-| `spring.security.oauth2.resourceserver.jwt.issuer-uri` | OAuth issuer for protecting internal endpoints. |
-| `novari.flyt.security.user.audience` | `aud` of user tokens: the client ID from secret `fint-flyt-auth-forward-sso`. Turns on `/api/intern/**`. |
-| `novari.flyt.security.tenant.additional-org-ids` | Extra tenant organizations (afk, bfk and ofk: `viken.no,frid-iks.no`). |
-| `novari.flyt.security.internal-client.authorized-client-ids` | Clients allowed on `/api/intern-klient/**`. Defaults to `fint.flyt.authorization.sso.client-id`. |
-| `spring.kafka.consumer.group-id` | Defaults to the application ID. |
+| Property                                                                                     | Description                                                                                                         |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `fint.application-id`                                                                        | Defaults to `fint-flyt-authorization-service`.                                                                      |
+| `fint.flyt.authorization.sso.client-id`                                                      | Client ID allowed to call `/api/intern-klient/authorization/users`.                                                 |
+| `novari.flyt.authorization.access-control.permitted-approles.*`                              | Map of allowed app roles (e.g., `flyt-user`, `flyt-developer`) to role URIs used when onboarding users.             |
+| `novari.flyt.authorization.access-control.enabled`                                           | Enables the scheduled user-permission publisher.                                                                    |
+| `novari.flyt.authorization.access-control.sync-schedule.initial-delay-ms` / `fixed-delay-ms` | Interval settings for the publisher task.                                                                           |
+| `fint.flyt.<app>.sso.client-id`, `fint.flyt.<app>.available`                                 | Client ID and availability per `SourceApplication`. Altinn, eGrunnerverv, HMSReg and VIGO are available by default. |
+| `novari.kafka.topic.domain-context` / `novari.kafka.topic.org-id`                            | Prefixes for Kafka topics and ACLs.                                                                                 |
+| `spring.datasource.*`                                                                        | JDBC details for Postgres; Flyway migrations live under `classpath:db/migration`.                                   |
+| `spring.security.oauth2.resourceserver.jwt.issuer-uri`                                       | OAuth issuer for protecting internal endpoints.                                                                     |
+| `novari.flyt.security.user.audience`                                                         | `aud` of user tokens: the client ID from secret `fint-flyt-auth-forward-sso`. Turns on `/api/intern/**`.            |
+| `novari.flyt.security.tenant.additional-org-ids`                                             | Extra tenant organizations (afk, bfk and ofk: `viken.no,frid-iks.no`).                                              |
+| `novari.flyt.security.internal-client.authorized-client-ids`                                 | Clients allowed on `/api/intern-klient/**`. Defaults to `fint.flyt.authorization.sso.client-id`.                    |
+| `spring.kafka.consumer.group-id`                                                             | Defaults to the application ID.                                                                                     |
 
 Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client IDs. The service now binds only `fint.flyt.<app>.sso.client-id` from these secrets; `client-secret` values are not injected into the application environment.
 
