@@ -9,7 +9,7 @@ import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationRequest
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationResponse
 import no.novari.flyt.authorization.user.model.User
-import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_CLIENT_API
+import no.novari.flyt.security.UrlPaths.INTERNAL_CLIENT_API
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

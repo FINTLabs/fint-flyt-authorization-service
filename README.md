@@ -4,7 +4,7 @@ Spring Boot service that persists Flyt user permissions, answers client authoriz
 
 ## Highlights
 
-- **Internal OAuth2 APIs** — web-resource-server profile locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/users` and `/api/intern-klient/authorization/clients/{clientId}` for authorized OAuth2 clients.
+- **Internal OAuth2 APIs** — flyt-security-starter locks down `/api/intern/authorization` for users/admins and `/api/intern-klient/authorization/users` and `/api/intern-klient/authorization/clients/{clientId}` for authorized OAuth2 clients.
 - **Permission sync** — persists users in Postgres and emits `userpermission` entity events whenever users are created, updated, or bulk-synced. The topic is retained for services that have not yet migrated to HTTP authorization.
 - **Permission auditing** — keeps an Envers history of `user_entity` and `sourceApplicationIds` changes in dedicated audit tables with actor metadata.
 - **Role-gated onboarding** — accepts users only when their token roles match a configured allow-list and auto-grants admins access to all source applications.
@@ -78,7 +78,7 @@ response contains only requested, permitted IDs.
 ## Kafka Integration
 
 - **Entity producer** — publishes `userpermission` entity events (partition count: 1, last/null-value retention: 4 days) whenever users are saved or bulk-updated; replay is also triggered by the scheduled publisher. This remains for backward compatibility while consumers migrate to the HTTP endpoint.
-- Topic names are built with `orgId`/`domainContext` prefixes from `novari.kafka.topic.*` and the FINT Kafka templating services.
+- Topic names are built with `orgId`/`domainContext` prefixes from `novari.kafka.topic.*` and fint-kafka-starter's `KafkaTopics`.
 
 ## Scheduled Tasks
 
@@ -86,7 +86,7 @@ response contains only requested, permitted IDs.
 
 ## Configuration
 
-The application includes the shared Spring profiles `flyt-kafka`, `flyt-logging`, `flyt-postgres`, and `flyt-web-resource-server`.
+The application includes the shared Spring profiles `flyt-kafka`, `flyt-logging` and `flyt-postgres`.
 
 Key properties:
 
@@ -101,8 +101,9 @@ Key properties:
 | `novari.kafka.topic.domain-context` / `novari.kafka.topic.org-id` | Prefixes for Kafka topics and ACLs. |
 | `spring.datasource.*` | JDBC details for Postgres; Flyway migrations live under `classpath:db/migration`. |
 | `spring.security.oauth2.resourceserver.jwt.issuer-uri` | OAuth issuer for protecting internal endpoints. |
-| `novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json` | Defines which org/role pairs may call internal APIs (injected by overlays). |
-| `novari.flyt.web-resource-server.security.api.internal-client.authorized-client-ids` | Defines which OAuth2 client IDs may call the internal client API. |
+| `novari.flyt.security.user.audience` | `aud` of user tokens: the client ID from secret `fint-flyt-auth-forward-sso`. Turns on `/api/intern/**`. |
+| `novari.flyt.security.tenant.additional-org-ids` | Extra tenant organizations (afk, bfk and ofk: `viken.no,frid-iks.no`). |
+| `novari.flyt.security.internal-client.authorized-client-ids` | Clients allowed on `/api/intern-klient/**`. Defaults to `fint.flyt.authorization.sso.client-id`. |
 | `spring.kafka.consumer.group-id` | Defaults to the application ID. |
 
 Secrets referenced by Kustomize overlays must provide database credentials, OAuth settings, Kafka access, and SSO client IDs. The service now binds only `fint.flyt.<app>.sso.client-id` from these secrets; `client-secret` values are not injected into the application environment.
@@ -134,7 +135,7 @@ Add `--profile tools` to also start Kafdrop on http://localhost:19000. Kafka top
 Kustomize layout:
 
 - `kustomize/base/` contains the shared `Application` resource and OAuth/OnePassword references for each upstream SSO client.
-- `kustomize/overlays/<org>/<env>/` applies namespace labels, Kafka org IDs, URL base paths, and authorized org/role pairs per organization and environment.
+- `kustomize/overlays/<org>/<env>/` applies namespace labels, Kafka org IDs, URL base paths, and and extra tenant organizations per organization and environment.
 
 Templates are centralized in `kustomize/templates/`:
 
@@ -146,12 +147,12 @@ Regenerate overlays after changing the template or rendering logic:
 ./script/render-overlay.sh
 ```
 
-The script injects namespace-specific values (base paths, Kafka topics, authorized org-role pairs) and rewrites each `kustomization.yaml` in place.
+The script injects namespace-specific values (base paths, Kafka topics, extra tenant organizations) and rewrites each `kustomization.yaml` in place.
 
 ## Security
 
-- Uses the FINT OAuth2 web-resource-server setup for JWT validation (`spring.security.oauth2.resourceserver.jwt.issuer-uri`).
-- Internal APIs are restricted to callers whose org/role pairs are configured; management endpoints additionally require `ROLE_ADMIN`.
+- Uses [flyt-security-starter](https://github.com/FINTLabs/fint-flyt-security-starter) for JWT validation (`spring.security.oauth2.resourceserver.jwt.issuer-uri`) and the filter chains.
+- Internal APIs take user tokens from the namespace's organizations (role `USER`) and the operator organizations (up to `DEVELOPER`); management endpoints additionally require `ROLE_ADMIN` (`@PreAuthorize`), which `DEVELOPER` has through the role hierarchy.
 - Internal client APIs are restricted to configured OAuth2 client IDs and are intended for `client_credentials` callers.
 - Client-authorization replies are limited to explicitly configured SSO client IDs per source application.
 

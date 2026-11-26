@@ -7,7 +7,7 @@ import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.RestrictedPageAuthorization
 import no.novari.flyt.authorization.user.model.User
-import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_API
+import no.novari.flyt.security.UrlPaths.INTERNAL_API
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
