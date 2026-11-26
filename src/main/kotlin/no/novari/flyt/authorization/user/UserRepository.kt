@@ -19,6 +19,18 @@ interface UserRepository : JpaRepository<UserEntity, Long> {
         FROM UserEntity user
         JOIN user.sourceApplicationIds sourceApplicationId
         WHERE user.objectIdentifier = :objectIdentifier
+        """,
+    )
+    fun findSourceApplicationIds(
+        @Param("objectIdentifier") objectIdentifier: UUID,
+    ): Set<Long>
+
+    @Query(
+        """
+        SELECT sourceApplicationId
+        FROM UserEntity user
+        JOIN user.sourceApplicationIds sourceApplicationId
+        WHERE user.objectIdentifier = :objectIdentifier
           AND sourceApplicationId IN :sourceApplicationIds
         """,
     )
