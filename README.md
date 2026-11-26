@@ -36,8 +36,8 @@ Base path: `/api/intern/authorization`
 | `GET` | `/me` | Returns the current user; creates one from JWT claims when absent (admins are granted all source application IDs). | – | `200 OK` with `User` JSON. |
 | `GET` | `/me/is-authorized` | Confirms the caller has a permitted role; provisions the user when missing. | – | `200 OK` with a confirmation string. |
 | `GET` | `/me/restricted-page-authorization` | Indicates whether the caller can access the user-permission page (`ROLE_ADMIN`). | – | `200 OK` with `RestrictedPageAuthorization`. |
-| `GET` | `/users` | Admin-only paginated list of users (`page`, `size`, `sort` supported). | – | `200 OK` with a `Page<User>` or `403` when unauthorized. |
-| `POST` | `/users/actions/userPermissionBatchPut` | Admin-only bulk upsert of user permissions, then republishes all users. | JSON array of `User` objects (`objectIdentifier`, `email`, `name`, `sourceApplicationIds`). | `200 OK` or `403` on insufficient role. |
+| `GET` | `/users` | Paginated list of users (`page`, `size`, `sort` supported). `@PreAuthorize("hasRole('ADMIN')")`, so ADMIN and DEVELOPER. | – | `200 OK` with a `Page<User>` or `403` when unauthorized. |
+| `POST` | `/users/actions/userPermissionBatchPut` | ADMIN and DEVELOPER only (`@PreAuthorize`). Bulk upsert of user permissions, then republishes all users. | JSON array of `User` objects (`objectIdentifier`, `email`, `name`, `sourceApplicationIds`). | `200 OK` or `403` on insufficient role. |
 
 Errors are surfaced as standard Spring MVC responses (`403 Forbidden` when the caller lacks admin authority).
 
@@ -67,8 +67,9 @@ Base path: `/api/intern-klient/authorization/users`
 | Method | Path | Description | Request body | Response |
 | --- | --- | --- | --- | --- |
 | `GET` | `/{objectIdentifier}` | Returns a single `User` by object identifier. | – | `200 OK` with `User` JSON or `404 Not Found`. |
+| `GET` | `/{objectIdentifier}/source-application-ids` | The user's source-application IDs, used by `FlytAccess` in flyt-security-starter. An unknown user gives `[]`, not `404`, so a missing route during a rollout is not read as no access. | – | `200 OK` with `[1, 3]`. |
 | `POST` | `/actions/lookup` | Returns all matching users for a batch of object identifiers. | JSON array of UUIDs. | `200 OK` with `List<User>`. |
-| `POST` | `/actions/authorize-source-applications` | Returns the requested source-application IDs the identified user is allowed to access. Unknown users and no matches return an empty set. | `{ "objectIdentifier": "<uuid>", "sourceApplicationIds": [1, 2, 3] }` | `200 OK` with `{ "authorizedSourceApplicationIds": [1, 3] }`. |
+| `POST` | `/actions/authorize-source-applications` | Kept until all consumers use the `GET` above. Returns the requested source-application IDs the identified user is allowed to access. Unknown users and no matches return an empty set. | `{ "objectIdentifier": "<uuid>", "sourceApplicationIds": [1, 2, 3] }` | `200 OK` with `{ "authorizedSourceApplicationIds": [1, 3] }`. |
 
 `sourceApplicationIds` is represented as a set in the API model: duplicate JSON array values are ignored, and the
 response contains only requested, permitted IDs.

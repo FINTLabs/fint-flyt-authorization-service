@@ -1,36 +1,65 @@
 package no.novari.flyt.authorization.user.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.novari.flyt.authorization.config.MethodSecurityConfiguration
 import no.novari.flyt.authorization.user.UserService
-import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.User
+import no.novari.flyt.webresourceserver.security.AuthorityMappingService
+import no.novari.flyt.webresourceserver.security.InternalClientApiConfiguration
+import no.novari.flyt.webresourceserver.security.InternalUserApiConfiguration
+import no.novari.flyt.webresourceserver.security.SecurityConfiguration
+import no.novari.flyt.webresourceserver.security.SecurityFilterChainFactoryService
 import no.novari.flyt.webresourceserver.security.client.sourceapplication.SourceApplicationJwtConverter
+import no.novari.flyt.webresourceserver.security.user.UserRole
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.core.annotation.Order
 import org.springframework.data.domain.PageImpl
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.jwt.BadJwtException
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
+/**
+ * Runs the production filter chains and role mapping from flyt-web-resource-server, configured through properties as
+ * in the overlays. Only the JwtDecoder is stubbed: [USER] and [DEVELOPER] decode to user tokens with role claims, and
+ * any other token decodes to a client token with that subject.
+ */
 @WebMvcTest(controllers = [InternalClientUserController::class, UserController::class])
-@Import(InternalClientUserControllerTest.TestSecurityConfiguration::class)
+@ImportAutoConfiguration(
+    SecurityConfiguration::class,
+    InternalClientApiConfiguration::class,
+    InternalUserApiConfiguration::class,
+)
+@Import(AuthorityMappingService::class, SecurityFilterChainFactoryService::class, MethodSecurityConfiguration::class)
+@TestPropertySource(
+    properties = [
+        "fint.flyt.authorization.sso.client-id=$INTERNAL_CLIENT_ID",
+        "novari.flyt.web-resource-server.security.api.internal.enabled=true",
+        "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json=" +
+            "{\"fintlabs.no\":[\"USER\"],\"vigo.no\":[\"DEVELOPER\",\"USER\"]}",
+        "novari.flyt.web-resource-server.security.api.internal-client.enabled=true",
+        "novari.flyt.web-resource-server.security.api.internal-client.authorized-client-ids=" +
+            "\${fint.flyt.authorization.sso.client-id}",
+    ],
+)
 class InternalClientUserControllerTest
     @Autowired
     constructor(
@@ -41,13 +70,38 @@ class InternalClientUserControllerTest
         private lateinit var userService: UserService
 
         @MockitoBean
-        private lateinit var tokenParsingUtils: TokenParsingUtils
-
-        @MockitoBean
         private lateinit var jwtDecoder: JwtDecoder
 
+        // Picked up by @WebMvcTest as a Converter bean; only used by the external API filter chain.
         @MockitoBean
         private lateinit var sourceApplicationJwtConverter: SourceApplicationJwtConverter
+
+        @BeforeEach
+        fun stubJwtDecoder() {
+            whenever(jwtDecoder.decode(any())).thenAnswer { invocation ->
+                when (val token = invocation.getArgument<String>(0)) {
+                    USER -> {
+                        userJwt(token, "fintlabs.no", UserRole.USER)
+                    }
+
+                    DEVELOPER -> {
+                        userJwt(token, "vigo.no", UserRole.DEVELOPER)
+                    }
+
+                    "invalid" -> {
+                        throw BadJwtException("Invalid token")
+                    }
+
+                    else -> {
+                        Jwt
+                            .withTokenValue(token)
+                            .header("alg", "none")
+                            .subject(token)
+                            .build()
+                    }
+                }
+            }
+        }
 
         @Test
         fun `get returns user json when found`() {
@@ -63,7 +117,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     get("/api/intern-klient/authorization/users/$objectIdentifier")
-                        .with(internalClientJwt()),
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID)),
                 ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.objectIdentifier").value(objectIdentifier.toString()))
                 .andExpect(jsonPath("$.name").value("Ada Lovelace"))
@@ -78,7 +132,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     get("/api/intern-klient/authorization/users/$objectIdentifier")
-                        .with(internalClientJwt()),
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID)),
                 ).andExpect(status().isNotFound)
         }
 
@@ -97,7 +151,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/lookup")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(listOf(first, second, third))),
                 ).andExpect(status().isOk)
@@ -115,7 +169,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/lookup")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(emptyList<UUID>())),
                 ).andExpect(status().isOk)
@@ -135,7 +189,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                             """
@@ -161,7 +215,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                             """
@@ -185,7 +239,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                             """
@@ -204,7 +258,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                             """
@@ -233,7 +287,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/authorize-source-applications")
-                        .with(userJwt())
+                        .header(AUTHORIZATION, bearer(USER))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""{"objectIdentifier":"${UUID.randomUUID()}","sourceApplicationIds":[1]}"""),
                 ).andExpect(status().isForbidden)
@@ -244,7 +298,7 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     post("/api/intern-klient/authorization/users/actions/lookup")
-                        .with(internalClientJwt())
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{invalid"),
                 ).andExpect(status().isBadRequest)
@@ -262,79 +316,101 @@ class InternalClientUserControllerTest
             mockMvc
                 .perform(
                     get("/api/intern-klient/authorization/users/${UUID.randomUUID()}")
-                        .with(userJwt()),
+                        .header(AUTHORIZATION, bearer(USER)),
                 ).andExpect(status().isForbidden)
         }
 
         @Test
-        fun `admin users endpoint still works for admins`() {
-            whenever(tokenParsingUtils.isAdmin(any())).thenReturn(true)
+        fun `source application ids returns the user's ids`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.findSourceApplicationIds(objectIdentifier)).thenReturn(setOf(1L, 3L))
+
+            mockMvc
+                .perform(
+                    get("/api/intern-klient/authorization/users/$objectIdentifier/source-application-ids")
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID)),
+                ).andExpect(status().isOk)
+                .andExpect(content().json("[1, 3]"))
+        }
+
+        @Test
+        fun `source application ids returns an empty list for an unknown user`() {
+            val objectIdentifier = UUID.randomUUID()
+            whenever(userService.findSourceApplicationIds(objectIdentifier)).thenReturn(emptySet())
+
+            mockMvc
+                .perform(
+                    get("/api/intern-klient/authorization/users/$objectIdentifier/source-application-ids")
+                        .header(AUTHORIZATION, bearer(INTERNAL_CLIENT_ID)),
+                ).andExpect(status().isOk)
+                .andExpect(content().json("[]"))
+        }
+
+        @Test
+        fun `source application ids rejects another client and user tokens`() {
+            val path = "/api/intern-klient/authorization/users/${UUID.randomUUID()}/source-application-ids"
+            mockMvc
+                .perform(get(path).header(AUTHORIZATION, bearer("another-client")))
+                .andExpect(status().isForbidden)
+            mockMvc.perform(get(path).header(AUTHORIZATION, bearer(USER))).andExpect(status().isForbidden)
+            mockMvc.perform(get(path)).andExpect(status().isUnauthorized)
+        }
+
+        @Test
+        fun `admin operations give 403 for USER`() {
+            mockMvc
+                .perform(get("/api/intern/authorization/users").header(AUTHORIZATION, bearer(USER)))
+                .andExpect(status().isForbidden)
+            mockMvc
+                .perform(
+                    post("/api/intern/authorization/users/actions/userPermissionBatchPut")
+                        .header(AUTHORIZATION, bearer(USER))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[]"),
+                ).andExpect(status().isForbidden)
+            verifyNoInteractions(userService)
+        }
+
+        @Test
+        fun `admin operations pass for DEVELOPER, who gets ADMIN from the role mapping`() {
             whenever(userService.getAll(any())).thenReturn(PageImpl(emptyList()))
 
-            mockMvc
-                .perform(
-                    get("/api/intern/authorization/users")
-                        .with(adminJwt()),
-                ).andExpect(status().isOk)
-                .andExpect(jsonPath("$.content.length()").value(0))
+            run {
+                mockMvc
+                    .perform(get("/api/intern/authorization/users").header(AUTHORIZATION, bearer(DEVELOPER)))
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.content.length()").value(0))
+                mockMvc
+                    .perform(
+                        post("/api/intern/authorization/users/actions/userPermissionBatchPut")
+                            .header(AUTHORIZATION, bearer(DEVELOPER))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("[]"),
+                    ).andExpect(status().isOk)
+            }
+            verify(userService).putAll(emptyList())
         }
 
-        @Test
-        fun `admin users endpoint still requires admin`() {
-            whenever(tokenParsingUtils.isAdmin(any())).thenReturn(false)
+        private fun bearer(token: String) = "Bearer $token"
 
-            mockMvc
-                .perform(
-                    get("/api/intern/authorization/users")
-                        .with(userJwt()),
-                ).andExpect(status().isForbidden)
-        }
+        private fun userJwt(
+            token: String,
+            organizationId: String,
+            role: UserRole,
+        ): Jwt =
+            Jwt
+                .withTokenValue(token)
+                .header("alg", "none")
+                .subject("opaque-user-id")
+                .claim("organizationid", organizationId)
+                .claim("objectidentifier", UUID.randomUUID().toString())
+                .claim("roles", listOf(role.claimValue))
+                .build()
 
-        private fun internalClientJwt() =
-            jwt().authorities(SimpleGrantedAuthority("CLIENT_ID_fint-flyt-authorization-oauth2-client"))
-
-        private fun userJwt() = jwt().authorities(SimpleGrantedAuthority("ROLE_USER"))
-
-        private fun adminJwt() =
-            jwt().authorities(
-                SimpleGrantedAuthority("ROLE_USER"),
-                SimpleGrantedAuthority("ROLE_ADMIN"),
-            )
-
-        @TestConfiguration
-        class TestSecurityConfiguration {
-            @Bean
-            @Order(1)
-            fun internalClientApiFilterChain(http: HttpSecurity): SecurityFilterChain {
-                return http
-                    .securityMatcher("/api/intern-klient/**")
-                    .csrf { it.disable() }
-                    .oauth2ResourceServer { it.jwt {} }
-                    .authorizeHttpRequests {
-                        it.anyRequest().hasAuthority("CLIENT_ID_fint-flyt-authorization-oauth2-client")
-                    }.build()
-            }
-
-            @Bean
-            @Order(2)
-            fun internalApiFilterChain(http: HttpSecurity): SecurityFilterChain {
-                return http
-                    .securityMatcher("/api/intern/**")
-                    .csrf { it.disable() }
-                    .oauth2ResourceServer { it.jwt {} }
-                    .authorizeHttpRequests {
-                        it.anyRequest().hasAuthority("ROLE_USER")
-                    }.build()
-            }
-
-            @Bean
-            @Order(3)
-            fun fallbackFilterChain(http: HttpSecurity): SecurityFilterChain {
-                return http
-                    .securityMatcher("/**")
-                    .csrf { it.disable() }
-                    .authorizeHttpRequests { it.anyRequest().denyAll() }
-                    .build()
-            }
+        private companion object {
+            const val USER = "user-token"
+            const val DEVELOPER = "developer-token"
         }
     }
+
+private const val INTERNAL_CLIENT_ID = "fint-flyt-authorization-oauth2-client"

@@ -50,6 +50,16 @@ class UserServiceTest {
     }
 
     @Test
+    fun `find source application IDs uses one query and does not load the user`() {
+        val known = UUID.randomUUID()
+        val repository = mock<UserRepository> { on { findSourceApplicationIds(known) } doReturn setOf(1L, 3L) }
+        val service = UserService(repository, mock(), actorDisplayResolver)
+
+        assertEquals(setOf(1L, 3L), service.findSourceApplicationIds(known))
+        verify(repository, never()).findByObjectIdentifier(any())
+    }
+
+    @Test
     fun `findOrCreate does not save when token name and email match stored values`() {
         val objectIdentifier = UUID.randomUUID()
         val existing =
