@@ -9,7 +9,7 @@ import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationRequest
 import no.novari.flyt.authorization.user.controller.model.SourceApplicationAuthorizationResponse
 import no.novari.flyt.authorization.user.model.User
-import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_CLIENT_API
+import no.novari.flyt.security.UrlPaths.INTERNAL_CLIENT_API
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -40,6 +40,24 @@ class InternalClientUserController(
     ): User {
         return userService.find(objectIdentifier)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    }
+
+    @GetMapping("/{objectIdentifier}/source-application-ids")
+    @Operation(summary = "Get the user's source applications")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "The user's source application IDs, empty for an unknown user",
+            ),
+        ],
+    )
+    fun getSourceApplicationIds(
+        @Parameter(description = "The user's object identifier")
+        @PathVariable objectIdentifier: UUID,
+    ): Set<Long> {
+        // [] and not 404 for an unknown user, so a missing route during a rollout is not read as "no access".
+        return userService.findSourceApplicationIds(objectIdentifier)
     }
 
     @PostMapping("/actions/lookup")

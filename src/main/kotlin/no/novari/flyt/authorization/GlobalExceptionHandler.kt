@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -63,6 +65,10 @@ class GlobalExceptionHandler {
             detail = "Invalid or incomplete authentication token",
         )
     }
+
+    // Let Spring Security's ExceptionTranslationFilter answer, e.g. 403 when @PreAuthorize denies access.
+    @ExceptionHandler(AccessDeniedException::class, AuthenticationException::class)
+    fun rethrowSecurityException(exception: RuntimeException): Nothing = throw exception
 
     @ExceptionHandler(Exception::class)
     fun handleUnhandledException(exception: Exception): ProblemDetail {

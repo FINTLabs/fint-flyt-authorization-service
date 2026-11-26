@@ -1,5 +1,15 @@
 fint:
   application-id: fint-flyt-authorization-service
+  flyt:
+    # Source applications available by default. The overlays turn on the rest per namespace.
+    altinn:
+      available: true
+    egrunnerverv:
+      available: true
+    hmsreg:
+      available: true
+    vigo:
+      available: true
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -15,11 +25,6 @@ novari:
         sync-schedule:
           initial-delay: 1s
           fixed-delay: 12h
-    web-resource-server:
-      security:
-        api:
-          internal-client:
-            authorized-client-ids: ${fint.flyt.authorization.sso.client-id}
 
 spring:
   profiles:
@@ -27,4 +32,3 @@ spring:
       - flyt-kafka
       - flyt-logging
       - flyt-postgres
-      - flyt-web-resource-server

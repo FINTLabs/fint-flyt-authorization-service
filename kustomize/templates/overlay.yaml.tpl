@@ -20,13 +20,7 @@ patches:
         value: "$ORG_ID"
       - op: replace
         path: "/spec/ingress/routes/0/path"
-        value: "$INGRESS_BASE_PATH"
-      - op: add
-        path: "/spec/env/-"
-        value:
-          name: "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json"
-          value: |
-$AUTHORIZED_ORG_ROLE_PAIRS$EXTRA_APP_PATCHES
+        value: "$INGRESS_BASE_PATH"$ADDITIONAL_ORG_IDS_PATCH$EXTRA_APP_PATCHES
       - op: add
         path: "/spec/env/-"
         value:

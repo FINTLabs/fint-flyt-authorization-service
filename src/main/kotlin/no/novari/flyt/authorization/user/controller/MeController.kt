@@ -2,12 +2,12 @@ package no.novari.flyt.authorization.user.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication
+import no.novari.flyt.authorization.client.sourceapplications.SourceApplications
 import no.novari.flyt.authorization.user.UserService
 import no.novari.flyt.authorization.user.controller.utils.TokenParsingUtils
 import no.novari.flyt.authorization.user.model.RestrictedPageAuthorization
 import no.novari.flyt.authorization.user.model.User
-import no.novari.flyt.webresourceserver.UrlPaths.INTERNAL_API
+import no.novari.flyt.security.UrlPaths.INTERNAL_API
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -22,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException
 class MeController(
     private val tokenParsingUtils: TokenParsingUtils,
     private val userService: UserService,
-    private val sourceApplications: List<SourceApplication>,
+    private val sourceApplications: SourceApplications,
 ) {
     @GetMapping("is-authorized")
     @Operation(summary = "Verify that the current user is authorized")
@@ -63,7 +63,7 @@ class MeController(
     }
 
     private fun allSourceApplicationIds(): List<Long> {
-        return sourceApplications.map(SourceApplication::id).sorted()
+        return sourceApplications.all.map { it.id }.sorted()
     }
 
     private fun requireJwtAuthenticationToken(authentication: Authentication?): JwtAuthenticationToken {

@@ -4,6 +4,7 @@ namespace: innlandetfylke-no
 
 resources:
   - ../../../base
+  - conexus-onepassword.yaml
 
 labels:
   - pairs:
@@ -24,13 +25,16 @@ patches:
       - op: add
         path: "/spec/env/-"
         value:
-          name: "novari.flyt.web-resource-server.security.api.internal.authorized-org-id-role-pairs-json"
-          value: |
-            {
-              "innlandetfylke.no":["USER"],
-              "vigo.no":["DEVELOPER","USER"],
-              "novari.no":["DEVELOPER","USER"]
-            }
+            name: "fint.flyt.conexus.available"
+            value: "true"
+      - op: add
+        path: "/spec/env/-"
+        value:
+            name: "fint.flyt.conexus.sso.client-id"
+            valueFrom:
+                secretKeyRef:
+                    name: fint-flyt-conexus-oauth2-client
+                    key: fint.flyt.conexus.sso.client-id
       - op: add
         path: "/spec/env/-"
         value:

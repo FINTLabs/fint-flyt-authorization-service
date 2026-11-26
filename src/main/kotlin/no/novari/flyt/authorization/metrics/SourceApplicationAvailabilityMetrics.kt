@@ -3,21 +3,22 @@ package no.novari.flyt.authorization.metrics
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.MeterBinder
-import no.novari.flyt.authorization.client.sourceapplications.model.SourceApplication
+import no.novari.flyt.authorization.client.sourceapplications.ConfiguredSourceApplication
+import no.novari.flyt.authorization.client.sourceapplications.SourceApplications
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 @Component
 class SourceApplicationAvailabilityMetrics(
-    private val sourceApplications: List<SourceApplication>,
+    private val sourceApplications: SourceApplications,
     private val environment: Environment,
 ) : MeterBinder {
     override fun bindTo(registry: MeterRegistry) {
         val orgId = resolveOrgId()
 
-        sourceApplications
+        sourceApplications.all
             .asSequence()
-            .sortedBy(SourceApplication::id)
+            .sortedBy(ConfiguredSourceApplication::id)
             .forEach { sourceApplication ->
                 Gauge
                     .builder(INFO_METRIC_NAME) { 1.0 }
@@ -28,10 +29,10 @@ class SourceApplicationAvailabilityMetrics(
                     .register(registry)
             }
 
-        sourceApplications
+        sourceApplications.all
             .asSequence()
-            .filter(SourceApplication::available)
-            .sortedBy(SourceApplication::id)
+            .filter(ConfiguredSourceApplication::available)
+            .sortedBy(ConfiguredSourceApplication::id)
             .forEach { sourceApplication ->
                 Gauge
                     .builder(AVAILABILITY_METRIC_NAME) { 1.0 }
