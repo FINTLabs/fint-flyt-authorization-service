@@ -14,6 +14,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.context.annotation.Import
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -67,7 +68,7 @@ class UserEntityAuditingTest
 
             authenticateAs(editorOid)
 
-            val updatedUser = userRepository.findById(checkNotNull(createdUser.id)).orElseThrow()
+            val updatedUser = checkNotNull(userRepository.findByIdOrNull(checkNotNull(createdUser.id)))
             updatedUser.sourceApplicationIds = mutableListOf(1L, 2L)
             userRepository.saveAndFlush(updatedUser)
 
@@ -100,7 +101,7 @@ class UserEntityAuditingTest
                 auditReader.findRevision(ActorRevisionEntity::class.java, secondRevision).actor,
             )
 
-            val persistedUser = userRepository.findById(createdUser.id!!).orElseThrow()
+            val persistedUser = checkNotNull(userRepository.findByIdOrNull(createdUser.id!!))
             assertEquals(Actor.User(creatorOid), persistedUser.createdBy)
             assertEquals(Actor.User(editorOid), persistedUser.lastModifiedBy)
             assertNotNull(persistedUser.createdAt)
@@ -131,7 +132,7 @@ class UserEntityAuditingTest
 
             authenticateAs(editorOid)
 
-            val updatedUser = userRepository.findById(checkNotNull(createdUser.id)).orElseThrow()
+            val updatedUser = checkNotNull(userRepository.findByIdOrNull(checkNotNull(createdUser.id)))
             updatedUser.name = "Updated Name"
             updatedUser.email = "updated@example.no"
             userRepository.saveAndFlush(updatedUser)
@@ -165,7 +166,7 @@ class UserEntityAuditingTest
                 auditReader.findRevision(ActorRevisionEntity::class.java, secondRevisionNumber).actor,
             )
 
-            val persistedUser = userRepository.findById(createdUser.id!!).orElseThrow()
+            val persistedUser = checkNotNull(userRepository.findByIdOrNull(createdUser.id!!))
             assertEquals(Actor.User(creatorOid), persistedUser.createdBy)
             assertEquals(Actor.User(editorOid), persistedUser.lastModifiedBy)
         }
